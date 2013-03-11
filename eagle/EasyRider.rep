@@ -1,0 +1,417 @@
+Data Exported from: C:/users/stamina/My Documents/Projects/eagle/EasyRider/EasyRider.brd
+with: C:/Program Files (x86)/EAGLE-6.3.0/ulp/statistic-brd.ulp Version 1.3.7
+at: 1/14/2013 1:26:13 PM
+EAGLE Version 6.3.0 Copyright (c) 1988-2012 CadSoft
+
+all Values in mm
+max. Board length (Layer 20)
+X = 160.00
+Y = 80.00
+Outline contour = 480.00
+
+used layers 2
+
+ 1 Top
+16 Bottom
+_________________________
+
+634   	 Wire(s) incl. Arc(s)
+2     	 Polygon(s)
+_________________________
+6     	 SMD(s) top
+0     	 SMD(s) bottom
+===================
+6     	 SMD(s) total
+
+282   	 PAD(s)
+_________________________
+39    	 Via
+9     	 Hole
+===================
+291   	 Drills total
+_________________________
+6	 tCream
+0	 bCream
+_________________________
+Routing Info: 
+69    	 Signal(s) 
+288   	 PAD/SMD total
+===================
+251   	 PAD/SMD on Signal
+_________________________
+Packages used area:
+~ 9132.19 mm² (0.913 dm²)
+_________________________
+
+
+============================
+
+============================
+79 Elements: 0 locked / 79 unlocked
+4 Testpoints (TP)
+
+----------------------------
+LAYER
+Nb.	Name	Used
+  1	Top	1
+  2	Route2	0
+  3	Route3	0
+  4	Route4	0
+  5	Route5	0
+  6	Route6	0
+  7	Route7	0
+  8	Route8	0
+  9	Route9	0
+ 10	Route10	0
+ 11	Route11	0
+ 12	Route12	0
+ 13	Route13	0
+ 14	Route14	0
+ 15	Route15	0
+ 16	Bottom	1
+ 17	Pads	1
+ 18	Vias	1
+ 19	Unrouted	0
+ 20	Dimension	1
+ 21	tPlace	1
+ 22	bPlace	0
+ 23	tOrigins	1
+ 24	bOrigins	0
+ 25	tNames	1
+ 26	bNames	0
+ 27	tValues	1
+ 28	bValues	0
+ 29	tStop	1
+ 30	bStop	1
+ 31	tCream	1
+ 32	bCream	0
+ 33	tFinish	0
+ 34	bFinish	0
+ 35	tGlue	0
+ 36	bGlue	0
+ 37	tTest	1
+ 38	bTest	0
+ 39	tKeepout	0
+ 40	bKeepout	0
+ 41	tRestrict	0
+ 42	bRestrict	0
+ 43	vRestrict	0
+ 44	Drills	1
+ 45	Holes	1
+ 46	Milling	0
+ 47	Measures	0
+ 48	Document	0
+ 49	Reference	0
+ 50	dxf	0
+ 51	tDocu	1
+ 52	bDocu	0
+ 53	tGND_GNDA	0
+ 54	bGND_GNDA	0
+ 56	wert	0
+100	Muster	0
+101	Patch_Top	0
+102	Vscore	0
+103	ATT_MISO	0
+104	Name	0
+105	Beschreib	0
+106	BGA-Top	0
+107	BD-Top	0
+108	centerline	0
+116	Patch_BOT	0
+121	_tsilk	0
+122	_bsilk	0
+131	prix	0
+132	test	0
+144	DrillLegend	0
+151	HeatSink	0
+200	200bmp	0
+201	201bmp	0
+202	202bmp	0
+203	203bmp	0
+204	204bmp	0
+205	205bmp	0
+206	206bmp	0
+207	207bmp	0
+208	208bmp	0
+209	209bmp	0
+210	210bmp	0
+211	211bmp	0
+212	212bmp	0
+213	213bmp	0
+214	214bmp	0
+215	215bmp	0
+216	216bmp	0
+250	Descript	0
+251	SMDround	0
+254	cooling	0
+
+----------------------------
+CLASS
+# 	Name	min. Width	Clearance	min. Drill	Used
+0	default	0.0000 	0.0000 	0.0000 	66  
+1	20mil_clearance	0.0000 	0.5080 	0.0000 	3   
+
+----------------------------
+WIDTH
+WIRE	Q.
+0.5080 	180 
+0.4064 	393 
+1.7780 	10  
+1.2700 	30  
+0.7620 	1   
+1.0160 	20  
+
+ARC	Q.
+ * Wire width are saved in 0.2 micron resolution.
+
+POLY. width	Q.
+0.4064 	2   
+
+POLY. Isol.	Q.
+0.0000 	2   
+
+Polygon
+Type	Name	Layer	Rank	Width
+Signal	GND	1	1	0.406
+Signal	GND	16	1	0.406
+ * Wire width are saved in 0.2 micron resolution.
+
+----------------------------
+CIRCLE (width)	Q.
+
+CIRCLE diam.	Q.
+
+----------------------------
+TEXT (w)	Q.
+
+TEXT (s)	Q.
+
+----------------------------
+SMD x	SMD y	Roundn.	Q.
+1.8000 	1.3000 	0%	2   
+2.0000 	2.0000 	0%	4   
+
+PAD tDiam	Q.
+1.2128 	91  
+2.5400 	6   
+1.6002 	8   
+2.2796 	24  
+1.8986 	2   
+1.5176 	29  
+1.6320 	6   
+1.2000 	110 
+1.4160 	6   
+
+PAD bDiam	Q.
+1.2128 	91  
+2.5400 	6   
+1.6002 	8   
+2.2796 	24  
+1.8986 	2   
+1.5176 	29  
+1.6320 	6   
+1.2000 	110 
+1.4160 	6   
+
+PAD tRestring	Q.
+0.2000 	262 
+0.7620 	4   
+0.3937 	8   
+0.6096 	2   
+0.3060 	6   
+
+PAD bRestring	Q.
+0.2000 	262 
+0.7620 	4   
+0.3937 	8   
+0.6096 	2   
+0.3060 	6   
+
+PAD iDiam	Q.
+1.3128 	99  
+1.5160 	10  
+2.3796 	24  
+1.9986 	2   
+1.6176 	29  
+1.8208 	2   
+1.5200 	6   
+1.3000 	110 
+
+PAD iRestring	Q.
+0.2500 	282 
+
+VIA Outer-Diam	Q.
+1.2128 	25  
+1.0858 	14  
+
+VIA Outer-Restring 	Q.
+0.2000 	39  
+
+VIA Inner-Diam.	Q.
+1.3128 	25  
+1.1858 	14  
+
+VIA Inner-Restring	Q.
+0.2500 	39  
+
+VIA drill	Q.
+
+VIA Stack	Q.
+01-16	39  
+01-16-PAD	282 
+
+PAD drill	Q.
+0.8128 	99  
+1.0160 	10  
+1.8796 	24  
+1.4986 	2   
+1.1176 	29  
+1.3208 	2   
+1.0200 	6   
+0.8000 	110 
+
+----------------------------
+HOLE drill	Q.
+3.5000 	4   
+2.5000 	2   
+3.7500 	3   
+
+RACK
+T01   0.7
+T02   0.8
+T03   1.0
+T04   1.1
+T05   1.3
+T06   1.5
+T07   1.9
+T08   2.5
+T09   3.5
+T10   3.8
+
+----------------------------
+LIBRARY	Q.
+accelboar_mma7361	1   
+buzzer	1   
+cap_pol	5   
+cap_ceramic	5   
+connector_easyrider	1   
+diode_1n5400	1   
+diode_1n4007	10  
+fuseholder_5x20_225	1   
+atmel_avr_atmega1284p	1   
+isp_header	1   
+led	1   
+mosfet_pnp	1   
+varistor	1   
+ptc_fuse_smd	1   
+transistor_npn	1   
+resistor_generic_dip	18  
+resistor_highwatt_dip	1   
+meder_reed_DIP05-1A72-12L	9   
+connector_single	1   
+button_momentary_6mm	1   
+testpad	4   
+easyrider_logo	1   
+ohw-logo	1   
+uart_header	1   
+voltagereg_igo	2   
+crystal	1   
+diode_zener_V56	11  
+
+PACKAGE	Q.
+BREAKOUT	1   
+0.3PITCH	1   
+E5-10,5	1   
+E2,5-4R	3   
+E2,5-7	1   
+C025-024X044	5   
+SIL	1   
+DO201-15	1   
+DIP_1N4007	10  
+SH22,5A	1   
+DIL40	1   
+HEADER_PRG_2X03	1   
+LED3MM	1   
+TO220	3   
+R-5	1   
+PTC	1   
+TO92	1   
+RESISTOR	19  
+DIP05-1A72-12L	9   
+M1X1	1   
+DIP45MM_56MM_PITCH	1   
+TP20SQ	4   
+EASYRIDER_LOGO	1   
+OSHW_FILLX350_NOTEXT	1   
+M1X2	1   
+HC49/S	1   
+DIODE_ZENER_56	11  
+
+VALUE	PAC	Q.	Top	Bot
+MMA7361FREESCALE	BREAKOUT	1	1	0
+5V	0.3PITCH	1	1	0
+1000uF	E5-10,5	1	1	0
+10uF	E2,5-4R	1	1	0
+100nF	E2,5-4R	2	2	0
+47uF	E2,5-7	1	1	0
+0.1uF	C025-024X044	3	3	0
+22pF	C025-024X044	2	2	0
+EASYRIDER_CONNDIP	SIL	1	1	0
+1N5400	DO201-15	1	1	0
+1N4007	DIP_1N4007	2	2	0
+1N4007DIP	DIP_1N4007	8	8	0
+6A SLOW	SH22,5A	1	1	0
+ATMEGA1284P	DIL40	1	1	0
+CON_HEADER_PRG_AVR_ICSP-PTH	HEADER_PRG_2X03	1	1	0
+~/-empty-/~LED	LED3MM	1	1	0
+IRF4905	TO220	1	1	0
+25V	R-5	1	1	0
+500mA	PTC	1	1	0
+2N3904TH	TO92	1	1	0
+10K	RESISTOR	4	4	0
+18K	RESISTOR	1	1	0
+100K	RESISTOR	1	1	0
+330	RESISTOR	1	1	0
+220	RESISTOR	11	11	0
+10 5W	RESISTOR	1	1	0
+MEDER_REED_DIP05-1A72-12LDIP	DIP05-1A72-12L	9	9	0
+CON_HEADER_1X01-PTH	M1X1	1	1	0
+RESET	DIP45MM_56MM_PITCH	1	1	0
+TPTP20SQ	TP20SQ	4	4	0
+EASYRIDER_LOGO	EASYRIDER_LOGO	1	1	0
+~/-empty-/~U$2	OSHW_FILLX350_NOTEXT	1	1	0
+CON_HEADER_1X02-PTH	M1X2	1	1	0
+~/-empty-/~VREG3.3	TO220	1	1	0
+~/-empty-/~VREG5.0	TO220	1	1	0
+20mhz	HC49/S	1	1	0
+5V6	DIODE_ZENER_56	11	11	0
+
+----------------------------
+RECT x	RECT y	Q.
+0 RECT (copper)
+
+----------------------------
+RECT Layer	Q.
+
+----------------------------
+TEXT (s)	Q.
+0 TEXT size (copper)
+
+TEXT (w)	Q.
+0 TEXT wire width (copper)
+
+TEXT 	Q.
+1.7780 	3   
+1.2700 	35  
+0.0152 	1   
+3 TEXT size (place)
+2 TEXT wire width (place)
+
+CIRCLE diam.	Q.
+0 CIRCLE (copper)
+
+
+Rudimentarily signal name(s):
+WIRE 'N$3' (-2.4732 -2.4732) (-3.4732 -2.4732);DELETE (-2.4732 -2.4732);
+
+End report

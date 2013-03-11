@@ -1,0 +1,193 @@
+EasyRider Telemetrics
+---------------------
+
+Version 1.0 bug fixes:
+
+[X] Cockpit status light stays lit in alarm/alarmsettle mode ->  unwanted check_battery_read() calls
+[X] Hardware bug: when claxon (2 amp) is pushed, all reed relays switch on: short blinks of lights
+      -> [X] snubber/flyback diode proberen
+[X] Alarm trigger werkt niet lekker: claxon/blinkers sequence niet goed en transition from alarm_settle/alarm states foutief
+
+Version 1.0 features:
+
+- [X] Lighting System
+- [X] Audio through Claxon and Buzzer
+- [X] Battery status
+- [X] Alarm, triggered by an accelerometer
+
+- [X] PCB creation via Eagle CAD
+
+- General functionality:
+  [X] State Machine rules "exclusive"/"inclusive"
+      [X] positive and negative substates parsing
+      [X] sense reading moet uit te zetten zijn: enableSense/disableSense
+      [X] event dispatching via psense reads, maar ook via dynamic senses (dyn_senses)
+  [X] JTD uitzetten, zodat de poorten normaal gebruikt kunnen worden ->
+       An IO control bit "JTD" is available. Unlike the fuses this bit can be
+       set at run-time allowing you to disable the JTAG / OCD functionality in software
+       during program execution.
+  [X] Watchdog aanzetten, tegen vastlopers!
+  [X] In production: OCD uitzetten ivm extra stroomverbruik
+
+- Audio
+  [X] Simple music via buzzer (Midi to CSV to .h binary conversion)
+
+ [X] Claxon
+  [X] Sound on Push button
+
+ - Battery status
+    [X] knipper status light cockpit:
+      [X] normal operation -> continue branden
+      [X] shutdown via switch -> uit
+      [X] indien low battery -> slow knipper
+      [X] indien high battery -> fast knipper
+
+ - Alarm, triggered by an accelerometer
+    [X] bij aanzetten -> 1x indicators aan voor x secs -> alarm settle time -> buzzer music
+    [X] in active mode: cockpit indicator lamp knippert
+    [X] Alarm triggered: alle lichten blinken, claxon repeat
+    [X] Alarm triggered: na x secs -> reset -> accelerometer slaat nieuwe voltage waarden op
+
+ - Light/Buzzer System
+    [X] Indicators Left/Right
+      [X] Buzzer mee laten piepen (software flag)
+    [X] Rearlight
+    [X] Brakelight
+    [X] Pilotlight
+    [X] Warning lights: 4x knipperbollen blinken en buzzer
+    [X] Achteruitrij sensen met accelerometer -> "all indicators" en buzzer aan -> warning state
+
+- Contact slot:
+  Ignition uit: sense wire (SENSE_IGN) -> contact uit
+    [X] naar ST_SLEEP mode
+    [X] Na x secs naar mcu hardware sleep mode
+      -> uitzetten van ADC, Watchdog en ports
+      -> geen wakeup trigger, alleen een harde reset
+  Ignition aan: sense wire (~SENSE_IGN) -> contact aan:
+    [X] Alle lampen een paar seconden aan
+    [X] startup sound / kleine muziekje
+    [X] status wordt ST_NORMAL
+
+- Shell Commands:
+    [X] help -> show help menu / service menu
+    [X] show
+        [X] version
+        [X] state (all substates / physical and dynamic senses)
+        [X] volt (accu voltage / 3-axis voltages accelerometer)
+        [X] conf (EEPROM struct, toon alle tSettings tegelijk):
+    [X] set 
+        [X] dynamic senses
+        [X] conf (settings in EEPROM struct)
+    [X] reset (software reset mcu via watchdog)
+
+Statistics
+----------
+
+(2.9Ah Gel battery)
+
+Power EasyRider Board:
+  Normal mode:     54mA
+  Sleep mode:      44mA
+  Alarm mode:      80mA (indicator relay on/off)
+  Deep Sleep mode: 10mA (mcu Power Down) -> accu leeg na 12 dagen
+
+BOM "EasyRider" REV A
+---------------------
+
+[X] 1x Atmel ATMEGA1284p 40 pins DIP
+[X] 9x Meder Reed relays DIP05-1A72-12L 
+[X] 10x 1N4007 diode
+[X] 1x 1N5400 diode
+[X] 11x 5.6V zener diode (10 senses, 1 voltage divider)
+[X] 1x 100k resistor 1% 
+[X] 1x 18k resistor 1% 
+[X] 4x 10k resistor 5%  (pullups reset mcu and slp accelerometer en trans./mosfet gate)
+[X] 11x 220 resistor 5% (10 senses, 1 heartbeat LED)
+[X] 1x 330 resistor (reset btn current limiter)
+[X] 1x 10 ohm 5 watt resistor
+[X] 1x 6 amp fuse holder voor 5x20
+[X] 1x 1A PTC 3,2 x 1,5 mm, hoog 1,05 mm -> van littelfuse "M" marking 15V!
+[X] 1x 25V Varistor JVR05N390K (5mm pitch)
+[X] 1x 1000uf cap electrolytic for filtering 
+[X] 1x 47uf low ESR cap electrolytic for filtering 
+[X] 1x 10uf output filter cap for LF33CV
+[X] 2x 100nf cap electrolytic for filtering
+[X] 3x 100nf cap ceramic for bypassing
+[X] 2x 22pf cap ceramic for crystal
+[X] 1x 20mhz crystal
+[X] 1x LM2940 regulator (TO-220)
+[X] 1x LF33CV regulator (TO-220)
+[X] 1x P-Channel MOSFET IRF4905PBF 
+[X] 1x NPN 2N3904 transistor
+[X] 1x reset button 4 pins 
+[X] 1x buzzer
+[X] 1x 3mm blue status led 
+[X] 1x shrouded ISP 6 pin (2x3) header (zie dangerousprototypes.com lib)
+[X] 1x 2 pin header UART 
+[X] 1x MMA7361 Freescale Accelerometer breakout pins 
+[X] 1x 24 pin main wire connector
+
+[X] 1x flyback diode for claxon: SB540E SCHOTTKY 40V 5A
+
+Schematic/Board
+---------------
+
+[X] ULP runnen voor re-ordering designators
+[X] +/- 10 via's plaatsen voor koppelen GND planes 
+[X] 4x drill hole 4mm (3mm x/y spacing zijkanten board)
+[X] 2x drill hole 3mm voor accelerometer board stabiliteitspunten
+[X] 4x Test Point TP (12v, 5V, 3.3v, GND) uit standard "testpad" library
+[X] Import BMP logo met import-bmp.ulp, settings: Scaled, Mil, 0.3 Scale, Layer 21
+
+Eagle settings:
+--------------
+
+- 1 oz copper thickness (35µm)
+- diameter drills voor bevestiging +/- 3.5mm
+- diameter voor via's = +/- 27 mil, voor 20 mil traces: 32 mil via's, let op dat outer-diameter niet te smal wordt:
+    aanpassen restring -> iets groter zetten
+- trace thickness:
+    10 mil (1 amp) standaard SMD signal tracks
+    16 mil (15-20 mil) for through-hole pads
+    20 mil 3.3v/5v/12v seperate tracks/gnd tracks (3 amp)
+    70 mil (6 amp) incoming 12v/GND track
+- spacing between traces: minimum 10 mil 
+- Isolation between GND polygons and other components/tracks: 15 mil
+- Oval TH: 0.0314 inch (0.8 mm) diameter holes -> pad widths: 1.3-1.5 mm
+- Oval TH: for 1mm2 draad (EasyRider connector): diameter holes: 1.9mm -> 0.074 inch
+- Round TH: voor 1A diodes etc: 0.040 inch (1.1 mm) diameter holes
+- Round TH: voor dikke 3A diodes etc: 0.059 inch (1.498 mm) diameter holes
+- Round TH: voor standard diodes/resistors: 0.032 inch (0.81 mm) diameter holes
+- Length/pitch for standard diodes/resistors: 0.4 inch (10.16 mm) of 0.5 inch (12.7 mm)
+- Length/pitch for dikke high watt resistors: 1.15 inch (29.21 mm)
+- text: always as vectors: 50 mil/0.05 inch size, 16% ratio == 8mil width, line distance 50%: (size*ratio/100 == width of text lines) 
+
+Eagle layers:
+
+- tNames: voor >NAME teksten
+- tValues: voor >VALUE teksten
+- tPlace: silkscreen lijnen/tekst/outlines -> (8 mil/0.008 inch width, gebruik een 0.025 inch afstandsgrid van pads/tracks: no overlapping!)
+- tDocu: outlines van alle packages (alleen ter controle voor spacing en printouts: past het allemaal naast elkaar) -> geef een gele kleur (5 mil width)
+
+EuroCircuits.com export settings:
+---------------------------------
+
+Gewoon de .brd uploaden, of:
+
+CAM processor: gerb274x.cam
+
+4 layers selecteren: Component side (.CMP)       = 1 Top layer / 17 Pads layer / 18 Vias layer / 20 Dimension layer
+4 layers selecteren: Solder side (.SOL)          = 16 Bot layer / 17 Pads layer / 18 Vias layer / 20 Dimension layer
+3 layers selecteren: Silk screen CMP (.PLC) 	   = 20 Dimension layer / 21 tPlace layer / 25 tNames layer
+2 layers selecteren: Solder stop mask CMP (.STC) = 20 Dimension layer / 29 tStop layer
+2 layers selecteren: Solder stop mask SOL (.STS) = 20 Dimension layer / 30 bStop layer
+
+CAM processor: excellon.cam
+
+2 layers selecteren: Excellon drill (.DRD)       = 44 Drills layer / 45 Holes layer
+
+NOTE: Cream (solderpaste) en milling/measures layers niet nodig.
+      Let op dat alle .extensies uniek zijn!
+
+You then click process job and the Excellon file will be generated.
+You now simply combine all these files into a single zip file and upload it via the Eurocircuits website.
