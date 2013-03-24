@@ -115,6 +115,10 @@ char *display_conf_info() {
   strcat(uart_buf, "alarm trigger (at): ");
   strcat(uart_buf, tmp_str);
   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+  utoa(g_settings.alarm_trigger_counter,tmp_str,10);
+  strcat(uart_buf, "alarm trigger (atc): ");
+  strcat(uart_buf, tmp_str);
+  strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
   utoa(g_settings.alarm_thres_min,tmp_str,10);
   strcat(uart_buf, "alarm min. threshold (amint): ");
   strcat(uart_buf, tmp_str);
@@ -176,6 +180,8 @@ void command_handle_set_conf(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) 
     eeprom_update_byte(&g_rom_settings.alarm_counter, (uint8_t)(atoi(args[1])));
   } else if (strcmp("at", args[0]) == 0) {
     eeprom_update_byte(&g_rom_settings.alarm_trigger, (uint8_t)(atoi(args[1])));
+  } else if (strcmp("atc", args[0]) == 0) {
+    eeprom_update_byte(&g_rom_settings.alarm_trigger_counter, (uint8_t)(atoi(args[1])));
   } else if (strcmp("amint", args[0]) == 0) {
     eeprom_update_byte(&g_rom_settings.alarm_thres_min, (uint8_t)(atoi(args[1])));
   } else if (strcmp("amaxt", args[0]) == 0) {

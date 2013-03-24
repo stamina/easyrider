@@ -521,7 +521,7 @@ void check_alarm_trigger() {
        (abs(g_adc_voltage[2] - g_alarm_snapshot[1]) > g_settings.alarm_trigger) || 
        (abs(g_adc_voltage[3] - g_alarm_snapshot[2]) > g_settings.alarm_trigger)) {
         g_trigger_counter++;
-        if (g_trigger_counter >= 6) {
+        if (g_trigger_counter >= g_settings.alarm_trigger_counter) {
           FLAG_ALARM_TRIGGER = 1;
         }
       }
@@ -746,6 +746,7 @@ void process_ign_off() {
     FLAG_DEBOUNCE_IGN = 0; // reset to wait for next timer event
     if (((g_ign_debounce & 0b00000111) << 5) == 0) {
       all_lights_off();
+      PORT_C90_BUZZER &= ~(1 << PIN_C90_BUZZER); // buzzer off
       FLAG_SETTLE = 0; // reset settle
       g_state = ST_SLEEP;
     }
@@ -872,6 +873,7 @@ void process_battery() {
   }
 }
 
+// all lighting pins go low
 void all_lights_off() {
   PORT_C90_LIGHT_INDICATOR_COCKPIT &= ~(1 << PIN_C90_LIGHT_INDICATOR_COCKPIT);
   PORT_C90_LIGHT_STATUS_COCKPIT &= ~(1 << PIN_C90_LIGHT_STATUS_COCKPIT);
@@ -1130,6 +1132,9 @@ void initialize() {
   }
   if (eeprom_read_byte(&g_rom_settings.alarm_trigger) != g_settings.alarm_trigger) {
     g_settings.alarm_trigger = eeprom_read_byte(&g_rom_settings.alarm_trigger);
+  }
+  if (eeprom_read_byte(&g_rom_settings.alarm_trigger_counter) != g_settings.alarm_trigger_counter) {
+    g_settings.alarm_trigger_counter = eeprom_read_byte(&g_rom_settings.alarm_trigger_counter);
   }
   if (eeprom_read_byte(&g_rom_settings.alarm_thres_min) != g_settings.alarm_thres_min) {
     g_settings.alarm_thres_min = eeprom_read_byte(&g_rom_settings.alarm_thres_min);

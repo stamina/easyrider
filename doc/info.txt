@@ -1,12 +1,14 @@
 EasyRider Telemetrics
 ---------------------
 
-Version 1.0 bug fixes:
+Version 1.0 bug fixes and changes:
 
-[X] Cockpit status light stays lit in alarm/alarmsettle mode ->  unwanted check_battery_read() calls
-[X] Hardware bug: when claxon (2 amp) is pushed, all reed relays switch on: short blinks of lights
+[X] TODO: Alarm trigger time should be faster, 
+[X] BUG: Ignition off: disable all lights/sounds
+[X] BUG: Cockpit status light stays lit in alarm/alarmsettle mode ->  unwanted check_battery_read() calls
+[X] BUG: Hardware related:  when claxon (2 amp) is pushed, all reed relays switch on: short blinks of lights
       -> [X] snubber/flyback diode proberen
-[X] Alarm trigger werkt niet lekker: claxon/blinkers sequence niet goed en transition from alarm_settle/alarm states foutief
+[X] BUG: Alarm trigger werkt niet lekker: claxon/blinkers sequence niet goed en transition from alarm_settle/alarm states foutief
 
 Version 1.0 features:
 

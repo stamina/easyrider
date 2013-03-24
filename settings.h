@@ -27,6 +27,7 @@ typedef struct {
   uint16_t blink_speed; // default 9766: 1 tick is 0.0000512 secs
   uint8_t alarm_counter; // default 4 times: 2 times on and 2 times off
   uint8_t alarm_trigger; // default 18: voltage offset 18 * 5V/1024 parts
+  uint8_t alarm_trigger_counter; // default 4: we need 4 times a postive alarm trigger, each measurement is done TIMER1 (0.5s) tick
   uint8_t alarm_thres_min; // default 140: voltage minimum 0.685
   uint16_t alarm_thres_max; // default 550: voltage maximum 2.685
   uint8_t backpedal; // default 0: indicators and beep when moving backswards  
