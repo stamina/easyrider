@@ -313,11 +313,11 @@ typedef struct {
 } tTransition;                         
 
 tSettings g_settings = {
-  1200,800,800,1,9766,4,18,4,140,550,0,297,0,1,"admin"
+  1200,800,800,1,9766,6,18,4,140,550,0,297,0,1,"admin"
 };
 
 tSettings EEMEM g_rom_settings = {
-  1200,800,800,1,9766,4,18,4,140,550,0,297,0,1,"admin"
+  1200,800,800,1,9766,6,18,4,140,550,0,297,0,1,"admin"
 };
 
 // proto's
@@ -437,7 +437,7 @@ static volatile uint8_t g_adc_read_pin; // current pin to read ADC voltage
 volatile uint16_t g_adc_voltage[4]; // current ADC voltages: 0 is accu, 1-3 is xyz accelerometer
 static volatile uint16_t g_adc_avg_voltage[3]; // average ADC voltages: 0-2 is xyz accelerometer
 static volatile uint8_t g_battery_blink_counter; // counter to determine battery status blink speed
-static volatile uint8_t g_alarm_blink_counter; // counter to determine alarm indicator blink/claxon speed
+static volatile uint8_t g_alarm_blink_counter; // counter to determine alarm indicator blinking interval
 static volatile uint8_t g_alarm_counter; // counter to determine the amount of alarm signals in a row
 static volatile uint16_t g_alarm_snapshot[3]; // alarm snapshot array which contains the 3-axis' voltages
 static volatile uint8_t g_indicator_sound; // buzzer beep when indicators blink

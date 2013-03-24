@@ -25,7 +25,7 @@ typedef struct {
   uint16_t alarm_settle_time; // default 800: 5ms ticks, so 4 secs
   uint8_t indicator_sound; // default 1: beep when indicators blink
   uint16_t blink_speed; // default 9766: 1 tick is 0.0000512 secs
-  uint8_t alarm_counter; // default 4 times: 2 times on and 2 times off
+  uint8_t alarm_counter; // default 6 times: 3 times on and 3 times off
   uint8_t alarm_trigger; // default 18: voltage offset 18 * 5V/1024 parts
   uint8_t alarm_trigger_counter; // default 4: we need 4 times a postive alarm trigger, each measurement is done TIMER1 (0.5s) tick
   uint8_t alarm_thres_min; // default 140: voltage minimum 0.685

@@ -516,7 +516,11 @@ void check_alarm_trigger() {
       }
     } else if (FLAG_ALARM_BLINK) {
       FLAG_ALARM_BLINK = 0;
-      PORT_C90_LIGHT_INDICATOR_COCKPIT ^= (1 << PIN_C90_LIGHT_INDICATOR_COCKPIT);
+      if (g_alarm_blink_counter % 4 == 0) { // blink for 1 tick every timer1 4 counts
+        PORT_C90_LIGHT_INDICATOR_COCKPIT |= (1 << PIN_C90_LIGHT_INDICATOR_COCKPIT);
+      } else {
+        PORT_C90_LIGHT_INDICATOR_COCKPIT &= ~(1 << PIN_C90_LIGHT_INDICATOR_COCKPIT);
+      }
       if ((abs(g_adc_voltage[1] - g_alarm_snapshot[0]) > g_settings.alarm_trigger) ||
        (abs(g_adc_voltage[2] - g_alarm_snapshot[1]) > g_settings.alarm_trigger) || 
        (abs(g_adc_voltage[3] - g_alarm_snapshot[2]) > g_settings.alarm_trigger)) {
@@ -671,11 +675,12 @@ void process_warning_on() {
       FLAG_BLINK_WARNING = 0; // reset to wait for next timer event
       if (!get_substate(ST_WARNING)) { // first time to blink
         TCNT1 = 0; // reset timer so the blink starts in an even pace
-        // reset indicators to prevent a previous RI/LI ON mess with displaying all 4 indicators at the same time
+        // initial ON for indicators to prevent a  RI/LI ON messing with the synchronization, i.e. warning lights override indicator switches
         PORT_C90_LIGHT_RI_F |= (1 << PIN_C90_LIGHT_RI_F);
         PORT_C90_LIGHT_RI_B |= (1 << PIN_C90_LIGHT_RI_B);
         PORT_C90_LIGHT_LI_F |= (1 << PIN_C90_LIGHT_LI_F);
         PORT_C90_LIGHT_LI_B |= (1 << PIN_C90_LIGHT_LI_B);
+        PORT_C90_LIGHT_INDICATOR_COCKPIT |= (1 << PIN_C90_LIGHT_INDICATOR_COCKPIT);
         set_substate(ST_WARNING);
       }
     }
@@ -1053,6 +1058,7 @@ ISR(TIMER1_COMPA_vect)
   if (g_sleep_counter) {
     g_sleep_counter--;
   }
+  g_alarm_blink_counter++;
 }
 
 ISR(TIMER3_COMPA_vect)
@@ -1071,8 +1077,7 @@ void check_sound() {
         }
         g_music_duration = calc_note_duration(pgm_read_word(g_current_music));
         g_current_music++;
-        // pause check
-        if (pgm_read_word(g_current_music) == MUSIC_P) {
+        if (pgm_read_word(g_current_music) == MUSIC_P) { // pause check (silence for a certain time)
           TIMSK3 &= ~(1 << OCIE3A); // disable interrupt
           PORT_C90_BUZZER &= ~(1 << PIN_C90_BUZZER);
         } else {
