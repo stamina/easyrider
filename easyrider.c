@@ -408,6 +408,7 @@ void check_settle() {
       PORT_C90_BRAKE |= (1 << PIN_C90_BRAKE);
       PORT_C90_PILOT |= (1 << PIN_C90_PILOT);
       PORT_C90_LIGHT |= (1 << PIN_C90_LIGHT);
+      PORT_C90_CLAXON &= ~(1 << PIN_C90_CLAXON); // silence a possible claxon from the alarm
       // check voltage and activate according sound
       g_music_duration = 0;
       // check for random startup song

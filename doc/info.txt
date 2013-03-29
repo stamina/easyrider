@@ -3,6 +3,7 @@ EasyRider Telemetrics
 
 Version 1.0 bug fixes and changes:
 
+[X] BUG: The claxon sound continues when turning the alarm off by turning the ignition key on 
 [X] TODO: Alarm mode: indicator blink slower -> every 4 timer1 ticks: 1 tick on 
 [X] TODO: Alarm trigger time should be faster, 
 [X] BUG: Ignition off: disable all lights/sounds
