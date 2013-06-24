@@ -3,13 +3,25 @@ EasyRider Telemetrics
 
 Version 1.0 bug fixes and changes:
 
+[ ] TODO: Add some outgoing signals over uart, like when a state changes, or when the mcu starts etc.
+      -> implement in wrapper functions like set_substate
+[X] BUG: Claxon mosfet switched aan bij veel toeren, voor zeer korte tijd -> oscillation?
+      -> FIXED: Gemeten met scope: elke keer precies 15ms gate trigger, dus physical sense (drukknop claxon) maakt
+         contact -> vergroten van 3x 5ms "debouncing" algoritme in code naar 6x
+      -> duikt de 12V op gate naar beneden? waarom?
+      -> Cap ervoor zetten?
+      -> Grotere input cap bij 12V Regulator -> 1000uf, niet te hoge dimensie
+      -> Transistor base resistor van 10K naar 2200 ohm?
+      -> Cooler verwijderen: te veel capacitance?
+      -> extra flyback diode (schottky) parallel aan mosfet? 
 [X] BUG: The claxon sound continues when turning the alarm off by turning the ignition key on 
 [X] TODO: Alarm mode: indicator blink slower -> every 4 timer1 ticks: 1 tick on 
 [X] TODO: Alarm trigger time should be faster, 
 [X] BUG: Ignition off: disable all lights/sounds
 [X] BUG: Cockpit status light stays lit in alarm/alarmsettle mode ->  unwanted check_battery_read() calls
 [X] BUG: Hardware related:  when claxon (2 amp) is pushed, all reed relays switch on: short blinks of lights
-      -> [X] snubber/flyback diode proberen
+      -> snubber/flyback diode proberen
+      -> Ground path van claxon terugvoeren via draad naar accu min-pole om groundloops te voorkomen
 [X] BUG: Alarm trigger werkt niet lekker: claxon/blinkers sequence niet goed en transition from alarm_settle/alarm states foutief
 
 Version 1.0 features:
@@ -131,7 +143,7 @@ BOM "EasyRider" REV A
 [X] 1x MMA7361 Freescale Accelerometer breakout pins 
 [X] 1x 24 pin main wire connector
 
-[X] 1x flyback diode for claxon: SB540E SCHOTTKY 40V 5A
+[X] 1x flyback diode parallel across claxon: SB540E SCHOTTKY 40V 5A
 
 Schematic/Board
 ---------------
