@@ -1,0 +1,468 @@
+   1               		.file	"command_usart.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               		.section	.text.command_usart_input,"ax",@progbits
+  12               	.global	command_usart_input
+  14               	command_usart_input:
+  15               	.LFB2:
+  16               		.file 1 "command_usart.c"
+   1:command_usart.c **** /*
+   2:command_usart.c ****  *
+   3:command_usart.c ****  *  Copyright (C) 2013 Bas Brugman
+   4:command_usart.c ****  *  http://www.visionnaire.nl
+   5:command_usart.c ****  *
+   6:command_usart.c ****  *  Licensed under the Apache License, Version 2.0 (the "License");
+   7:command_usart.c ****  *  you may not use this file except in compliance with the License.
+   8:command_usart.c ****  *  You may obtain a copy of the License at
+   9:command_usart.c ****  *
+  10:command_usart.c ****  *    http://www.apache.org/licenses/LICENSE-2.0
+  11:command_usart.c ****  *
+  12:command_usart.c ****  *  Unless required by applicable law or agreed to in writing, software
+  13:command_usart.c ****  *  distributed under the License is distributed on an "AS IS" BASIS,
+  14:command_usart.c ****  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15:command_usart.c ****  *  See the License for the specific language governing permissions and
+  16:command_usart.c ****  *  limitations under the License.
+  17:command_usart.c ****  *
+  18:command_usart.c ****  */
+  19:command_usart.c **** #include <stdint.h>
+  20:command_usart.c **** #include <avr/io.h>
+  21:command_usart.c **** #include <avr/interrupt.h>
+  22:command_usart.c **** #include <string.h>
+  23:command_usart.c **** 
+  24:command_usart.c **** #include  "command_usart.h"
+  25:command_usart.c **** #include  "usart.h"
+  26:command_usart.c **** 
+  27:command_usart.c **** static char g_buffer[256]; // max of 256 chars for input
+  28:command_usart.c **** static uint8_t g_buffer_pos;
+  29:command_usart.c **** static uint8_t g_command_status;
+  30:command_usart.c **** 
+  31:command_usart.c **** #define B_SIZE ((int) (sizeof(g_buffer) / sizeof(g_buffer[0]))) 
+  32:command_usart.c **** 
+  33:command_usart.c **** void command_usart_input(uint8_t event, char *cmd) {
+  17               		.loc 1 33 0
+  18               		.cfi_startproc
+  19               	.LVL0:
+  20 0000 1F93      		push r17
+  21               	.LCFI0:
+  22               		.cfi_def_cfa_offset 3
+  23               		.cfi_offset 17, -2
+  24 0002 CF93      		push r28
+  25               	.LCFI1:
+  26               		.cfi_def_cfa_offset 4
+  27               		.cfi_offset 28, -3
+  28 0004 DF93      		push r29
+  29               	.LCFI2:
+  30               		.cfi_def_cfa_offset 5
+  31               		.cfi_offset 29, -4
+  32               	/* prologue: function */
+  33               	/* frame size = 0 */
+  34               	/* stack size = 3 */
+  35               	.L__stack_usage = 3
+  36 0006 EB01      		movw r28,r22
+  34:command_usart.c ****   uint8_t status, current;
+  35:command_usart.c ****   if (event == 0) {
+  37               		.loc 1 35 0
+  38 0008 8823      		tst r24
+  39 000a 01F0      		breq .L11
+  40               	.LVL1:
+  41               	.L1:
+  42               	/* epilogue start */
+  36:command_usart.c ****     if (uart_available()) { // data ready
+  37:command_usart.c ****       current = uart_get();
+  38:command_usart.c ****       status = command_usart_parse(&current);
+  39:command_usart.c ****       if (status == CHAR_NORMAL) {
+  40:command_usart.c ****         if (g_buffer_pos >= B_SIZE) { // reset when full
+  41:command_usart.c ****           g_buffer_pos = 0;
+  42:command_usart.c ****         }
+  43:command_usart.c ****         uart_put(current); // echo valid char back
+  44:command_usart.c ****         g_buffer[g_buffer_pos] = current; // add to buffer
+  45:command_usart.c ****         g_command_status = CMD_IN_PROCESS;
+  46:command_usart.c ****         g_buffer_pos++;
+  47:command_usart.c ****       } else if (status == CHAR_ENTER) { // enter pressed
+  48:command_usart.c ****           g_buffer[g_buffer_pos] = '\0'; // mark current pos as end
+  49:command_usart.c ****           g_buffer_pos = 0;
+  50:command_usart.c ****           g_command_status = CMD_RDY;
+  51:command_usart.c ****       }
+  52:command_usart.c ****     }
+  53:command_usart.c ****     if (g_command_status == CMD_RDY) { // copy buffer to command
+  54:command_usart.c ****       strcpy(cmd, g_buffer);
+  55:command_usart.c ****       g_command_status = CMD_IN_PROCESS;
+  56:command_usart.c ****     } else { // set command as "still empty"
+  57:command_usart.c ****       cmd[0] = '\0'; 
+  58:command_usart.c ****     }
+  59:command_usart.c ****   }
+  60:command_usart.c **** }
+  43               		.loc 1 60 0
+  44 000c DF91      		pop r29
+  45 000e CF91      		pop r28
+  46               	.LVL2:
+  47 0010 1F91      		pop r17
+  48 0012 0895      		ret
+  49               	.LVL3:
+  50               	.L11:
+  36:command_usart.c ****     if (uart_available()) { // data ready
+  51               		.loc 1 36 0
+  52 0014 0E94 0000 		call uart_available
+  53               	.LVL4:
+  54 0018 8111      		cpse r24,__zero_reg__
+  55 001a 00C0      		rjmp .L3
+  56               	.L9:
+  57 001c 8091 0000 		lds r24,g_command_status
+  53:command_usart.c ****     if (g_command_status == CMD_RDY) { // copy buffer to command
+  58               		.loc 1 53 0
+  59 0020 8130      		cpi r24,lo8(1)
+  60 0022 01F0      		breq .L8
+  57:command_usart.c ****       cmd[0] = '\0'; 
+  61               		.loc 1 57 0
+  62 0024 1882      		st Y,__zero_reg__
+  63               	.L12:
+  64               	/* epilogue start */
+  65               		.loc 1 60 0
+  66 0026 DF91      		pop r29
+  67 0028 CF91      		pop r28
+  68               	.LVL5:
+  69 002a 1F91      		pop r17
+  70 002c 0895      		ret
+  71               	.LVL6:
+  72               	.L3:
+  37:command_usart.c ****       current = uart_get();
+  73               		.loc 1 37 0
+  74 002e 0E94 0000 		call uart_get
+  75               	.LVL7:
+  76 0032 182F      		mov r17,r24
+  77               	.LVL8:
+  78               	.LBB4:
+  79               	.LBB5:
+  61:command_usart.c **** 
+  62:command_usart.c **** void command_usart_output(const char *cmd, uint8_t flashmem, uint8_t clear) {
+  63:command_usart.c ****   if (clear == 1 || clear == 3) {
+  64:command_usart.c ****     uart_put_str("\x1B[2J\x0D"); // clear entire screen
+  65:command_usart.c ****   }
+  66:command_usart.c ****   if (flashmem) {
+  67:command_usart.c ****     uart_put_str_P(cmd);
+  68:command_usart.c ****   } else {
+  69:command_usart.c ****     uart_put_str(cmd);
+  70:command_usart.c ****   }
+  71:command_usart.c ****   if (clear == 2 || clear == 3) {
+  72:command_usart.c ****     uart_put_str("\x1B[1B"); // next line
+  73:command_usart.c ****     uart_put_str("\x1B[2K\x0D"); // clear line and CR
+  74:command_usart.c ****   }
+  75:command_usart.c **** }
+  76:command_usart.c **** 
+  77:command_usart.c **** uint8_t command_usart_parse(uint8_t *current) {
+  78:command_usart.c ****   if (*current == 0x0d) {
+  80               		.loc 1 78 0
+  81 0034 8D30      		cpi r24,lo8(13)
+  82 0036 01F0      		breq .L5
+  79:command_usart.c ****     return CHAR_ENTER;
+  80:command_usart.c ****   } else if (*current == 0x08) {
+  83               		.loc 1 80 0
+  84 0038 80EE      		ldi r24,lo8(-32)
+  85 003a 810F      		add r24,r17
+  86 003c 8F35      		cpi r24,lo8(95)
+  87 003e 00F4      		brsh .L9
+  88               	.LBE5:
+  89               	.LBE4:
+  43:command_usart.c ****         uart_put(current); // echo valid char back
+  90               		.loc 1 43 0
+  91 0040 812F      		mov r24,r17
+  92 0042 0E94 0000 		call uart_put
+  93               	.LVL9:
+  44:command_usart.c ****         g_buffer[g_buffer_pos] = current; // add to buffer
+  94               		.loc 1 44 0
+  95 0046 8091 0000 		lds r24,g_buffer_pos
+  96 004a E82F      		mov r30,r24
+  97 004c F0E0      		ldi r31,0
+  98 004e E050      		subi r30,lo8(-(g_buffer))
+  99 0050 F040      		sbci r31,hi8(-(g_buffer))
+ 100 0052 1083      		st Z,r17
+  45:command_usart.c ****         g_command_status = CMD_IN_PROCESS;
+ 101               		.loc 1 45 0
+ 102 0054 1092 0000 		sts g_command_status,__zero_reg__
+  46:command_usart.c ****         g_buffer_pos++;
+ 103               		.loc 1 46 0
+ 104 0058 8F5F      		subi r24,lo8(-(1))
+ 105 005a 8093 0000 		sts g_buffer_pos,r24
+  57:command_usart.c ****       cmd[0] = '\0'; 
+ 106               		.loc 1 57 0
+ 107 005e 1882      		st Y,__zero_reg__
+ 108 0060 00C0      		rjmp .L12
+ 109               	.L5:
+  48:command_usart.c ****           g_buffer[g_buffer_pos] = '\0'; // mark current pos as end
+ 110               		.loc 1 48 0
+ 111 0062 E091 0000 		lds r30,g_buffer_pos
+ 112 0066 F0E0      		ldi r31,0
+ 113 0068 E050      		subi r30,lo8(-(g_buffer))
+ 114 006a F040      		sbci r31,hi8(-(g_buffer))
+ 115 006c 1082      		st Z,__zero_reg__
+  49:command_usart.c ****           g_buffer_pos = 0;
+ 116               		.loc 1 49 0
+ 117 006e 1092 0000 		sts g_buffer_pos,__zero_reg__
+ 118               	.LVL10:
+ 119               	.L8:
+  54:command_usart.c ****       strcpy(cmd, g_buffer);
+ 120               		.loc 1 54 0
+ 121 0072 60E0      		ldi r22,lo8(g_buffer)
+ 122 0074 70E0      		ldi r23,hi8(g_buffer)
+ 123 0076 CE01      		movw r24,r28
+ 124 0078 0E94 0000 		call strcpy
+ 125               	.LVL11:
+  55:command_usart.c ****       g_command_status = CMD_IN_PROCESS;
+ 126               		.loc 1 55 0
+ 127 007c 1092 0000 		sts g_command_status,__zero_reg__
+ 128 0080 00C0      		rjmp .L1
+ 129               		.cfi_endproc
+ 130               	.LFE2:
+ 132               		.section	.rodata.str1.1,"aMS",@progbits,1
+ 133               	.LC0:
+ 134 0000 1B5B 324A 		.string	"\033[2J\r"
+ 134      0D00 
+ 135               	.LC1:
+ 136 0006 1B5B 3142 		.string	"\033[1B"
+ 136      00
+ 137               	.LC2:
+ 138 000b 1B5B 324B 		.string	"\033[2K\r"
+ 138      0D00 
+ 139               		.section	.text.command_usart_output,"ax",@progbits
+ 140               	.global	command_usart_output
+ 142               	command_usart_output:
+ 143               	.LFB3:
+  62:command_usart.c **** void command_usart_output(const char *cmd, uint8_t flashmem, uint8_t clear) {
+ 144               		.loc 1 62 0
+ 145               		.cfi_startproc
+ 146               	.LVL12:
+ 147 0000 EF92      		push r14
+ 148               	.LCFI3:
+ 149               		.cfi_def_cfa_offset 3
+ 150               		.cfi_offset 14, -2
+ 151 0002 FF92      		push r15
+ 152               	.LCFI4:
+ 153               		.cfi_def_cfa_offset 4
+ 154               		.cfi_offset 15, -3
+ 155 0004 1F93      		push r17
+ 156               	.LCFI5:
+ 157               		.cfi_def_cfa_offset 5
+ 158               		.cfi_offset 17, -4
+ 159 0006 CF93      		push r28
+ 160               	.LCFI6:
+ 161               		.cfi_def_cfa_offset 6
+ 162               		.cfi_offset 28, -5
+ 163 0008 DF93      		push r29
+ 164               	.LCFI7:
+ 165               		.cfi_def_cfa_offset 7
+ 166               		.cfi_offset 29, -6
+ 167 000a 1F92      		push __zero_reg__
+ 168               	.LCFI8:
+ 169               		.cfi_def_cfa_offset 8
+ 170 000c CDB7      		in r28,__SP_L__
+ 171 000e DEB7      		in r29,__SP_H__
+ 172               	.LCFI9:
+ 173               		.cfi_def_cfa_register 28
+ 174               	/* prologue: function */
+ 175               	/* frame size = 1 */
+ 176               	/* stack size = 6 */
+ 177               	.L__stack_usage = 6
+ 178 0010 7C01      		movw r14,r24
+ 179 0012 142F      		mov r17,r20
+  63:command_usart.c ****   if (clear == 1 || clear == 3) {
+ 180               		.loc 1 63 0
+ 181 0014 842F      		mov r24,r20
+ 182               	.LVL13:
+ 183 0016 8D7F      		andi r24,lo8(-3)
+ 184 0018 8130      		cpi r24,lo8(1)
+ 185 001a 01F0      		breq .L18
+ 186               	.LVL14:
+ 187               	.L14:
+  67:command_usart.c ****     uart_put_str_P(cmd);
+ 188               		.loc 1 67 0
+ 189 001c C701      		movw r24,r14
+  66:command_usart.c ****   if (flashmem) {
+ 190               		.loc 1 66 0
+ 191 001e 6623      		tst r22
+ 192 0020 01F0      		breq .L15
+  67:command_usart.c ****     uart_put_str_P(cmd);
+ 193               		.loc 1 67 0
+ 194 0022 0E94 0000 		call uart_put_str_P
+ 195               	.LVL15:
+  71:command_usart.c ****   if (clear == 2 || clear == 3) {
+ 196               		.loc 1 71 0
+ 197 0026 1250      		subi r17,lo8(-(-2))
+ 198               	.LVL16:
+ 199 0028 1230      		cpi r17,lo8(2)
+ 200 002a 00F0      		brlo .L19
+ 201               	.LVL17:
+ 202               	.L13:
+ 203               	/* epilogue start */
+  75:command_usart.c **** }
+ 204               		.loc 1 75 0
+ 205 002c 0F90      		pop __tmp_reg__
+ 206 002e DF91      		pop r29
+ 207 0030 CF91      		pop r28
+ 208 0032 1F91      		pop r17
+ 209 0034 FF90      		pop r15
+ 210 0036 EF90      		pop r14
+ 211               	.LVL18:
+ 212 0038 0895      		ret
+ 213               	.LVL19:
+ 214               	.L15:
+  69:command_usart.c ****     uart_put_str(cmd);
+ 215               		.loc 1 69 0
+ 216 003a 0E94 0000 		call uart_put_str
+ 217               	.LVL20:
+  71:command_usart.c ****   if (clear == 2 || clear == 3) {
+ 218               		.loc 1 71 0
+ 219 003e 1250      		subi r17,lo8(-(-2))
+ 220               	.LVL21:
+ 221 0040 1230      		cpi r17,lo8(2)
+ 222 0042 00F4      		brsh .L13
+ 223               	.LVL22:
+ 224               	.L19:
+  72:command_usart.c ****     uart_put_str("\x1B[1B"); // next line
+ 225               		.loc 1 72 0
+ 226 0044 80E0      		ldi r24,lo8(.LC1)
+ 227 0046 90E0      		ldi r25,hi8(.LC1)
+ 228 0048 0E94 0000 		call uart_put_str
+ 229               	.LVL23:
+  73:command_usart.c ****     uart_put_str("\x1B[2K\x0D"); // clear line and CR
+ 230               		.loc 1 73 0
+ 231 004c 80E0      		ldi r24,lo8(.LC2)
+ 232 004e 90E0      		ldi r25,hi8(.LC2)
+ 233               	/* epilogue start */
+  75:command_usart.c **** }
+ 234               		.loc 1 75 0
+ 235 0050 0F90      		pop __tmp_reg__
+ 236 0052 DF91      		pop r29
+ 237 0054 CF91      		pop r28
+ 238 0056 1F91      		pop r17
+ 239 0058 FF90      		pop r15
+ 240 005a EF90      		pop r14
+ 241               	.LVL24:
+  73:command_usart.c ****     uart_put_str("\x1B[2K\x0D"); // clear line and CR
+ 242               		.loc 1 73 0
+ 243 005c 0C94 0000 		jmp uart_put_str
+ 244               	.LVL25:
+ 245               	.L18:
+  64:command_usart.c ****     uart_put_str("\x1B[2J\x0D"); // clear entire screen
+ 246               		.loc 1 64 0
+ 247 0060 80E0      		ldi r24,lo8(.LC0)
+ 248 0062 90E0      		ldi r25,hi8(.LC0)
+ 249 0064 6983      		std Y+1,r22
+ 250 0066 0E94 0000 		call uart_put_str
+ 251               	.LVL26:
+ 252 006a 6981      		ldd r22,Y+1
+ 253 006c 00C0      		rjmp .L14
+ 254               		.cfi_endproc
+ 255               	.LFE3:
+ 257               		.section	.text.command_usart_parse,"ax",@progbits
+ 258               	.global	command_usart_parse
+ 260               	command_usart_parse:
+ 261               	.LFB4:
+  77:command_usart.c **** uint8_t command_usart_parse(uint8_t *current) {
+ 262               		.loc 1 77 0
+ 263               		.cfi_startproc
+ 264               	.LVL27:
+ 265               	/* prologue: function */
+ 266               	/* frame size = 0 */
+ 267               	/* stack size = 0 */
+ 268               	.L__stack_usage = 0
+  78:command_usart.c ****   if (*current == 0x0d) {
+ 269               		.loc 1 78 0
+ 270 0000 FC01      		movw r30,r24
+ 271 0002 8081      		ld r24,Z
+ 272               	.LVL28:
+ 273 0004 8D30      		cpi r24,lo8(13)
+ 274 0006 01F0      		breq .L22
+ 275               		.loc 1 80 0
+ 276 0008 8830      		cpi r24,lo8(8)
+ 277 000a 01F0      		breq .L23
+  81:command_usart.c ****     return CHAR_BACKSPACE;
+  82:command_usart.c ****   } else if ((*current >= 0x20) && (*current < 0x7F)) {
+ 278               		.loc 1 82 0
+ 279 000c 8052      		subi r24,lo8(-(-32))
+ 280 000e 8F35      		cpi r24,lo8(95)
+ 281 0010 00F0      		brlo .L25
+  83:command_usart.c ****     return CHAR_NORMAL;
+  84:command_usart.c ****   }
+  85:command_usart.c ****   return CHAR_FILTER;
+ 282               		.loc 1 85 0
+ 283 0012 84E0      		ldi r24,lo8(4)
+  86:command_usart.c **** }
+ 284               		.loc 1 86 0
+ 285 0014 0895      		ret
+ 286               	.L23:
+  81:command_usart.c ****     return CHAR_BACKSPACE;
+ 287               		.loc 1 81 0
+ 288 0016 83E0      		ldi r24,lo8(3)
+ 289 0018 0895      		ret
+ 290               	.L22:
+  79:command_usart.c ****     return CHAR_ENTER;
+ 291               		.loc 1 79 0
+ 292 001a 82E0      		ldi r24,lo8(2)
+ 293 001c 0895      		ret
+ 294               	.L25:
+  83:command_usart.c ****     return CHAR_NORMAL;
+ 295               		.loc 1 83 0
+ 296 001e 81E0      		ldi r24,lo8(1)
+ 297 0020 0895      		ret
+ 298               		.cfi_endproc
+ 299               	.LFE4:
+ 301               		.local	g_command_status
+ 302               		.comm	g_command_status,1,1
+ 303               		.local	g_buffer_pos
+ 304               		.comm	g_buffer_pos,1,1
+ 305               		.local	g_buffer
+ 306               		.comm	g_buffer,256,1
+ 307               		.local	rx_buffer_tail
+ 308               		.comm	rx_buffer_tail,1,1
+ 309               		.local	rx_buffer_head
+ 310               		.comm	rx_buffer_head,1,1
+ 311               		.local	rx_buffer
+ 312               		.comm	rx_buffer,256,1
+ 313               		.local	tx_buffer_tail
+ 314               		.comm	tx_buffer_tail,1,1
+ 315               		.local	tx_buffer_head
+ 316               		.comm	tx_buffer_head,1,1
+ 317               		.local	tx_buffer
+ 318               		.comm	tx_buffer,256,1
+ 319               		.text
+ 320               	.Letext0:
+ 321               		.file 2 "usart.h"
+ 322               		.file 3 "/usr/avr/include/string.h"
+ 323               		.file 4 "/usr/avr/include/stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 command_usart.c
+     /tmp/cc9ylL91.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/cc9ylL91.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/cc9ylL91.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/cc9ylL91.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/cc9ylL91.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/cc9ylL91.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/cc9ylL91.s:14     .text.command_usart_input:0000000000000000 command_usart_input
+                             .bss:0000000000000000 g_command_status
+     /tmp/cc9ylL91.s:302    .bss:0000000000000001 g_buffer_pos
+     /tmp/cc9ylL91.s:304    .bss:0000000000000002 g_buffer
+     /tmp/cc9ylL91.s:142    .text.command_usart_output:0000000000000000 command_usart_output
+     /tmp/cc9ylL91.s:260    .text.command_usart_parse:0000000000000000 command_usart_parse
+     /tmp/cc9ylL91.s:306    .bss:0000000000000102 rx_buffer_tail
+     /tmp/cc9ylL91.s:308    .bss:0000000000000103 rx_buffer_head
+     /tmp/cc9ylL91.s:310    .bss:0000000000000104 rx_buffer
+     /tmp/cc9ylL91.s:312    .bss:0000000000000204 tx_buffer_tail
+     /tmp/cc9ylL91.s:314    .bss:0000000000000205 tx_buffer_head
+     /tmp/cc9ylL91.s:316    .bss:0000000000000206 tx_buffer
+
+UNDEFINED SYMBOLS
+uart_available
+uart_get
+uart_put
+strcpy
+uart_put_str_P
+uart_put_str
+__do_copy_data
+__do_clear_bss

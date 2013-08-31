@@ -1,0 +1,3388 @@
+   1               		.file	"command_handlers.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               		.section	.rodata.str1.1,"aMS",@progbits,1
+  12               	.LC0:
+  13 0000 5265 7365 		.string	"Resetting...."
+  13      7474 696E 
+  13      672E 2E2E 
+  13      2E00 
+  14               		.section	.text.command_handle_reset,"ax",@progbits
+  15               	.global	command_handle_reset
+  17               	command_handle_reset:
+  18               	.LFB13:
+  19               		.file 1 "command_handlers.c"
+   1:command_handlers.c **** /*
+   2:command_handlers.c ****  *
+   3:command_handlers.c ****  *  Copyright (C) 2013 Bas Brugman
+   4:command_handlers.c ****  *  http://www.visionnaire.nl
+   5:command_handlers.c ****  *
+   6:command_handlers.c ****  *  Licensed under the Apache License, Version 2.0 (the "License");
+   7:command_handlers.c ****  *  you may not use this file except in compliance with the License.
+   8:command_handlers.c ****  *  You may obtain a copy of the License at
+   9:command_handlers.c ****  *
+  10:command_handlers.c ****  *    http://www.apache.org/licenses/LICENSE-2.0
+  11:command_handlers.c ****  *
+  12:command_handlers.c ****  *  Unless required by applicable law or agreed to in writing, software
+  13:command_handlers.c ****  *  distributed under the License is distributed on an "AS IS" BASIS,
+  14:command_handlers.c ****  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15:command_handlers.c ****  *  See the License for the specific language governing permissions and
+  16:command_handlers.c ****  *  limitations under the License.
+  17:command_handlers.c ****  *
+  18:command_handlers.c ****  */
+  19:command_handlers.c **** #include <stdlib.h>
+  20:command_handlers.c **** #include <stdint.h>
+  21:command_handlers.c **** #include <string.h>
+  22:command_handlers.c **** #include <avr/io.h>
+  23:command_handlers.c **** #include <avr/pgmspace.h>
+  24:command_handlers.c **** #include <avr/eeprom.h>
+  25:command_handlers.c **** 
+  26:command_handlers.c **** #include  "command_handlers.h"
+  27:command_handlers.c **** 
+  28:command_handlers.c **** const char *btob(uint8_t x) {
+  29:command_handlers.c ****   byte_buf[0] = '\0';
+  30:command_handlers.c ****   uint8_t z;
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+  33:command_handlers.c ****   }
+  34:command_handlers.c ****   return byte_buf;
+  35:command_handlers.c **** }
+  36:command_handlers.c **** 
+  37:command_handlers.c **** void register_commands() {
+  38:command_handlers.c ****   command_register("help", help_info, COMMAND_NO_PRIV, command_handle_help);
+  39:command_handlers.c ****   command_register("reset", reset_info, COMMAND_NO_PRIV, command_handle_reset);
+  40:command_handlers.c ****   command_register("show version", show_version_info, COMMAND_NO_PRIV, command_handle_show_version)
+  41:command_handlers.c ****   command_register("show state", show_state_info, COMMAND_NO_PRIV, command_handle_show_state);
+  42:command_handlers.c ****   command_register("show conf", show_conf_info, COMMAND_NO_PRIV, command_handle_show_conf);
+  43:command_handlers.c ****   command_register("show voltage", show_voltage_info, COMMAND_NO_PRIV, command_handle_show_voltage)
+  44:command_handlers.c ****   command_register("set dsense", set_sense_info, COMMAND_NO_PRIV, command_handle_set_sense);
+  45:command_handlers.c ****   command_register("set conf", set_conf_info, COMMAND_NO_PRIV, command_handle_set_conf);
+  46:command_handlers.c **** }
+  47:command_handlers.c **** 
+  48:command_handlers.c **** char *display_state_info() {
+  49:command_handlers.c ****   strcpy(uart_buf, "st: ");
+  50:command_handlers.c ****   strcat(uart_buf, btob(g_state >> 8));
+  51:command_handlers.c ****   strcat(uart_buf, ".");
+  52:command_handlers.c ****   strcat(uart_buf, btob(g_state));
+  53:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+  54:command_handlers.c ****   strcat(uart_buf, "ds: ");
+  55:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses >> 8));
+  56:command_handlers.c ****   strcat(uart_buf, ".");
+  57:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses));
+  58:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+  59:command_handlers.c ****   strcat(uart_buf, "dss:");
+  60:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses_status >> 8));
+  61:command_handlers.c ****   strcat(uart_buf, ".");
+  62:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses_status));
+  63:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+  64:command_handlers.c ****   return uart_buf;
+  65:command_handlers.c **** }
+  66:command_handlers.c **** 
+  67:command_handlers.c **** char *display_voltage_info() {
+  68:command_handlers.c ****   char accu_str[5];
+  69:command_handlers.c ****   char x_str[5];
+  70:command_handlers.c ****   char y_str[5];
+  71:command_handlers.c ****   char z_str[5];
+  72:command_handlers.c ****   utoa(g_adc_voltage[0],accu_str,10);
+  73:command_handlers.c ****   utoa(g_adc_voltage[1],x_str,10);
+  74:command_handlers.c ****   utoa(g_adc_voltage[2],y_str,10);
+  75:command_handlers.c ****   utoa(g_adc_voltage[3],z_str,10);
+  76:command_handlers.c ****   strcpy(uart_buf, "battery: ");
+  77:command_handlers.c ****   strcat(uart_buf, accu_str);
+  78:command_handlers.c ****   strcat(uart_buf, " x: ");
+  79:command_handlers.c ****   strcat(uart_buf, x_str);
+  80:command_handlers.c ****   strcat(uart_buf, " y: ");
+  81:command_handlers.c ****   strcat(uart_buf, y_str);
+  82:command_handlers.c ****   strcat(uart_buf, " z: ");
+  83:command_handlers.c ****   strcat(uart_buf, z_str);
+  84:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+  85:command_handlers.c ****   return uart_buf;
+  86:command_handlers.c **** }
+  87:command_handlers.c **** 
+  88:command_handlers.c **** char *display_conf_info() {
+  89:command_handlers.c ****   char tmp_str[32];
+  90:command_handlers.c ****   utoa(g_settings.deep_sleep_counter,tmp_str,10);
+  91:command_handlers.c ****   strcpy(uart_buf, "deep sleep counter (dsc): ");
+  92:command_handlers.c ****   strcat(uart_buf, tmp_str);
+  93:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+  94:command_handlers.c ****   utoa(g_settings.settle_time,tmp_str,10);
+  95:command_handlers.c ****   strcat(uart_buf, "settle time (st): ");
+  96:command_handlers.c ****   strcat(uart_buf, tmp_str);
+  97:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+  98:command_handlers.c ****   utoa(g_settings.alarm_settle_time,tmp_str,10);
+  99:command_handlers.c ****   strcat(uart_buf, "alarm settle time (ast): ");
+ 100:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 101:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 102:command_handlers.c ****   utoa(g_settings.indicator_sound,tmp_str,10);
+ 103:command_handlers.c ****   strcat(uart_buf, "indicator sound (is): ");
+ 104:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 105:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 106:command_handlers.c ****   utoa(g_settings.blink_speed,tmp_str,10);
+ 107:command_handlers.c ****   strcat(uart_buf, "blink speed (bs): ");
+ 108:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 109:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 110:command_handlers.c ****   utoa(g_settings.alarm_counter,tmp_str,10);
+ 111:command_handlers.c ****   strcat(uart_buf, "alarm counter (ac): ");
+ 112:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 113:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 114:command_handlers.c ****   utoa(g_settings.alarm_trigger,tmp_str,10);
+ 115:command_handlers.c ****   strcat(uart_buf, "alarm trigger (at): ");
+ 116:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 117:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 118:command_handlers.c ****   utoa(g_settings.alarm_trigger_counter,tmp_str,10);
+ 119:command_handlers.c ****   strcat(uart_buf, "alarm trigger (atc): ");
+ 120:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 121:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 122:command_handlers.c ****   utoa(g_settings.alarm_thres_min,tmp_str,10);
+ 123:command_handlers.c ****   strcat(uart_buf, "alarm min. threshold (amint): ");
+ 124:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 125:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 126:command_handlers.c ****   utoa(g_settings.alarm_thres_max,tmp_str,10);
+ 127:command_handlers.c ****   strcat(uart_buf, "alarm max.threshold (amaxt): ");
+ 128:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 129:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 130:command_handlers.c ****   utoa(g_settings.backpedal,tmp_str,10);
+ 131:command_handlers.c ****   strcat(uart_buf, "backpedal (bp): ");
+ 132:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 133:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 134:command_handlers.c ****   utoa(g_settings.backpedal_thres_min,tmp_str,10);
+ 135:command_handlers.c ****   strcat(uart_buf, "backpedal threshold (bpt): ");
+ 136:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 137:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 138:command_handlers.c ****   utoa(g_settings.startup_sound,tmp_str,10);
+ 139:command_handlers.c ****   strcat(uart_buf, "startup sound (ss): ");
+ 140:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 141:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 142:command_handlers.c ****   utoa(g_settings.alarm_sound,tmp_str,10);
+ 143:command_handlers.c ****   strcat(uart_buf, "alarm sound (as): ");
+ 144:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 145:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 146:command_handlers.c ****   strcat(uart_buf, "password (p): ");
+ 147:command_handlers.c ****   strcat(uart_buf, g_settings.passwd);
+ 148:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 149:command_handlers.c ****   return uart_buf;
+ 150:command_handlers.c **** }
+ 151:command_handlers.c **** 
+ 152:command_handlers.c **** void command_handle_show_version(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 153:command_handlers.c ****   strcpy_P(cmd_output, g_firmware_version);
+ 154:command_handlers.c **** }
+ 155:command_handlers.c **** 
+ 156:command_handlers.c **** void command_handle_show_state(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 157:command_handlers.c ****   strcpy(cmd_output, display_state_info());
+ 158:command_handlers.c **** }
+ 159:command_handlers.c **** 
+ 160:command_handlers.c **** void command_handle_set_sense(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 161:command_handlers.c ****   g_senses = 0; // deactivate physical senses, because they can conflict
+ 162:command_handlers.c ****   g_dyn_senses = (uint16_t)(strtol(args[0], NULL, 2));
+ 163:command_handlers.c ****   g_dyn_senses_status = (uint16_t)(strtol(args[1], NULL, 2));
+ 164:command_handlers.c ****   strcpy(cmd_output, "Senses updated.");
+ 165:command_handlers.c **** }
+ 166:command_handlers.c **** 
+ 167:command_handlers.c **** void command_handle_set_conf(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 168:command_handlers.c ****   uint8_t success = 1;
+ 169:command_handlers.c ****   if (strcmp("dsc", args[0]) == 0) {
+ 170:command_handlers.c ****     eeprom_update_word(&g_rom_settings.deep_sleep_counter, (uint16_t)(atoi(args[1])));
+ 171:command_handlers.c ****   } else if (strcmp("st", args[0]) == 0) {
+ 172:command_handlers.c ****     eeprom_update_word(&g_rom_settings.settle_time, (uint16_t)(atoi(args[1])));
+ 173:command_handlers.c ****   } else if (strcmp("ast", args[0]) == 0) {
+ 174:command_handlers.c ****     eeprom_update_word(&g_rom_settings.alarm_settle_time, (uint16_t)(atoi(args[1])));
+ 175:command_handlers.c ****   } else if (strcmp("is", args[0]) == 0) {
+ 176:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.indicator_sound, (uint8_t)(atoi(args[1])));
+ 177:command_handlers.c ****   } else if (strcmp("bs", args[0]) == 0) {
+ 178:command_handlers.c ****     eeprom_update_word(&g_rom_settings.blink_speed, (uint16_t)(atoi(args[1])));
+ 179:command_handlers.c ****   } else if (strcmp("ac", args[0]) == 0) {
+ 180:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_counter, (uint8_t)(atoi(args[1])));
+ 181:command_handlers.c ****   } else if (strcmp("at", args[0]) == 0) {
+ 182:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_trigger, (uint8_t)(atoi(args[1])));
+ 183:command_handlers.c ****   } else if (strcmp("atc", args[0]) == 0) {
+ 184:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_trigger_counter, (uint8_t)(atoi(args[1])));
+ 185:command_handlers.c ****   } else if (strcmp("amint", args[0]) == 0) {
+ 186:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_thres_min, (uint8_t)(atoi(args[1])));
+ 187:command_handlers.c ****   } else if (strcmp("amaxt", args[0]) == 0) {
+ 188:command_handlers.c ****     eeprom_update_word(&g_rom_settings.alarm_thres_max, (uint16_t)(atoi(args[1])));
+ 189:command_handlers.c ****   } else if (strcmp("bp", args[0]) == 0) {
+ 190:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.backpedal, (uint8_t)(atoi(args[1])));
+ 191:command_handlers.c ****   } else if (strcmp("bpt", args[0]) == 0) {
+ 192:command_handlers.c ****     eeprom_update_word(&g_rom_settings.backpedal_thres_min, (uint16_t)(atoi(args[1])));
+ 193:command_handlers.c ****   } else if (strcmp("ss", args[0]) == 0) {
+ 194:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.startup_sound, (uint8_t)(atoi(args[1])));
+ 195:command_handlers.c ****   } else if (strcmp("as", args[0]) == 0) {
+ 196:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_sound, (uint8_t)(atoi(args[1])));
+ 197:command_handlers.c ****   } else if (strcmp("p", args[0]) == 0) {
+ 198:command_handlers.c ****     eeprom_update_block(args[1], &g_rom_settings.passwd, 32);
+ 199:command_handlers.c ****   } else {
+ 200:command_handlers.c ****     success = 0;
+ 201:command_handlers.c ****   }
+ 202:command_handlers.c ****   if (success) {
+ 203:command_handlers.c ****     strcpy(cmd_output, "Update successful, RESET the device to use new values!");
+ 204:command_handlers.c ****   } else {
+ 205:command_handlers.c ****     strcpy(cmd_output, "Configuration options error! Use set conf [abbreviation] [value].");
+ 206:command_handlers.c ****   }
+ 207:command_handlers.c **** }
+ 208:command_handlers.c **** 
+ 209:command_handlers.c **** void command_handle_show_conf(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 210:command_handlers.c ****   strcpy(cmd_output, display_conf_info());
+ 211:command_handlers.c **** }
+ 212:command_handlers.c **** 
+ 213:command_handlers.c **** void command_handle_show_voltage(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 214:command_handlers.c ****   strcpy(cmd_output, display_voltage_info());
+ 215:command_handlers.c **** }
+ 216:command_handlers.c **** 
+ 217:command_handlers.c **** void command_handle_help(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 218:command_handlers.c ****   strcpy_P(uart_buf, help_info);
+ 219:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 220:command_handlers.c ****   strcat_P(uart_buf, reset_info);
+ 221:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 222:command_handlers.c ****   strcat_P(uart_buf, show_version_info);
+ 223:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 224:command_handlers.c ****   strcat_P(uart_buf, show_state_info);
+ 225:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 226:command_handlers.c ****   strcat_P(uart_buf, show_voltage_info);
+ 227:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 228:command_handlers.c ****   strcat_P(uart_buf, set_sense_info);
+ 229:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 230:command_handlers.c ****   strcat_P(uart_buf, set_conf_info);
+ 231:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 232:command_handlers.c ****   strcat_P(uart_buf, show_conf_info);
+ 233:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 234:command_handlers.c ****   strcpy(cmd_output, uart_buf);
+ 235:command_handlers.c **** }
+ 236:command_handlers.c **** 
+ 237:command_handlers.c **** void command_handle_reset(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+  20               		.loc 1 237 0
+  21               		.cfi_startproc
+  22               	.LVL0:
+  23               	/* prologue: function */
+  24               	/* frame size = 0 */
+  25               	/* stack size = 0 */
+  26               	.L__stack_usage = 0
+ 238:command_handlers.c ****   g_mcu_reset = 1;
+  27               		.loc 1 238 0
+  28 0000 21E0      		ldi r18,lo8(1)
+  29 0002 2093 0000 		sts g_mcu_reset,r18
+ 239:command_handlers.c ****   strcpy(cmd_output, "Resetting....");
+  30               		.loc 1 239 0
+  31 0006 2EE0      		ldi r18,lo8(14)
+  32 0008 E0E0      		ldi r30,lo8(.LC0)
+  33 000a F0E0      		ldi r31,hi8(.LC0)
+  34 000c DC01      		movw r26,r24
+  35               		0:
+  36 000e 0190      		ld r0,Z+
+  37 0010 0D92      		st X+,r0
+  38 0012 2A95      		dec r18
+  39 0014 01F4      		brne 0b
+  40 0016 0895      		ret
+  41               		.cfi_endproc
+  42               	.LFE13:
+  44               		.section	.text.command_handle_show_version,"ax",@progbits
+  45               	.global	command_handle_show_version
+  47               	command_handle_show_version:
+  48               	.LFB6:
+ 152:command_handlers.c **** void command_handle_show_version(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+  49               		.loc 1 152 0
+  50               		.cfi_startproc
+  51               	.LVL1:
+  52               	/* prologue: function */
+  53               	/* frame size = 0 */
+  54               	/* stack size = 0 */
+  55               	.L__stack_usage = 0
+ 153:command_handlers.c ****   strcpy_P(cmd_output, g_firmware_version);
+  56               		.loc 1 153 0
+  57 0000 60E0      		ldi r22,lo8(g_firmware_version)
+  58 0002 70E0      		ldi r23,hi8(g_firmware_version)
+  59               	.LVL2:
+  60 0004 0C94 0000 		jmp strcpy_P
+  61               	.LVL3:
+  62               		.cfi_endproc
+  63               	.LFE6:
+  65               		.section	.rodata.str1.1
+  66               	.LC1:
+  67 000e 5365 6E73 		.string	"Senses updated."
+  67      6573 2075 
+  67      7064 6174 
+  67      6564 2E00 
+  68               		.section	.text.command_handle_set_sense,"ax",@progbits
+  69               	.global	command_handle_set_sense
+  71               	command_handle_set_sense:
+  72               	.LFB8:
+ 160:command_handlers.c **** void command_handle_set_sense(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+  73               		.loc 1 160 0
+  74               		.cfi_startproc
+  75               	.LVL4:
+  76 0000 0F93      		push r16
+  77               	.LCFI0:
+  78               		.cfi_def_cfa_offset 3
+  79               		.cfi_offset 16, -2
+  80 0002 1F93      		push r17
+  81               	.LCFI1:
+  82               		.cfi_def_cfa_offset 4
+  83               		.cfi_offset 17, -3
+  84 0004 CF93      		push r28
+  85               	.LCFI2:
+  86               		.cfi_def_cfa_offset 5
+  87               		.cfi_offset 28, -4
+  88 0006 DF93      		push r29
+  89               	.LCFI3:
+  90               		.cfi_def_cfa_offset 6
+  91               		.cfi_offset 29, -5
+  92               	/* prologue: function */
+  93               	/* frame size = 0 */
+  94               	/* stack size = 4 */
+  95               	.L__stack_usage = 4
+  96 0008 EC01      		movw r28,r24
+  97 000a 8B01      		movw r16,r22
+ 161:command_handlers.c ****   g_senses = 0; // deactivate physical senses, because they can conflict
+  98               		.loc 1 161 0
+  99 000c 1092 0000 		sts g_senses+1,__zero_reg__
+ 100 0010 1092 0000 		sts g_senses,__zero_reg__
+ 162:command_handlers.c ****   g_dyn_senses = (uint16_t)(strtol(args[0], NULL, 2));
+ 101               		.loc 1 162 0
+ 102 0014 42E0      		ldi r20,lo8(2)
+ 103 0016 50E0      		ldi r21,0
+ 104 0018 60E0      		ldi r22,0
+ 105 001a 70E0      		ldi r23,0
+ 106               	.LVL5:
+ 107 001c C801      		movw r24,r16
+ 108               	.LVL6:
+ 109 001e 0E94 0000 		call strtol
+ 110               	.LVL7:
+ 111 0022 7093 0000 		sts g_dyn_senses+1,r23
+ 112 0026 6093 0000 		sts g_dyn_senses,r22
+ 163:command_handlers.c ****   g_dyn_senses_status = (uint16_t)(strtol(args[1], NULL, 2));
+ 113               		.loc 1 163 0
+ 114 002a 42E0      		ldi r20,lo8(2)
+ 115 002c 50E0      		ldi r21,0
+ 116 002e 60E0      		ldi r22,0
+ 117 0030 70E0      		ldi r23,0
+ 118 0032 C801      		movw r24,r16
+ 119 0034 8096      		adiw r24,32
+ 120 0036 0E94 0000 		call strtol
+ 121               	.LVL8:
+ 122 003a 7093 0000 		sts g_dyn_senses_status+1,r23
+ 123 003e 6093 0000 		sts g_dyn_senses_status,r22
+ 164:command_handlers.c ****   strcpy(cmd_output, "Senses updated.");
+ 124               		.loc 1 164 0
+ 125 0042 80E1      		ldi r24,lo8(16)
+ 126 0044 E0E0      		ldi r30,lo8(.LC1)
+ 127 0046 F0E0      		ldi r31,hi8(.LC1)
+ 128 0048 DE01      		movw r26,r28
+ 129               		0:
+ 130 004a 0190      		ld r0,Z+
+ 131 004c 0D92      		st X+,r0
+ 132 004e 8A95      		dec r24
+ 133 0050 01F4      		brne 0b
+ 134               	/* epilogue start */
+ 165:command_handlers.c **** }
+ 135               		.loc 1 165 0
+ 136 0052 DF91      		pop r29
+ 137 0054 CF91      		pop r28
+ 138               	.LVL9:
+ 139 0056 1F91      		pop r17
+ 140 0058 0F91      		pop r16
+ 141               	.LVL10:
+ 142 005a 0895      		ret
+ 143               		.cfi_endproc
+ 144               	.LFE8:
+ 146               		.section	.rodata.str1.1
+ 147               	.LC2:
+ 148 001e 6473 6300 		.string	"dsc"
+ 149               	.LC3:
+ 150 0022 7374 00   		.string	"st"
+ 151               	.LC4:
+ 152 0025 6173 7400 		.string	"ast"
+ 153               	.LC5:
+ 154 0029 6973 00   		.string	"is"
+ 155               	.LC6:
+ 156 002c 6273 00   		.string	"bs"
+ 157               	.LC7:
+ 158 002f 6163 00   		.string	"ac"
+ 159               	.LC8:
+ 160 0032 6174 00   		.string	"at"
+ 161               	.LC9:
+ 162 0035 6174 6300 		.string	"atc"
+ 163               	.LC10:
+ 164 0039 616D 696E 		.string	"amint"
+ 164      7400 
+ 165               	.LC11:
+ 166 003f 616D 6178 		.string	"amaxt"
+ 166      7400 
+ 167               	.LC12:
+ 168 0045 6270 00   		.string	"bp"
+ 169               	.LC13:
+ 170 0048 6270 7400 		.string	"bpt"
+ 171               	.LC14:
+ 172 004c 7373 00   		.string	"ss"
+ 173               	.LC15:
+ 174 004f 6173 00   		.string	"as"
+ 175               	.LC16:
+ 176 0052 7000      		.string	"p"
+ 177               	.LC17:
+ 178 0054 5570 6461 		.string	"Update successful, RESET the device to use new values!"
+ 178      7465 2073 
+ 178      7563 6365 
+ 178      7373 6675 
+ 178      6C2C 2052 
+ 179               	.LC18:
+ 180 008b 436F 6E66 		.string	"Configuration options error! Use set conf [abbreviation] [value]."
+ 180      6967 7572 
+ 180      6174 696F 
+ 180      6E20 6F70 
+ 180      7469 6F6E 
+ 181               		.section	.text.command_handle_set_conf,"ax",@progbits
+ 182               	.global	command_handle_set_conf
+ 184               	command_handle_set_conf:
+ 185               	.LFB9:
+ 167:command_handlers.c **** void command_handle_set_conf(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 186               		.loc 1 167 0
+ 187               		.cfi_startproc
+ 188               	.LVL11:
+ 189 0000 0F93      		push r16
+ 190               	.LCFI4:
+ 191               		.cfi_def_cfa_offset 3
+ 192               		.cfi_offset 16, -2
+ 193 0002 1F93      		push r17
+ 194               	.LCFI5:
+ 195               		.cfi_def_cfa_offset 4
+ 196               		.cfi_offset 17, -3
+ 197 0004 CF93      		push r28
+ 198               	.LCFI6:
+ 199               		.cfi_def_cfa_offset 5
+ 200               		.cfi_offset 28, -4
+ 201 0006 DF93      		push r29
+ 202               	.LCFI7:
+ 203               		.cfi_def_cfa_offset 6
+ 204               		.cfi_offset 29, -5
+ 205               	/* prologue: function */
+ 206               	/* frame size = 0 */
+ 207               	/* stack size = 4 */
+ 208               	.L__stack_usage = 4
+ 209 0008 8C01      		movw r16,r24
+ 210 000a EB01      		movw r28,r22
+ 211               	.LVL12:
+ 169:command_handlers.c ****   if (strcmp("dsc", args[0]) == 0) {
+ 212               		.loc 1 169 0
+ 213 000c 80E0      		ldi r24,lo8(.LC2)
+ 214 000e 90E0      		ldi r25,hi8(.LC2)
+ 215               	.LVL13:
+ 216 0010 0E94 0000 		call strcmp
+ 217               	.LVL14:
+ 218 0014 892B      		or r24,r25
+ 219 0016 01F4      		brne .+2
+ 220 0018 00C0      		rjmp .L23
+ 171:command_handlers.c ****   } else if (strcmp("st", args[0]) == 0) {
+ 221               		.loc 1 171 0
+ 222 001a BE01      		movw r22,r28
+ 223 001c 80E0      		ldi r24,lo8(.LC3)
+ 224 001e 90E0      		ldi r25,hi8(.LC3)
+ 225 0020 0E94 0000 		call strcmp
+ 226               	.LVL15:
+ 227 0024 892B      		or r24,r25
+ 228 0026 01F4      		brne .+2
+ 229 0028 00C0      		rjmp .L24
+ 173:command_handlers.c ****   } else if (strcmp("ast", args[0]) == 0) {
+ 230               		.loc 1 173 0
+ 231 002a BE01      		movw r22,r28
+ 232 002c 80E0      		ldi r24,lo8(.LC4)
+ 233 002e 90E0      		ldi r25,hi8(.LC4)
+ 234 0030 0E94 0000 		call strcmp
+ 235               	.LVL16:
+ 236 0034 892B      		or r24,r25
+ 237 0036 01F4      		brne .+2
+ 238 0038 00C0      		rjmp .L25
+ 175:command_handlers.c ****   } else if (strcmp("is", args[0]) == 0) {
+ 239               		.loc 1 175 0
+ 240 003a BE01      		movw r22,r28
+ 241 003c 80E0      		ldi r24,lo8(.LC5)
+ 242 003e 90E0      		ldi r25,hi8(.LC5)
+ 243 0040 0E94 0000 		call strcmp
+ 244               	.LVL17:
+ 245 0044 892B      		or r24,r25
+ 246 0046 01F4      		brne .+2
+ 247 0048 00C0      		rjmp .L26
+ 177:command_handlers.c ****   } else if (strcmp("bs", args[0]) == 0) {
+ 248               		.loc 1 177 0
+ 249 004a BE01      		movw r22,r28
+ 250 004c 80E0      		ldi r24,lo8(.LC6)
+ 251 004e 90E0      		ldi r25,hi8(.LC6)
+ 252 0050 0E94 0000 		call strcmp
+ 253               	.LVL18:
+ 254 0054 892B      		or r24,r25
+ 255 0056 01F4      		brne .+2
+ 256 0058 00C0      		rjmp .L27
+ 179:command_handlers.c ****   } else if (strcmp("ac", args[0]) == 0) {
+ 257               		.loc 1 179 0
+ 258 005a BE01      		movw r22,r28
+ 259 005c 80E0      		ldi r24,lo8(.LC7)
+ 260 005e 90E0      		ldi r25,hi8(.LC7)
+ 261 0060 0E94 0000 		call strcmp
+ 262               	.LVL19:
+ 263 0064 892B      		or r24,r25
+ 264 0066 01F4      		brne .+2
+ 265 0068 00C0      		rjmp .L28
+ 181:command_handlers.c ****   } else if (strcmp("at", args[0]) == 0) {
+ 266               		.loc 1 181 0
+ 267 006a BE01      		movw r22,r28
+ 268 006c 80E0      		ldi r24,lo8(.LC8)
+ 269 006e 90E0      		ldi r25,hi8(.LC8)
+ 270 0070 0E94 0000 		call strcmp
+ 271               	.LVL20:
+ 272 0074 892B      		or r24,r25
+ 273 0076 01F4      		brne .+2
+ 274 0078 00C0      		rjmp .L29
+ 183:command_handlers.c ****   } else if (strcmp("atc", args[0]) == 0) {
+ 275               		.loc 1 183 0
+ 276 007a BE01      		movw r22,r28
+ 277 007c 80E0      		ldi r24,lo8(.LC9)
+ 278 007e 90E0      		ldi r25,hi8(.LC9)
+ 279 0080 0E94 0000 		call strcmp
+ 280               	.LVL21:
+ 281 0084 892B      		or r24,r25
+ 282 0086 01F4      		brne .+2
+ 283 0088 00C0      		rjmp .L30
+ 185:command_handlers.c ****   } else if (strcmp("amint", args[0]) == 0) {
+ 284               		.loc 1 185 0
+ 285 008a BE01      		movw r22,r28
+ 286 008c 80E0      		ldi r24,lo8(.LC10)
+ 287 008e 90E0      		ldi r25,hi8(.LC10)
+ 288 0090 0E94 0000 		call strcmp
+ 289               	.LVL22:
+ 290 0094 892B      		or r24,r25
+ 291 0096 01F4      		brne .+2
+ 292 0098 00C0      		rjmp .L31
+ 187:command_handlers.c ****   } else if (strcmp("amaxt", args[0]) == 0) {
+ 293               		.loc 1 187 0
+ 294 009a BE01      		movw r22,r28
+ 295 009c 80E0      		ldi r24,lo8(.LC11)
+ 296 009e 90E0      		ldi r25,hi8(.LC11)
+ 297 00a0 0E94 0000 		call strcmp
+ 298               	.LVL23:
+ 299 00a4 892B      		or r24,r25
+ 300 00a6 01F4      		brne .+2
+ 301 00a8 00C0      		rjmp .L32
+ 189:command_handlers.c ****   } else if (strcmp("bp", args[0]) == 0) {
+ 302               		.loc 1 189 0
+ 303 00aa BE01      		movw r22,r28
+ 304 00ac 80E0      		ldi r24,lo8(.LC12)
+ 305 00ae 90E0      		ldi r25,hi8(.LC12)
+ 306 00b0 0E94 0000 		call strcmp
+ 307               	.LVL24:
+ 308 00b4 892B      		or r24,r25
+ 309 00b6 01F4      		brne .+2
+ 310 00b8 00C0      		rjmp .L33
+ 191:command_handlers.c ****   } else if (strcmp("bpt", args[0]) == 0) {
+ 311               		.loc 1 191 0
+ 312 00ba BE01      		movw r22,r28
+ 313 00bc 80E0      		ldi r24,lo8(.LC13)
+ 314 00be 90E0      		ldi r25,hi8(.LC13)
+ 315 00c0 0E94 0000 		call strcmp
+ 316               	.LVL25:
+ 317 00c4 892B      		or r24,r25
+ 318 00c6 01F4      		brne .+2
+ 319 00c8 00C0      		rjmp .L34
+ 193:command_handlers.c ****   } else if (strcmp("ss", args[0]) == 0) {
+ 320               		.loc 1 193 0
+ 321 00ca BE01      		movw r22,r28
+ 322 00cc 80E0      		ldi r24,lo8(.LC14)
+ 323 00ce 90E0      		ldi r25,hi8(.LC14)
+ 324 00d0 0E94 0000 		call strcmp
+ 325               	.LVL26:
+ 326 00d4 892B      		or r24,r25
+ 327 00d6 01F4      		brne .+2
+ 328 00d8 00C0      		rjmp .L35
+ 195:command_handlers.c ****   } else if (strcmp("as", args[0]) == 0) {
+ 329               		.loc 1 195 0
+ 330 00da BE01      		movw r22,r28
+ 331 00dc 80E0      		ldi r24,lo8(.LC15)
+ 332 00de 90E0      		ldi r25,hi8(.LC15)
+ 333 00e0 0E94 0000 		call strcmp
+ 334               	.LVL27:
+ 335 00e4 892B      		or r24,r25
+ 336 00e6 01F4      		brne .+2
+ 337 00e8 00C0      		rjmp .L36
+ 197:command_handlers.c ****   } else if (strcmp("p", args[0]) == 0) {
+ 338               		.loc 1 197 0
+ 339 00ea BE01      		movw r22,r28
+ 340 00ec 80E0      		ldi r24,lo8(.LC16)
+ 341 00ee 90E0      		ldi r25,hi8(.LC16)
+ 342 00f0 0E94 0000 		call strcmp
+ 343               	.LVL28:
+ 344 00f4 892B      		or r24,r25
+ 345 00f6 01F4      		brne .+2
+ 346 00f8 00C0      		rjmp .L37
+ 347               	.LVL29:
+ 205:command_handlers.c ****     strcpy(cmd_output, "Configuration options error! Use set conf [abbreviation] [value].");
+ 348               		.loc 1 205 0
+ 349 00fa 82E4      		ldi r24,lo8(66)
+ 350 00fc E0E0      		ldi r30,lo8(.LC18)
+ 351 00fe F0E0      		ldi r31,hi8(.LC18)
+ 352 0100 D801      		movw r26,r16
+ 353               		0:
+ 354 0102 0190      		ld r0,Z+
+ 355 0104 0D92      		st X+,r0
+ 356 0106 8A95      		dec r24
+ 357 0108 01F4      		brne 0b
+ 358 010a 00C0      		rjmp .L4
+ 359               	.LVL30:
+ 360               	.L23:
+ 170:command_handlers.c ****     eeprom_update_word(&g_rom_settings.deep_sleep_counter, (uint16_t)(atoi(args[1])));
+ 361               		.loc 1 170 0
+ 362 010c CE01      		movw r24,r28
+ 363 010e 8096      		adiw r24,32
+ 364 0110 0E94 0000 		call atoi
+ 365               	.LVL31:
+ 366 0114 BC01      		movw r22,r24
+ 367 0116 80E0      		ldi r24,lo8(g_rom_settings)
+ 368 0118 90E0      		ldi r25,hi8(g_rom_settings)
+ 369 011a 0E94 0000 		call __eeupd_word_m1284p
+ 370               	.LVL32:
+ 371               	.L6:
+ 203:command_handlers.c ****     strcpy(cmd_output, "Update successful, RESET the device to use new values!");
+ 372               		.loc 1 203 0
+ 373 011e 87E3      		ldi r24,lo8(55)
+ 374 0120 E0E0      		ldi r30,lo8(.LC17)
+ 375 0122 F0E0      		ldi r31,hi8(.LC17)
+ 376 0124 D801      		movw r26,r16
+ 377               		0:
+ 378 0126 0190      		ld r0,Z+
+ 379 0128 0D92      		st X+,r0
+ 380 012a 8A95      		dec r24
+ 381 012c 01F4      		brne 0b
+ 382               	.LVL33:
+ 383               	.L4:
+ 384               	/* epilogue start */
+ 207:command_handlers.c **** }
+ 385               		.loc 1 207 0
+ 386 012e DF91      		pop r29
+ 387 0130 CF91      		pop r28
+ 388               	.LVL34:
+ 389 0132 1F91      		pop r17
+ 390 0134 0F91      		pop r16
+ 391               	.LVL35:
+ 392 0136 0895      		ret
+ 393               	.LVL36:
+ 394               	.L24:
+ 172:command_handlers.c ****     eeprom_update_word(&g_rom_settings.settle_time, (uint16_t)(atoi(args[1])));
+ 395               		.loc 1 172 0
+ 396 0138 CE01      		movw r24,r28
+ 397 013a 8096      		adiw r24,32
+ 398 013c 0E94 0000 		call atoi
+ 399               	.LVL37:
+ 400 0140 BC01      		movw r22,r24
+ 401 0142 80E0      		ldi r24,lo8(g_rom_settings+2)
+ 402 0144 90E0      		ldi r25,hi8(g_rom_settings+2)
+ 403 0146 0E94 0000 		call __eeupd_word_m1284p
+ 404               	.LVL38:
+ 405 014a 00C0      		rjmp .L6
+ 406               	.L25:
+ 174:command_handlers.c ****     eeprom_update_word(&g_rom_settings.alarm_settle_time, (uint16_t)(atoi(args[1])));
+ 407               		.loc 1 174 0
+ 408 014c CE01      		movw r24,r28
+ 409 014e 8096      		adiw r24,32
+ 410 0150 0E94 0000 		call atoi
+ 411               	.LVL39:
+ 412 0154 BC01      		movw r22,r24
+ 413 0156 80E0      		ldi r24,lo8(g_rom_settings+4)
+ 414 0158 90E0      		ldi r25,hi8(g_rom_settings+4)
+ 415 015a 0E94 0000 		call __eeupd_word_m1284p
+ 416               	.LVL40:
+ 417 015e 00C0      		rjmp .L6
+ 418               	.L27:
+ 178:command_handlers.c ****     eeprom_update_word(&g_rom_settings.blink_speed, (uint16_t)(atoi(args[1])));
+ 419               		.loc 1 178 0
+ 420 0160 CE01      		movw r24,r28
+ 421 0162 8096      		adiw r24,32
+ 422 0164 0E94 0000 		call atoi
+ 423               	.LVL41:
+ 424 0168 BC01      		movw r22,r24
+ 425 016a 80E0      		ldi r24,lo8(g_rom_settings+7)
+ 426 016c 90E0      		ldi r25,hi8(g_rom_settings+7)
+ 427 016e 0E94 0000 		call __eeupd_word_m1284p
+ 428               	.LVL42:
+ 429 0172 00C0      		rjmp .L6
+ 430               	.L26:
+ 176:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.indicator_sound, (uint8_t)(atoi(args[1])));
+ 431               		.loc 1 176 0
+ 432 0174 CE01      		movw r24,r28
+ 433 0176 8096      		adiw r24,32
+ 434 0178 0E94 0000 		call atoi
+ 435               	.LVL43:
+ 436 017c 682F      		mov r22,r24
+ 437 017e 80E0      		ldi r24,lo8(g_rom_settings+6)
+ 438 0180 90E0      		ldi r25,hi8(g_rom_settings+6)
+ 439 0182 0E94 0000 		call __eeupd_byte_m1284p
+ 440               	.LVL44:
+ 441 0186 00C0      		rjmp .L6
+ 442               	.L28:
+ 180:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_counter, (uint8_t)(atoi(args[1])));
+ 443               		.loc 1 180 0
+ 444 0188 CE01      		movw r24,r28
+ 445 018a 8096      		adiw r24,32
+ 446 018c 0E94 0000 		call atoi
+ 447               	.LVL45:
+ 448 0190 682F      		mov r22,r24
+ 449 0192 80E0      		ldi r24,lo8(g_rom_settings+9)
+ 450 0194 90E0      		ldi r25,hi8(g_rom_settings+9)
+ 451 0196 0E94 0000 		call __eeupd_byte_m1284p
+ 452               	.LVL46:
+ 453 019a 00C0      		rjmp .L6
+ 454               	.L31:
+ 186:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_thres_min, (uint8_t)(atoi(args[1])));
+ 455               		.loc 1 186 0
+ 456 019c CE01      		movw r24,r28
+ 457 019e 8096      		adiw r24,32
+ 458 01a0 0E94 0000 		call atoi
+ 459               	.LVL47:
+ 460 01a4 682F      		mov r22,r24
+ 461 01a6 80E0      		ldi r24,lo8(g_rom_settings+12)
+ 462 01a8 90E0      		ldi r25,hi8(g_rom_settings+12)
+ 463 01aa 0E94 0000 		call __eeupd_byte_m1284p
+ 464               	.LVL48:
+ 465 01ae 00C0      		rjmp .L6
+ 466               	.L29:
+ 182:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_trigger, (uint8_t)(atoi(args[1])));
+ 467               		.loc 1 182 0
+ 468 01b0 CE01      		movw r24,r28
+ 469 01b2 8096      		adiw r24,32
+ 470 01b4 0E94 0000 		call atoi
+ 471               	.LVL49:
+ 472 01b8 682F      		mov r22,r24
+ 473 01ba 80E0      		ldi r24,lo8(g_rom_settings+10)
+ 474 01bc 90E0      		ldi r25,hi8(g_rom_settings+10)
+ 475 01be 0E94 0000 		call __eeupd_byte_m1284p
+ 476               	.LVL50:
+ 477 01c2 00C0      		rjmp .L6
+ 478               	.L30:
+ 184:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_trigger_counter, (uint8_t)(atoi(args[1])));
+ 479               		.loc 1 184 0
+ 480 01c4 CE01      		movw r24,r28
+ 481 01c6 8096      		adiw r24,32
+ 482 01c8 0E94 0000 		call atoi
+ 483               	.LVL51:
+ 484 01cc 682F      		mov r22,r24
+ 485 01ce 80E0      		ldi r24,lo8(g_rom_settings+11)
+ 486 01d0 90E0      		ldi r25,hi8(g_rom_settings+11)
+ 487 01d2 0E94 0000 		call __eeupd_byte_m1284p
+ 488               	.LVL52:
+ 489 01d6 00C0      		rjmp .L6
+ 490               	.L32:
+ 188:command_handlers.c ****     eeprom_update_word(&g_rom_settings.alarm_thres_max, (uint16_t)(atoi(args[1])));
+ 491               		.loc 1 188 0
+ 492 01d8 CE01      		movw r24,r28
+ 493 01da 8096      		adiw r24,32
+ 494 01dc 0E94 0000 		call atoi
+ 495               	.LVL53:
+ 496 01e0 BC01      		movw r22,r24
+ 497 01e2 80E0      		ldi r24,lo8(g_rom_settings+13)
+ 498 01e4 90E0      		ldi r25,hi8(g_rom_settings+13)
+ 499 01e6 0E94 0000 		call __eeupd_word_m1284p
+ 500               	.LVL54:
+ 501 01ea 00C0      		rjmp .L6
+ 502               	.L33:
+ 190:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.backpedal, (uint8_t)(atoi(args[1])));
+ 503               		.loc 1 190 0
+ 504 01ec CE01      		movw r24,r28
+ 505 01ee 8096      		adiw r24,32
+ 506 01f0 0E94 0000 		call atoi
+ 507               	.LVL55:
+ 508 01f4 682F      		mov r22,r24
+ 509 01f6 80E0      		ldi r24,lo8(g_rom_settings+15)
+ 510 01f8 90E0      		ldi r25,hi8(g_rom_settings+15)
+ 511 01fa 0E94 0000 		call __eeupd_byte_m1284p
+ 512               	.LVL56:
+ 513 01fe 00C0      		rjmp .L6
+ 514               	.L34:
+ 192:command_handlers.c ****     eeprom_update_word(&g_rom_settings.backpedal_thres_min, (uint16_t)(atoi(args[1])));
+ 515               		.loc 1 192 0
+ 516 0200 CE01      		movw r24,r28
+ 517 0202 8096      		adiw r24,32
+ 518 0204 0E94 0000 		call atoi
+ 519               	.LVL57:
+ 520 0208 BC01      		movw r22,r24
+ 521 020a 80E0      		ldi r24,lo8(g_rom_settings+16)
+ 522 020c 90E0      		ldi r25,hi8(g_rom_settings+16)
+ 523 020e 0E94 0000 		call __eeupd_word_m1284p
+ 524               	.LVL58:
+ 525 0212 00C0      		rjmp .L6
+ 526               	.L35:
+ 194:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.startup_sound, (uint8_t)(atoi(args[1])));
+ 527               		.loc 1 194 0
+ 528 0214 CE01      		movw r24,r28
+ 529 0216 8096      		adiw r24,32
+ 530 0218 0E94 0000 		call atoi
+ 531               	.LVL59:
+ 532 021c 682F      		mov r22,r24
+ 533 021e 80E0      		ldi r24,lo8(g_rom_settings+18)
+ 534 0220 90E0      		ldi r25,hi8(g_rom_settings+18)
+ 535 0222 0E94 0000 		call __eeupd_byte_m1284p
+ 536               	.LVL60:
+ 537 0226 00C0      		rjmp .L6
+ 538               	.L36:
+ 196:command_handlers.c ****     eeprom_update_byte(&g_rom_settings.alarm_sound, (uint8_t)(atoi(args[1])));
+ 539               		.loc 1 196 0
+ 540 0228 CE01      		movw r24,r28
+ 541 022a 8096      		adiw r24,32
+ 542 022c 0E94 0000 		call atoi
+ 543               	.LVL61:
+ 544 0230 682F      		mov r22,r24
+ 545 0232 80E0      		ldi r24,lo8(g_rom_settings+19)
+ 546 0234 90E0      		ldi r25,hi8(g_rom_settings+19)
+ 547 0236 0E94 0000 		call __eeupd_byte_m1284p
+ 548               	.LVL62:
+ 549 023a 00C0      		rjmp .L6
+ 550               	.L37:
+ 198:command_handlers.c ****     eeprom_update_block(args[1], &g_rom_settings.passwd, 32);
+ 551               		.loc 1 198 0
+ 552 023c 40E2      		ldi r20,lo8(32)
+ 553 023e 50E0      		ldi r21,0
+ 554 0240 60E0      		ldi r22,lo8(g_rom_settings+20)
+ 555 0242 70E0      		ldi r23,hi8(g_rom_settings+20)
+ 556 0244 CE01      		movw r24,r28
+ 557 0246 8096      		adiw r24,32
+ 558 0248 0E94 0000 		call __eeupd_block_m1284p
+ 559               	.LVL63:
+ 560 024c 00C0      		rjmp .L6
+ 561               		.cfi_endproc
+ 562               	.LFE9:
+ 564               		.section	.rodata.str1.1
+ 565               	.LC19:
+ 566 00cd 1B5B 3142 		.string	"\033[1B\033[2K\r"
+ 566      1B5B 324B 
+ 566      0D00 
+ 567               		.section	.text.command_handle_help,"ax",@progbits
+ 568               	.global	command_handle_help
+ 570               	command_handle_help:
+ 571               	.LFB12:
+ 217:command_handlers.c **** void command_handle_help(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 572               		.loc 1 217 0
+ 573               		.cfi_startproc
+ 574               	.LVL64:
+ 575 0000 0F93      		push r16
+ 576               	.LCFI8:
+ 577               		.cfi_def_cfa_offset 3
+ 578               		.cfi_offset 16, -2
+ 579 0002 1F93      		push r17
+ 580               	.LCFI9:
+ 581               		.cfi_def_cfa_offset 4
+ 582               		.cfi_offset 17, -3
+ 583 0004 CF93      		push r28
+ 584               	.LCFI10:
+ 585               		.cfi_def_cfa_offset 5
+ 586               		.cfi_offset 28, -4
+ 587 0006 DF93      		push r29
+ 588               	.LCFI11:
+ 589               		.cfi_def_cfa_offset 6
+ 590               		.cfi_offset 29, -5
+ 591               	/* prologue: function */
+ 592               	/* frame size = 0 */
+ 593               	/* stack size = 4 */
+ 594               	.L__stack_usage = 4
+ 595 0008 8C01      		movw r16,r24
+ 218:command_handlers.c ****   strcpy_P(uart_buf, help_info);
+ 596               		.loc 1 218 0
+ 597 000a 60E0      		ldi r22,lo8(help_info)
+ 598 000c 70E0      		ldi r23,hi8(help_info)
+ 599               	.LVL65:
+ 600 000e 80E0      		ldi r24,lo8(uart_buf)
+ 601 0010 90E0      		ldi r25,hi8(uart_buf)
+ 602               	.LVL66:
+ 603 0012 0E94 0000 		call strcpy_P
+ 604               	.LVL67:
+ 219:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 605               		.loc 1 219 0
+ 606 0016 C0E0      		ldi r28,lo8(uart_buf)
+ 607 0018 D0E0      		ldi r29,hi8(uart_buf)
+ 608 001a DE01      		movw r26,r28
+ 609               		0:
+ 610 001c 0D90      		ld __tmp_reg__,X+
+ 611 001e 0020      		tst __tmp_reg__
+ 612 0020 01F4      		brne 0b
+ 613 0022 1197      		sbiw r26,1
+ 614 0024 8AE0      		ldi r24,lo8(10)
+ 615 0026 E0E0      		ldi r30,lo8(.LC19)
+ 616 0028 F0E0      		ldi r31,hi8(.LC19)
+ 617               		0:
+ 618 002a 0190      		ld r0,Z+
+ 619 002c 0D92      		st X+,r0
+ 620 002e 8A95      		dec r24
+ 621 0030 01F4      		brne 0b
+ 220:command_handlers.c ****   strcat_P(uart_buf, reset_info);
+ 622               		.loc 1 220 0
+ 623 0032 60E0      		ldi r22,lo8(reset_info)
+ 624 0034 70E0      		ldi r23,hi8(reset_info)
+ 625 0036 CE01      		movw r24,r28
+ 626 0038 0E94 0000 		call strcat_P
+ 627               	.LVL68:
+ 221:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 628               		.loc 1 221 0
+ 629 003c DE01      		movw r26,r28
+ 630               		0:
+ 631 003e 0D90      		ld __tmp_reg__,X+
+ 632 0040 0020      		tst __tmp_reg__
+ 633 0042 01F4      		brne 0b
+ 634 0044 1197      		sbiw r26,1
+ 635 0046 8AE0      		ldi r24,lo8(10)
+ 636 0048 E0E0      		ldi r30,lo8(.LC19)
+ 637 004a F0E0      		ldi r31,hi8(.LC19)
+ 638               		0:
+ 639 004c 0190      		ld r0,Z+
+ 640 004e 0D92      		st X+,r0
+ 641 0050 8A95      		dec r24
+ 642 0052 01F4      		brne 0b
+ 222:command_handlers.c ****   strcat_P(uart_buf, show_version_info);
+ 643               		.loc 1 222 0
+ 644 0054 60E0      		ldi r22,lo8(show_version_info)
+ 645 0056 70E0      		ldi r23,hi8(show_version_info)
+ 646 0058 CE01      		movw r24,r28
+ 647 005a 0E94 0000 		call strcat_P
+ 648               	.LVL69:
+ 223:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 649               		.loc 1 223 0
+ 650 005e DE01      		movw r26,r28
+ 651               		0:
+ 652 0060 0D90      		ld __tmp_reg__,X+
+ 653 0062 0020      		tst __tmp_reg__
+ 654 0064 01F4      		brne 0b
+ 655 0066 1197      		sbiw r26,1
+ 656 0068 8AE0      		ldi r24,lo8(10)
+ 657 006a E0E0      		ldi r30,lo8(.LC19)
+ 658 006c F0E0      		ldi r31,hi8(.LC19)
+ 659               		0:
+ 660 006e 0190      		ld r0,Z+
+ 661 0070 0D92      		st X+,r0
+ 662 0072 8A95      		dec r24
+ 663 0074 01F4      		brne 0b
+ 224:command_handlers.c ****   strcat_P(uart_buf, show_state_info);
+ 664               		.loc 1 224 0
+ 665 0076 60E0      		ldi r22,lo8(show_state_info)
+ 666 0078 70E0      		ldi r23,hi8(show_state_info)
+ 667 007a CE01      		movw r24,r28
+ 668 007c 0E94 0000 		call strcat_P
+ 669               	.LVL70:
+ 225:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 670               		.loc 1 225 0
+ 671 0080 DE01      		movw r26,r28
+ 672               		0:
+ 673 0082 0D90      		ld __tmp_reg__,X+
+ 674 0084 0020      		tst __tmp_reg__
+ 675 0086 01F4      		brne 0b
+ 676 0088 1197      		sbiw r26,1
+ 677 008a 8AE0      		ldi r24,lo8(10)
+ 678 008c E0E0      		ldi r30,lo8(.LC19)
+ 679 008e F0E0      		ldi r31,hi8(.LC19)
+ 680               		0:
+ 681 0090 0190      		ld r0,Z+
+ 682 0092 0D92      		st X+,r0
+ 683 0094 8A95      		dec r24
+ 684 0096 01F4      		brne 0b
+ 226:command_handlers.c ****   strcat_P(uart_buf, show_voltage_info);
+ 685               		.loc 1 226 0
+ 686 0098 60E0      		ldi r22,lo8(show_voltage_info)
+ 687 009a 70E0      		ldi r23,hi8(show_voltage_info)
+ 688 009c CE01      		movw r24,r28
+ 689 009e 0E94 0000 		call strcat_P
+ 690               	.LVL71:
+ 227:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 691               		.loc 1 227 0
+ 692 00a2 DE01      		movw r26,r28
+ 693               		0:
+ 694 00a4 0D90      		ld __tmp_reg__,X+
+ 695 00a6 0020      		tst __tmp_reg__
+ 696 00a8 01F4      		brne 0b
+ 697 00aa 1197      		sbiw r26,1
+ 698 00ac 8AE0      		ldi r24,lo8(10)
+ 699 00ae E0E0      		ldi r30,lo8(.LC19)
+ 700 00b0 F0E0      		ldi r31,hi8(.LC19)
+ 701               		0:
+ 702 00b2 0190      		ld r0,Z+
+ 703 00b4 0D92      		st X+,r0
+ 704 00b6 8A95      		dec r24
+ 705 00b8 01F4      		brne 0b
+ 228:command_handlers.c ****   strcat_P(uart_buf, set_sense_info);
+ 706               		.loc 1 228 0
+ 707 00ba 60E0      		ldi r22,lo8(set_sense_info)
+ 708 00bc 70E0      		ldi r23,hi8(set_sense_info)
+ 709 00be CE01      		movw r24,r28
+ 710 00c0 0E94 0000 		call strcat_P
+ 711               	.LVL72:
+ 229:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 712               		.loc 1 229 0
+ 713 00c4 DE01      		movw r26,r28
+ 714               		0:
+ 715 00c6 0D90      		ld __tmp_reg__,X+
+ 716 00c8 0020      		tst __tmp_reg__
+ 717 00ca 01F4      		brne 0b
+ 718 00cc 1197      		sbiw r26,1
+ 719 00ce 8AE0      		ldi r24,lo8(10)
+ 720 00d0 E0E0      		ldi r30,lo8(.LC19)
+ 721 00d2 F0E0      		ldi r31,hi8(.LC19)
+ 722               		0:
+ 723 00d4 0190      		ld r0,Z+
+ 724 00d6 0D92      		st X+,r0
+ 725 00d8 8A95      		dec r24
+ 726 00da 01F4      		brne 0b
+ 230:command_handlers.c ****   strcat_P(uart_buf, set_conf_info);
+ 727               		.loc 1 230 0
+ 728 00dc 60E0      		ldi r22,lo8(set_conf_info)
+ 729 00de 70E0      		ldi r23,hi8(set_conf_info)
+ 730 00e0 CE01      		movw r24,r28
+ 731 00e2 0E94 0000 		call strcat_P
+ 732               	.LVL73:
+ 231:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 733               		.loc 1 231 0
+ 734 00e6 DE01      		movw r26,r28
+ 735               		0:
+ 736 00e8 0D90      		ld __tmp_reg__,X+
+ 737 00ea 0020      		tst __tmp_reg__
+ 738 00ec 01F4      		brne 0b
+ 739 00ee 1197      		sbiw r26,1
+ 740 00f0 8AE0      		ldi r24,lo8(10)
+ 741 00f2 E0E0      		ldi r30,lo8(.LC19)
+ 742 00f4 F0E0      		ldi r31,hi8(.LC19)
+ 743               		0:
+ 744 00f6 0190      		ld r0,Z+
+ 745 00f8 0D92      		st X+,r0
+ 746 00fa 8A95      		dec r24
+ 747 00fc 01F4      		brne 0b
+ 232:command_handlers.c ****   strcat_P(uart_buf, show_conf_info);
+ 748               		.loc 1 232 0
+ 749 00fe 60E0      		ldi r22,lo8(show_conf_info)
+ 750 0100 70E0      		ldi r23,hi8(show_conf_info)
+ 751 0102 CE01      		movw r24,r28
+ 752 0104 0E94 0000 		call strcat_P
+ 753               	.LVL74:
+ 233:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 754               		.loc 1 233 0
+ 755               		0:
+ 756 0108 0990      		ld __tmp_reg__,Y+
+ 757 010a 0020      		tst __tmp_reg__
+ 758 010c 01F4      		brne 0b
+ 759 010e 2197      		sbiw r28,1
+ 760 0110 C050      		subi r28,lo8(uart_buf)
+ 761 0112 D040      		sbci r29,hi8(uart_buf)
+ 762 0114 DE01      		movw r26,r28
+ 763 0116 A050      		subi r26,lo8(-(uart_buf))
+ 764 0118 B040      		sbci r27,hi8(-(uart_buf))
+ 765 011a 8AE0      		ldi r24,lo8(10)
+ 766 011c E0E0      		ldi r30,lo8(.LC19)
+ 767 011e F0E0      		ldi r31,hi8(.LC19)
+ 768               		0:
+ 769 0120 0190      		ld r0,Z+
+ 770 0122 0D92      		st X+,r0
+ 771 0124 8A95      		dec r24
+ 772 0126 01F4      		brne 0b
+ 234:command_handlers.c ****   strcpy(cmd_output, uart_buf);
+ 773               		.loc 1 234 0
+ 774 0128 AE01      		movw r20,r28
+ 775 012a 465F      		subi r20,-10
+ 776 012c 5F4F      		sbci r21,-1
+ 777 012e 60E0      		ldi r22,lo8(uart_buf)
+ 778 0130 70E0      		ldi r23,hi8(uart_buf)
+ 779 0132 C801      		movw r24,r16
+ 780               	/* epilogue start */
+ 235:command_handlers.c **** }
+ 781               		.loc 1 235 0
+ 782 0134 DF91      		pop r29
+ 783 0136 CF91      		pop r28
+ 784 0138 1F91      		pop r17
+ 785 013a 0F91      		pop r16
+ 786               	.LVL75:
+ 234:command_handlers.c ****   strcpy(cmd_output, uart_buf);
+ 787               		.loc 1 234 0
+ 788 013c 0C94 0000 		jmp memcpy
+ 789               	.LVL76:
+ 790               		.cfi_endproc
+ 791               	.LFE12:
+ 793               		.section	.rodata.str1.1
+ 794               	.LC20:
+ 795 00d7 3100      		.string	"1"
+ 796               	.LC21:
+ 797 00d9 3000      		.string	"0"
+ 798               		.section	.text.btob,"ax",@progbits
+ 799               	.global	btob
+ 801               	btob:
+ 802               	.LFB1:
+  28:command_handlers.c **** const char *btob(uint8_t x) {
+ 803               		.loc 1 28 0
+ 804               		.cfi_startproc
+ 805               	.LVL77:
+ 806 0000 CF93      		push r28
+ 807               	.LCFI12:
+ 808               		.cfi_def_cfa_offset 3
+ 809               		.cfi_offset 28, -2
+ 810 0002 DF93      		push r29
+ 811               	.LCFI13:
+ 812               		.cfi_def_cfa_offset 4
+ 813               		.cfi_offset 29, -3
+ 814               	/* prologue: function */
+ 815               	/* frame size = 0 */
+ 816               	/* stack size = 2 */
+ 817               	.L__stack_usage = 2
+  29:command_handlers.c ****   byte_buf[0] = '\0';
+ 818               		.loc 1 29 0
+ 819 0004 1092 0000 		sts byte_buf,__zero_reg__
+ 820               	.LVL78:
+ 821 0008 28E0      		ldi r18,lo8(8)
+ 822 000a 30E0      		ldi r19,0
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 823               		.loc 1 31 0
+ 824 000c 90E8      		ldi r25,lo8(-128)
+ 825 000e C0E0      		ldi r28,lo8(byte_buf)
+ 826 0010 D0E0      		ldi r29,hi8(byte_buf)
+ 827 0012 00C0      		rjmp .L42
+ 828               	.LVL79:
+ 829               	.L43:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 830               		.loc 1 32 0
+ 831 0014 A0E0      		ldi r26,lo8(.LC21)
+ 832 0016 B0E0      		ldi r27,hi8(.LC21)
+ 833               	.L40:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 834               		.loc 1 32 0 is_stmt 0 discriminator 3
+ 835 0018 FE01      		movw r30,r28
+ 836               		0:
+ 837 001a 0190      		ld __tmp_reg__,Z+
+ 838 001c 0020      		tst __tmp_reg__
+ 839 001e 01F4      		brne 0b
+ 840 0020 3197      		sbiw r30,1
+ 841 0022 4D91      		ld r20,X+
+ 842 0024 5C91      		ld r21,X
+ 843 0026 5183      		std Z+1,r21
+ 844 0028 4083      		st Z,r20
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 845               		.loc 1 31 0 is_stmt 1 discriminator 3
+ 846 002a 9695      		lsr r25
+ 847               	.LVL80:
+ 848 002c 2150      		subi r18,1
+ 849 002e 3109      		sbc r19,__zero_reg__
+ 850 0030 2115      		cp r18,__zero_reg__
+ 851 0032 3105      		cpc r19,__zero_reg__
+ 852 0034 01F0      		breq .L44
+ 853               	.LVL81:
+ 854               	.L42:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 855               		.loc 1 32 0
+ 856 0036 492F      		mov r20,r25
+ 857 0038 4823      		and r20,r24
+ 858 003a 4913      		cpse r20,r25
+ 859 003c 00C0      		rjmp .L43
+ 860 003e A0E0      		ldi r26,lo8(.LC20)
+ 861 0040 B0E0      		ldi r27,hi8(.LC20)
+ 862 0042 00C0      		rjmp .L40
+ 863               	.L44:
+  35:command_handlers.c **** }
+ 864               		.loc 1 35 0
+ 865 0044 80E0      		ldi r24,lo8(byte_buf)
+ 866 0046 90E0      		ldi r25,hi8(byte_buf)
+ 867               	.LVL82:
+ 868               	/* epilogue start */
+ 869 0048 DF91      		pop r29
+ 870 004a CF91      		pop r28
+ 871 004c 0895      		ret
+ 872               		.cfi_endproc
+ 873               	.LFE1:
+ 875               		.section	.rodata.str1.1
+ 876               	.LC22:
+ 877 00db 6865 6C70 		.string	"help"
+ 877      00
+ 878               	.LC23:
+ 879 00e0 7265 7365 		.string	"reset"
+ 879      7400 
+ 880               	.LC24:
+ 881 00e6 7368 6F77 		.string	"show version"
+ 881      2076 6572 
+ 881      7369 6F6E 
+ 881      00
+ 882               	.LC25:
+ 883 00f3 7368 6F77 		.string	"show state"
+ 883      2073 7461 
+ 883      7465 00
+ 884               	.LC26:
+ 885 00fe 7368 6F77 		.string	"show conf"
+ 885      2063 6F6E 
+ 885      6600 
+ 886               	.LC27:
+ 887 0108 7368 6F77 		.string	"show voltage"
+ 887      2076 6F6C 
+ 887      7461 6765 
+ 887      00
+ 888               	.LC28:
+ 889 0115 7365 7420 		.string	"set dsense"
+ 889      6473 656E 
+ 889      7365 00
+ 890               	.LC29:
+ 891 0120 7365 7420 		.string	"set conf"
+ 891      636F 6E66 
+ 891      00
+ 892               		.section	.text.register_commands,"ax",@progbits
+ 893               	.global	register_commands
+ 895               	register_commands:
+ 896               	.LFB2:
+  37:command_handlers.c **** void register_commands() {
+ 897               		.loc 1 37 0
+ 898               		.cfi_startproc
+ 899               	/* prologue: function */
+ 900               	/* frame size = 0 */
+ 901               	/* stack size = 0 */
+ 902               	.L__stack_usage = 0
+  38:command_handlers.c ****   command_register("help", help_info, COMMAND_NO_PRIV, command_handle_help);
+ 903               		.loc 1 38 0
+ 904 0000 20E0      		ldi r18,lo8(gs(command_handle_help))
+ 905 0002 30E0      		ldi r19,hi8(gs(command_handle_help))
+ 906 0004 40E0      		ldi r20,0
+ 907 0006 60E0      		ldi r22,lo8(help_info)
+ 908 0008 70E0      		ldi r23,hi8(help_info)
+ 909 000a 80E0      		ldi r24,lo8(.LC22)
+ 910 000c 90E0      		ldi r25,hi8(.LC22)
+ 911 000e 0E94 0000 		call command_register
+ 912               	.LVL83:
+  39:command_handlers.c ****   command_register("reset", reset_info, COMMAND_NO_PRIV, command_handle_reset);
+ 913               		.loc 1 39 0
+ 914 0012 20E0      		ldi r18,lo8(gs(command_handle_reset))
+ 915 0014 30E0      		ldi r19,hi8(gs(command_handle_reset))
+ 916 0016 40E0      		ldi r20,0
+ 917 0018 60E0      		ldi r22,lo8(reset_info)
+ 918 001a 70E0      		ldi r23,hi8(reset_info)
+ 919 001c 80E0      		ldi r24,lo8(.LC23)
+ 920 001e 90E0      		ldi r25,hi8(.LC23)
+ 921 0020 0E94 0000 		call command_register
+ 922               	.LVL84:
+  40:command_handlers.c ****   command_register("show version", show_version_info, COMMAND_NO_PRIV, command_handle_show_version)
+ 923               		.loc 1 40 0
+ 924 0024 20E0      		ldi r18,lo8(gs(command_handle_show_version))
+ 925 0026 30E0      		ldi r19,hi8(gs(command_handle_show_version))
+ 926 0028 40E0      		ldi r20,0
+ 927 002a 60E0      		ldi r22,lo8(show_version_info)
+ 928 002c 70E0      		ldi r23,hi8(show_version_info)
+ 929 002e 80E0      		ldi r24,lo8(.LC24)
+ 930 0030 90E0      		ldi r25,hi8(.LC24)
+ 931 0032 0E94 0000 		call command_register
+ 932               	.LVL85:
+  41:command_handlers.c ****   command_register("show state", show_state_info, COMMAND_NO_PRIV, command_handle_show_state);
+ 933               		.loc 1 41 0
+ 934 0036 20E0      		ldi r18,lo8(gs(command_handle_show_state))
+ 935 0038 30E0      		ldi r19,hi8(gs(command_handle_show_state))
+ 936 003a 40E0      		ldi r20,0
+ 937 003c 60E0      		ldi r22,lo8(show_state_info)
+ 938 003e 70E0      		ldi r23,hi8(show_state_info)
+ 939 0040 80E0      		ldi r24,lo8(.LC25)
+ 940 0042 90E0      		ldi r25,hi8(.LC25)
+ 941 0044 0E94 0000 		call command_register
+ 942               	.LVL86:
+  42:command_handlers.c ****   command_register("show conf", show_conf_info, COMMAND_NO_PRIV, command_handle_show_conf);
+ 943               		.loc 1 42 0
+ 944 0048 20E0      		ldi r18,lo8(gs(command_handle_show_conf))
+ 945 004a 30E0      		ldi r19,hi8(gs(command_handle_show_conf))
+ 946 004c 40E0      		ldi r20,0
+ 947 004e 60E0      		ldi r22,lo8(show_conf_info)
+ 948 0050 70E0      		ldi r23,hi8(show_conf_info)
+ 949 0052 80E0      		ldi r24,lo8(.LC26)
+ 950 0054 90E0      		ldi r25,hi8(.LC26)
+ 951 0056 0E94 0000 		call command_register
+ 952               	.LVL87:
+  43:command_handlers.c ****   command_register("show voltage", show_voltage_info, COMMAND_NO_PRIV, command_handle_show_voltage)
+ 953               		.loc 1 43 0
+ 954 005a 20E0      		ldi r18,lo8(gs(command_handle_show_voltage))
+ 955 005c 30E0      		ldi r19,hi8(gs(command_handle_show_voltage))
+ 956 005e 40E0      		ldi r20,0
+ 957 0060 60E0      		ldi r22,lo8(show_voltage_info)
+ 958 0062 70E0      		ldi r23,hi8(show_voltage_info)
+ 959 0064 80E0      		ldi r24,lo8(.LC27)
+ 960 0066 90E0      		ldi r25,hi8(.LC27)
+ 961 0068 0E94 0000 		call command_register
+ 962               	.LVL88:
+  44:command_handlers.c ****   command_register("set dsense", set_sense_info, COMMAND_NO_PRIV, command_handle_set_sense);
+ 963               		.loc 1 44 0
+ 964 006c 20E0      		ldi r18,lo8(gs(command_handle_set_sense))
+ 965 006e 30E0      		ldi r19,hi8(gs(command_handle_set_sense))
+ 966 0070 40E0      		ldi r20,0
+ 967 0072 60E0      		ldi r22,lo8(set_sense_info)
+ 968 0074 70E0      		ldi r23,hi8(set_sense_info)
+ 969 0076 80E0      		ldi r24,lo8(.LC28)
+ 970 0078 90E0      		ldi r25,hi8(.LC28)
+ 971 007a 0E94 0000 		call command_register
+ 972               	.LVL89:
+  45:command_handlers.c ****   command_register("set conf", set_conf_info, COMMAND_NO_PRIV, command_handle_set_conf);
+ 973               		.loc 1 45 0
+ 974 007e 20E0      		ldi r18,lo8(gs(command_handle_set_conf))
+ 975 0080 30E0      		ldi r19,hi8(gs(command_handle_set_conf))
+ 976 0082 40E0      		ldi r20,0
+ 977 0084 60E0      		ldi r22,lo8(set_conf_info)
+ 978 0086 70E0      		ldi r23,hi8(set_conf_info)
+ 979 0088 80E0      		ldi r24,lo8(.LC29)
+ 980 008a 90E0      		ldi r25,hi8(.LC29)
+ 981 008c 0C94 0000 		jmp command_register
+ 982               	.LVL90:
+ 983               		.cfi_endproc
+ 984               	.LFE2:
+ 986               		.section	.rodata.str1.1
+ 987               	.LC30:
+ 988 0129 7374 3A20 		.string	"st: "
+ 988      00
+ 989               	.LC31:
+ 990 012e 6473 3A20 		.string	"ds: "
+ 990      00
+ 991               	.LC32:
+ 992 0133 6473 733A 		.string	"dss:"
+ 992      00
+ 993               		.section	.text.display_state_info,"ax",@progbits
+ 994               	.global	display_state_info
+ 996               	display_state_info:
+ 997               	.LFB3:
+  48:command_handlers.c **** char *display_state_info() {
+ 998               		.loc 1 48 0
+ 999               		.cfi_startproc
+ 1000 0000 EF92      		push r14
+ 1001               	.LCFI14:
+ 1002               		.cfi_def_cfa_offset 3
+ 1003               		.cfi_offset 14, -2
+ 1004 0002 FF92      		push r15
+ 1005               	.LCFI15:
+ 1006               		.cfi_def_cfa_offset 4
+ 1007               		.cfi_offset 15, -3
+ 1008 0004 0F93      		push r16
+ 1009               	.LCFI16:
+ 1010               		.cfi_def_cfa_offset 5
+ 1011               		.cfi_offset 16, -4
+ 1012 0006 1F93      		push r17
+ 1013               	.LCFI17:
+ 1014               		.cfi_def_cfa_offset 6
+ 1015               		.cfi_offset 17, -5
+ 1016 0008 CF93      		push r28
+ 1017               	.LCFI18:
+ 1018               		.cfi_def_cfa_offset 7
+ 1019               		.cfi_offset 28, -6
+ 1020 000a DF93      		push r29
+ 1021               	.LCFI19:
+ 1022               		.cfi_def_cfa_offset 8
+ 1023               		.cfi_offset 29, -7
+ 1024               	/* prologue: function */
+ 1025               	/* frame size = 0 */
+ 1026               	/* stack size = 6 */
+ 1027               	.L__stack_usage = 6
+  49:command_handlers.c ****   strcpy(uart_buf, "st: ");
+ 1028               		.loc 1 49 0
+ 1029 000c 85E0      		ldi r24,lo8(5)
+ 1030 000e E0E0      		ldi r30,lo8(.LC30)
+ 1031 0010 F0E0      		ldi r31,hi8(.LC30)
+ 1032 0012 A0E0      		ldi r26,lo8(uart_buf)
+ 1033 0014 B0E0      		ldi r27,hi8(uart_buf)
+ 1034               		0:
+ 1035 0016 0190      		ld r0,Z+
+ 1036 0018 0D92      		st X+,r0
+ 1037 001a 8A95      		dec r24
+ 1038 001c 01F4      		brne 0b
+  50:command_handlers.c ****   strcat(uart_buf, btob(g_state >> 8));
+ 1039               		.loc 1 50 0
+ 1040 001e 8091 0000 		lds r24,g_state
+ 1041 0022 9091 0000 		lds r25,g_state+1
+ 1042 0026 592F      		mov r21,r25
+ 1043               	.LVL91:
+ 1044               	.LBB14:
+ 1045               	.LBB15:
+  29:command_handlers.c ****   byte_buf[0] = '\0';
+ 1046               		.loc 1 29 0
+ 1047 0028 1092 0000 		sts byte_buf,__zero_reg__
+ 1048               	.LVL92:
+ 1049 002c 88E0      		ldi r24,lo8(8)
+ 1050 002e 90E0      		ldi r25,0
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1051               		.loc 1 31 0
+ 1052 0030 40E8      		ldi r20,lo8(-128)
+ 1053 0032 C0E0      		ldi r28,lo8(byte_buf)
+ 1054 0034 D0E0      		ldi r29,hi8(byte_buf)
+ 1055 0036 00C0      		rjmp .L49
+ 1056               	.LVL93:
+ 1057               	.L65:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1058               		.loc 1 32 0
+ 1059 0038 A0E0      		ldi r26,lo8(.LC21)
+ 1060 003a B0E0      		ldi r27,hi8(.LC21)
+ 1061               	.L47:
+ 1062 003c FE01      		movw r30,r28
+ 1063               		0:
+ 1064 003e 0190      		ld __tmp_reg__,Z+
+ 1065 0040 0020      		tst __tmp_reg__
+ 1066 0042 01F4      		brne 0b
+ 1067 0044 3197      		sbiw r30,1
+ 1068 0046 8F01      		movw r16,r30
+ 1069 0048 0050      		subi r16,lo8(byte_buf)
+ 1070 004a 1040      		sbci r17,hi8(byte_buf)
+ 1071 004c 2D91      		ld r18,X+
+ 1072 004e 3C91      		ld r19,X
+ 1073 0050 3183      		std Z+1,r19
+ 1074 0052 2083      		st Z,r18
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1075               		.loc 1 31 0
+ 1076 0054 4695      		lsr r20
+ 1077               	.LVL94:
+ 1078 0056 0197      		sbiw r24,1
+ 1079 0058 0097      		sbiw r24,0
+ 1080 005a 01F0      		breq .L71
+ 1081               	.LVL95:
+ 1082               	.L49:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1083               		.loc 1 32 0
+ 1084 005c 242F      		mov r18,r20
+ 1085 005e 2523      		and r18,r21
+ 1086 0060 4213      		cpse r20,r18
+ 1087 0062 00C0      		rjmp .L65
+ 1088 0064 A0E0      		ldi r26,lo8(.LC20)
+ 1089 0066 B0E0      		ldi r27,hi8(.LC20)
+ 1090 0068 00C0      		rjmp .L47
+ 1091               	.L71:
+ 1092               	.LBE15:
+ 1093               	.LBE14:
+  50:command_handlers.c ****   strcat(uart_buf, btob(g_state >> 8));
+ 1094               		.loc 1 50 0
+ 1095 006a A801      		movw r20,r16
+ 1096               	.LVL96:
+ 1097 006c 4E5F      		subi r20,-2
+ 1098 006e 5F4F      		sbci r21,-1
+ 1099 0070 60E0      		ldi r22,lo8(byte_buf)
+ 1100 0072 70E0      		ldi r23,hi8(byte_buf)
+ 1101 0074 80E0      		ldi r24,lo8(uart_buf+4)
+ 1102 0076 90E0      		ldi r25,hi8(uart_buf+4)
+ 1103 0078 0E94 0000 		call memcpy
+ 1104               	.LVL97:
+  51:command_handlers.c ****   strcat(uart_buf, ".");
+ 1105               		.loc 1 51 0
+ 1106 007c 8EE2      		ldi r24,lo8(46)
+ 1107 007e 90E0      		ldi r25,0
+ 1108 0080 F801      		movw r30,r16
+ 1109 0082 E050      		subi r30,lo8(-(uart_buf+5))
+ 1110 0084 F040      		sbci r31,hi8(-(uart_buf+5))
+ 1111 0086 9183      		std Z+1,r25
+ 1112 0088 8083      		st Z,r24
+  52:command_handlers.c ****   strcat(uart_buf, btob(g_state));
+ 1113               		.loc 1 52 0
+ 1114 008a 8091 0000 		lds r24,g_state
+ 1115 008e 9091 0000 		lds r25,g_state+1
+ 1116 0092 582F      		mov r21,r24
+ 1117               	.LVL98:
+ 1118               	.LBB16:
+ 1119               	.LBB17:
+  29:command_handlers.c ****   byte_buf[0] = '\0';
+ 1120               		.loc 1 29 0
+ 1121 0094 1092 0000 		sts byte_buf,__zero_reg__
+ 1122               	.LVL99:
+ 1123 0098 88E0      		ldi r24,lo8(8)
+ 1124 009a 90E0      		ldi r25,0
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1125               		.loc 1 31 0
+ 1126 009c 40E8      		ldi r20,lo8(-128)
+ 1127 009e 00C0      		rjmp .L52
+ 1128               	.LVL100:
+ 1129               	.L66:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1130               		.loc 1 32 0
+ 1131 00a0 A0E0      		ldi r26,lo8(.LC21)
+ 1132 00a2 B0E0      		ldi r27,hi8(.LC21)
+ 1133               	.L50:
+ 1134 00a4 FE01      		movw r30,r28
+ 1135               		0:
+ 1136 00a6 0190      		ld __tmp_reg__,Z+
+ 1137 00a8 0020      		tst __tmp_reg__
+ 1138 00aa 01F4      		brne 0b
+ 1139 00ac 3197      		sbiw r30,1
+ 1140 00ae 9F01      		movw r18,r30
+ 1141 00b0 2050      		subi r18,lo8(byte_buf)
+ 1142 00b2 3040      		sbci r19,hi8(byte_buf)
+ 1143 00b4 7901      		movw r14,r18
+ 1144 00b6 2D91      		ld r18,X+
+ 1145 00b8 3C91      		ld r19,X
+ 1146 00ba 3183      		std Z+1,r19
+ 1147 00bc 2083      		st Z,r18
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1148               		.loc 1 31 0
+ 1149 00be 4695      		lsr r20
+ 1150               	.LVL101:
+ 1151 00c0 0197      		sbiw r24,1
+ 1152 00c2 0097      		sbiw r24,0
+ 1153 00c4 01F0      		breq .L72
+ 1154               	.LVL102:
+ 1155               	.L52:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1156               		.loc 1 32 0
+ 1157 00c6 242F      		mov r18,r20
+ 1158 00c8 2523      		and r18,r21
+ 1159 00ca 4213      		cpse r20,r18
+ 1160 00cc 00C0      		rjmp .L66
+ 1161 00ce A0E0      		ldi r26,lo8(.LC20)
+ 1162 00d0 B0E0      		ldi r27,hi8(.LC20)
+ 1163 00d2 00C0      		rjmp .L50
+ 1164               	.L72:
+ 1165               	.LBE17:
+ 1166               	.LBE16:
+  52:command_handlers.c ****   strcat(uart_buf, btob(g_state));
+ 1167               		.loc 1 52 0
+ 1168 00d4 A701      		movw r20,r14
+ 1169               	.LVL103:
+ 1170 00d6 4E5F      		subi r20,-2
+ 1171 00d8 5F4F      		sbci r21,-1
+ 1172 00da 60E0      		ldi r22,lo8(byte_buf)
+ 1173 00dc 70E0      		ldi r23,hi8(byte_buf)
+ 1174 00de C801      		movw r24,r16
+ 1175 00e0 8050      		subi r24,lo8(-(uart_buf+6))
+ 1176 00e2 9040      		sbci r25,hi8(-(uart_buf+6))
+ 1177 00e4 0E94 0000 		call memcpy
+ 1178               	.LVL104:
+ 1179 00e8 095F      		subi r16,-7
+ 1180 00ea 1F4F      		sbci r17,-1
+ 1181 00ec 0E0D      		add r16,r14
+ 1182 00ee 1F1D      		adc r17,r15
+  53:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 1183               		.loc 1 53 0
+ 1184 00f0 D801      		movw r26,r16
+ 1185 00f2 A050      		subi r26,lo8(-(uart_buf))
+ 1186 00f4 B040      		sbci r27,hi8(-(uart_buf))
+ 1187 00f6 89E0      		ldi r24,lo8(9)
+ 1188 00f8 E0E0      		ldi r30,lo8(.LC19)
+ 1189 00fa F0E0      		ldi r31,hi8(.LC19)
+ 1190               		0:
+ 1191 00fc 0190      		ld r0,Z+
+ 1192 00fe 0D92      		st X+,r0
+ 1193 0100 8A95      		dec r24
+ 1194 0102 01F4      		brne 0b
+  54:command_handlers.c ****   strcat(uart_buf, "ds: ");
+ 1195               		.loc 1 54 0
+ 1196 0104 D801      		movw r26,r16
+ 1197 0106 A050      		subi r26,lo8(-(uart_buf+9))
+ 1198 0108 B040      		sbci r27,hi8(-(uart_buf+9))
+ 1199 010a 85E0      		ldi r24,lo8(5)
+ 1200 010c E0E0      		ldi r30,lo8(.LC31)
+ 1201 010e F0E0      		ldi r31,hi8(.LC31)
+ 1202               		0:
+ 1203 0110 0190      		ld r0,Z+
+ 1204 0112 0D92      		st X+,r0
+ 1205 0114 8A95      		dec r24
+ 1206 0116 01F4      		brne 0b
+  55:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses >> 8));
+ 1207               		.loc 1 55 0
+ 1208 0118 8091 0000 		lds r24,g_dyn_senses
+ 1209 011c 9091 0000 		lds r25,g_dyn_senses+1
+ 1210 0120 592F      		mov r21,r25
+ 1211               	.LVL105:
+ 1212               	.LBB18:
+ 1213               	.LBB19:
+  29:command_handlers.c ****   byte_buf[0] = '\0';
+ 1214               		.loc 1 29 0
+ 1215 0122 1092 0000 		sts byte_buf,__zero_reg__
+ 1216               	.LVL106:
+ 1217 0126 88E0      		ldi r24,lo8(8)
+ 1218 0128 90E0      		ldi r25,0
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1219               		.loc 1 31 0
+ 1220 012a 40E8      		ldi r20,lo8(-128)
+ 1221 012c 00C0      		rjmp .L55
+ 1222               	.LVL107:
+ 1223               	.L67:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1224               		.loc 1 32 0
+ 1225 012e A0E0      		ldi r26,lo8(.LC21)
+ 1226 0130 B0E0      		ldi r27,hi8(.LC21)
+ 1227               	.L53:
+ 1228 0132 FE01      		movw r30,r28
+ 1229               		0:
+ 1230 0134 0190      		ld __tmp_reg__,Z+
+ 1231 0136 0020      		tst __tmp_reg__
+ 1232 0138 01F4      		brne 0b
+ 1233 013a 3197      		sbiw r30,1
+ 1234 013c 9F01      		movw r18,r30
+ 1235 013e 2050      		subi r18,lo8(byte_buf)
+ 1236 0140 3040      		sbci r19,hi8(byte_buf)
+ 1237 0142 7901      		movw r14,r18
+ 1238 0144 2D91      		ld r18,X+
+ 1239 0146 3C91      		ld r19,X
+ 1240 0148 3183      		std Z+1,r19
+ 1241 014a 2083      		st Z,r18
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1242               		.loc 1 31 0
+ 1243 014c 4695      		lsr r20
+ 1244               	.LVL108:
+ 1245 014e 0197      		sbiw r24,1
+ 1246 0150 0097      		sbiw r24,0
+ 1247 0152 01F0      		breq .L73
+ 1248               	.LVL109:
+ 1249               	.L55:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1250               		.loc 1 32 0
+ 1251 0154 242F      		mov r18,r20
+ 1252 0156 2523      		and r18,r21
+ 1253 0158 4213      		cpse r20,r18
+ 1254 015a 00C0      		rjmp .L67
+ 1255 015c A0E0      		ldi r26,lo8(.LC20)
+ 1256 015e B0E0      		ldi r27,hi8(.LC20)
+ 1257 0160 00C0      		rjmp .L53
+ 1258               	.L73:
+ 1259               	.LBE19:
+ 1260               	.LBE18:
+  55:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses >> 8));
+ 1261               		.loc 1 55 0
+ 1262 0162 A701      		movw r20,r14
+ 1263               	.LVL110:
+ 1264 0164 4E5F      		subi r20,-2
+ 1265 0166 5F4F      		sbci r21,-1
+ 1266 0168 60E0      		ldi r22,lo8(byte_buf)
+ 1267 016a 70E0      		ldi r23,hi8(byte_buf)
+ 1268 016c C801      		movw r24,r16
+ 1269 016e 8050      		subi r24,lo8(-(uart_buf+13))
+ 1270 0170 9040      		sbci r25,hi8(-(uart_buf+13))
+ 1271 0172 0E94 0000 		call memcpy
+ 1272               	.LVL111:
+ 1273 0176 025F      		subi r16,-14
+ 1274 0178 1F4F      		sbci r17,-1
+ 1275 017a 0E0D      		add r16,r14
+ 1276 017c 1F1D      		adc r17,r15
+  56:command_handlers.c ****   strcat(uart_buf, ".");
+ 1277               		.loc 1 56 0
+ 1278 017e F801      		movw r30,r16
+ 1279 0180 E050      		subi r30,lo8(-(uart_buf))
+ 1280 0182 F040      		sbci r31,hi8(-(uart_buf))
+ 1281 0184 8EE2      		ldi r24,lo8(46)
+ 1282 0186 90E0      		ldi r25,0
+ 1283 0188 9183      		std Z+1,r25
+ 1284 018a 8083      		st Z,r24
+  57:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses));
+ 1285               		.loc 1 57 0
+ 1286 018c 8091 0000 		lds r24,g_dyn_senses
+ 1287 0190 9091 0000 		lds r25,g_dyn_senses+1
+ 1288 0194 582F      		mov r21,r24
+ 1289               	.LVL112:
+ 1290               	.LBB20:
+ 1291               	.LBB21:
+  29:command_handlers.c ****   byte_buf[0] = '\0';
+ 1292               		.loc 1 29 0
+ 1293 0196 1092 0000 		sts byte_buf,__zero_reg__
+ 1294               	.LVL113:
+ 1295 019a 88E0      		ldi r24,lo8(8)
+ 1296 019c 90E0      		ldi r25,0
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1297               		.loc 1 31 0
+ 1298 019e 40E8      		ldi r20,lo8(-128)
+ 1299 01a0 00C0      		rjmp .L58
+ 1300               	.LVL114:
+ 1301               	.L68:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1302               		.loc 1 32 0
+ 1303 01a2 A0E0      		ldi r26,lo8(.LC21)
+ 1304 01a4 B0E0      		ldi r27,hi8(.LC21)
+ 1305               	.L56:
+ 1306 01a6 FE01      		movw r30,r28
+ 1307               		0:
+ 1308 01a8 0190      		ld __tmp_reg__,Z+
+ 1309 01aa 0020      		tst __tmp_reg__
+ 1310 01ac 01F4      		brne 0b
+ 1311 01ae 3197      		sbiw r30,1
+ 1312 01b0 9F01      		movw r18,r30
+ 1313 01b2 2050      		subi r18,lo8(byte_buf)
+ 1314 01b4 3040      		sbci r19,hi8(byte_buf)
+ 1315 01b6 7901      		movw r14,r18
+ 1316 01b8 2D91      		ld r18,X+
+ 1317 01ba 3C91      		ld r19,X
+ 1318 01bc 3183      		std Z+1,r19
+ 1319 01be 2083      		st Z,r18
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1320               		.loc 1 31 0
+ 1321 01c0 4695      		lsr r20
+ 1322               	.LVL115:
+ 1323 01c2 0197      		sbiw r24,1
+ 1324 01c4 0097      		sbiw r24,0
+ 1325 01c6 01F0      		breq .L74
+ 1326               	.LVL116:
+ 1327               	.L58:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1328               		.loc 1 32 0
+ 1329 01c8 242F      		mov r18,r20
+ 1330 01ca 2523      		and r18,r21
+ 1331 01cc 4213      		cpse r20,r18
+ 1332 01ce 00C0      		rjmp .L68
+ 1333 01d0 A0E0      		ldi r26,lo8(.LC20)
+ 1334 01d2 B0E0      		ldi r27,hi8(.LC20)
+ 1335 01d4 00C0      		rjmp .L56
+ 1336               	.L74:
+ 1337               	.LBE21:
+ 1338               	.LBE20:
+  57:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses));
+ 1339               		.loc 1 57 0
+ 1340 01d6 A701      		movw r20,r14
+ 1341               	.LVL117:
+ 1342 01d8 4E5F      		subi r20,-2
+ 1343 01da 5F4F      		sbci r21,-1
+ 1344 01dc 60E0      		ldi r22,lo8(byte_buf)
+ 1345 01de 70E0      		ldi r23,hi8(byte_buf)
+ 1346 01e0 C801      		movw r24,r16
+ 1347 01e2 8050      		subi r24,lo8(-(uart_buf+1))
+ 1348 01e4 9040      		sbci r25,hi8(-(uart_buf+1))
+ 1349 01e6 0E94 0000 		call memcpy
+ 1350               	.LVL118:
+ 1351 01ea 0E5F      		subi r16,-2
+ 1352 01ec 1F4F      		sbci r17,-1
+ 1353 01ee 0E0D      		add r16,r14
+ 1354 01f0 1F1D      		adc r17,r15
+  58:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 1355               		.loc 1 58 0
+ 1356 01f2 D801      		movw r26,r16
+ 1357 01f4 A050      		subi r26,lo8(-(uart_buf))
+ 1358 01f6 B040      		sbci r27,hi8(-(uart_buf))
+ 1359 01f8 89E0      		ldi r24,lo8(9)
+ 1360 01fa E0E0      		ldi r30,lo8(.LC19)
+ 1361 01fc F0E0      		ldi r31,hi8(.LC19)
+ 1362               		0:
+ 1363 01fe 0190      		ld r0,Z+
+ 1364 0200 0D92      		st X+,r0
+ 1365 0202 8A95      		dec r24
+ 1366 0204 01F4      		brne 0b
+  59:command_handlers.c ****   strcat(uart_buf, "dss:");
+ 1367               		.loc 1 59 0
+ 1368 0206 D801      		movw r26,r16
+ 1369 0208 A050      		subi r26,lo8(-(uart_buf+9))
+ 1370 020a B040      		sbci r27,hi8(-(uart_buf+9))
+ 1371 020c 85E0      		ldi r24,lo8(5)
+ 1372 020e E0E0      		ldi r30,lo8(.LC32)
+ 1373 0210 F0E0      		ldi r31,hi8(.LC32)
+ 1374               		0:
+ 1375 0212 0190      		ld r0,Z+
+ 1376 0214 0D92      		st X+,r0
+ 1377 0216 8A95      		dec r24
+ 1378 0218 01F4      		brne 0b
+  60:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses_status >> 8));
+ 1379               		.loc 1 60 0
+ 1380 021a 8091 0000 		lds r24,g_dyn_senses_status
+ 1381 021e 9091 0000 		lds r25,g_dyn_senses_status+1
+ 1382 0222 592F      		mov r21,r25
+ 1383               	.LVL119:
+ 1384               	.LBB22:
+ 1385               	.LBB23:
+  29:command_handlers.c ****   byte_buf[0] = '\0';
+ 1386               		.loc 1 29 0
+ 1387 0224 1092 0000 		sts byte_buf,__zero_reg__
+ 1388               	.LVL120:
+ 1389 0228 88E0      		ldi r24,lo8(8)
+ 1390 022a 90E0      		ldi r25,0
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1391               		.loc 1 31 0
+ 1392 022c 40E8      		ldi r20,lo8(-128)
+ 1393 022e 00C0      		rjmp .L61
+ 1394               	.LVL121:
+ 1395               	.L69:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1396               		.loc 1 32 0
+ 1397 0230 A0E0      		ldi r26,lo8(.LC21)
+ 1398 0232 B0E0      		ldi r27,hi8(.LC21)
+ 1399               	.L59:
+ 1400 0234 FE01      		movw r30,r28
+ 1401               		0:
+ 1402 0236 0190      		ld __tmp_reg__,Z+
+ 1403 0238 0020      		tst __tmp_reg__
+ 1404 023a 01F4      		brne 0b
+ 1405 023c 3197      		sbiw r30,1
+ 1406 023e 9F01      		movw r18,r30
+ 1407 0240 2050      		subi r18,lo8(byte_buf)
+ 1408 0242 3040      		sbci r19,hi8(byte_buf)
+ 1409 0244 7901      		movw r14,r18
+ 1410 0246 2D91      		ld r18,X+
+ 1411 0248 3C91      		ld r19,X
+ 1412 024a 3183      		std Z+1,r19
+ 1413 024c 2083      		st Z,r18
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1414               		.loc 1 31 0
+ 1415 024e 4695      		lsr r20
+ 1416               	.LVL122:
+ 1417 0250 0197      		sbiw r24,1
+ 1418 0252 0097      		sbiw r24,0
+ 1419 0254 01F0      		breq .L75
+ 1420               	.LVL123:
+ 1421               	.L61:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1422               		.loc 1 32 0
+ 1423 0256 242F      		mov r18,r20
+ 1424 0258 2523      		and r18,r21
+ 1425 025a 4213      		cpse r20,r18
+ 1426 025c 00C0      		rjmp .L69
+ 1427 025e A0E0      		ldi r26,lo8(.LC20)
+ 1428 0260 B0E0      		ldi r27,hi8(.LC20)
+ 1429 0262 00C0      		rjmp .L59
+ 1430               	.L75:
+ 1431               	.LBE23:
+ 1432               	.LBE22:
+  60:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses_status >> 8));
+ 1433               		.loc 1 60 0
+ 1434 0264 A701      		movw r20,r14
+ 1435               	.LVL124:
+ 1436 0266 4E5F      		subi r20,-2
+ 1437 0268 5F4F      		sbci r21,-1
+ 1438 026a 60E0      		ldi r22,lo8(byte_buf)
+ 1439 026c 70E0      		ldi r23,hi8(byte_buf)
+ 1440 026e C801      		movw r24,r16
+ 1441 0270 8050      		subi r24,lo8(-(uart_buf+13))
+ 1442 0272 9040      		sbci r25,hi8(-(uart_buf+13))
+ 1443 0274 0E94 0000 		call memcpy
+ 1444               	.LVL125:
+ 1445 0278 025F      		subi r16,-14
+ 1446 027a 1F4F      		sbci r17,-1
+ 1447 027c 0E0D      		add r16,r14
+ 1448 027e 1F1D      		adc r17,r15
+  61:command_handlers.c ****   strcat(uart_buf, ".");
+ 1449               		.loc 1 61 0
+ 1450 0280 F801      		movw r30,r16
+ 1451 0282 E050      		subi r30,lo8(-(uart_buf))
+ 1452 0284 F040      		sbci r31,hi8(-(uart_buf))
+ 1453 0286 8EE2      		ldi r24,lo8(46)
+ 1454 0288 90E0      		ldi r25,0
+ 1455 028a 9183      		std Z+1,r25
+ 1456 028c 8083      		st Z,r24
+  62:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses_status));
+ 1457               		.loc 1 62 0
+ 1458 028e 8091 0000 		lds r24,g_dyn_senses_status
+ 1459 0292 9091 0000 		lds r25,g_dyn_senses_status+1
+ 1460 0296 582F      		mov r21,r24
+ 1461               	.LVL126:
+ 1462               	.LBB24:
+ 1463               	.LBB25:
+  29:command_handlers.c ****   byte_buf[0] = '\0';
+ 1464               		.loc 1 29 0
+ 1465 0298 1092 0000 		sts byte_buf,__zero_reg__
+ 1466               	.LVL127:
+ 1467 029c 88E0      		ldi r24,lo8(8)
+ 1468 029e 90E0      		ldi r25,0
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1469               		.loc 1 31 0
+ 1470 02a0 40E8      		ldi r20,lo8(-128)
+ 1471 02a2 00C0      		rjmp .L64
+ 1472               	.LVL128:
+ 1473               	.L70:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1474               		.loc 1 32 0
+ 1475 02a4 A0E0      		ldi r26,lo8(.LC21)
+ 1476 02a6 B0E0      		ldi r27,hi8(.LC21)
+ 1477               	.L62:
+ 1478 02a8 FE01      		movw r30,r28
+ 1479               		0:
+ 1480 02aa 0190      		ld __tmp_reg__,Z+
+ 1481 02ac 0020      		tst __tmp_reg__
+ 1482 02ae 01F4      		brne 0b
+ 1483 02b0 3197      		sbiw r30,1
+ 1484 02b2 9F01      		movw r18,r30
+ 1485 02b4 2050      		subi r18,lo8(byte_buf)
+ 1486 02b6 3040      		sbci r19,hi8(byte_buf)
+ 1487 02b8 7901      		movw r14,r18
+ 1488 02ba 2D91      		ld r18,X+
+ 1489 02bc 3C91      		ld r19,X
+ 1490 02be 3183      		std Z+1,r19
+ 1491 02c0 2083      		st Z,r18
+  31:command_handlers.c ****   for (z = 128; z > 0; z >>= 1) {
+ 1492               		.loc 1 31 0
+ 1493 02c2 4695      		lsr r20
+ 1494               	.LVL129:
+ 1495 02c4 0197      		sbiw r24,1
+ 1496 02c6 0097      		sbiw r24,0
+ 1497 02c8 01F0      		breq .L76
+ 1498               	.LVL130:
+ 1499               	.L64:
+  32:command_handlers.c ****     strcat(byte_buf, ((x & z) == z) ? "1" : "0");
+ 1500               		.loc 1 32 0
+ 1501 02ca 242F      		mov r18,r20
+ 1502 02cc 2523      		and r18,r21
+ 1503 02ce 4213      		cpse r20,r18
+ 1504 02d0 00C0      		rjmp .L70
+ 1505 02d2 A0E0      		ldi r26,lo8(.LC20)
+ 1506 02d4 B0E0      		ldi r27,hi8(.LC20)
+ 1507 02d6 00C0      		rjmp .L62
+ 1508               	.L76:
+ 1509               	.LBE25:
+ 1510               	.LBE24:
+  62:command_handlers.c ****   strcat(uart_buf, btob(g_dyn_senses_status));
+ 1511               		.loc 1 62 0
+ 1512 02d8 A701      		movw r20,r14
+ 1513               	.LVL131:
+ 1514 02da 4E5F      		subi r20,-2
+ 1515 02dc 5F4F      		sbci r21,-1
+ 1516 02de 60E0      		ldi r22,lo8(byte_buf)
+ 1517 02e0 70E0      		ldi r23,hi8(byte_buf)
+ 1518 02e2 C801      		movw r24,r16
+ 1519 02e4 8050      		subi r24,lo8(-(uart_buf+1))
+ 1520 02e6 9040      		sbci r25,hi8(-(uart_buf+1))
+ 1521 02e8 0E94 0000 		call memcpy
+ 1522               	.LVL132:
+ 1523 02ec D701      		movw r26,r14
+ 1524 02ee A00F      		add r26,r16
+ 1525 02f0 B11F      		adc r27,r17
+  63:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 1526               		.loc 1 63 0
+ 1527 02f2 A050      		subi r26,lo8(-(uart_buf+2))
+ 1528 02f4 B040      		sbci r27,hi8(-(uart_buf+2))
+ 1529 02f6 8AE0      		ldi r24,lo8(10)
+ 1530 02f8 E0E0      		ldi r30,lo8(.LC19)
+ 1531 02fa F0E0      		ldi r31,hi8(.LC19)
+ 1532               		0:
+ 1533 02fc 0190      		ld r0,Z+
+ 1534 02fe 0D92      		st X+,r0
+ 1535 0300 8A95      		dec r24
+ 1536 0302 01F4      		brne 0b
+  65:command_handlers.c **** }
+ 1537               		.loc 1 65 0
+ 1538 0304 80E0      		ldi r24,lo8(uart_buf)
+ 1539 0306 90E0      		ldi r25,hi8(uart_buf)
+ 1540               	/* epilogue start */
+ 1541 0308 DF91      		pop r29
+ 1542 030a CF91      		pop r28
+ 1543 030c 1F91      		pop r17
+ 1544 030e 0F91      		pop r16
+ 1545 0310 FF90      		pop r15
+ 1546 0312 EF90      		pop r14
+ 1547 0314 0895      		ret
+ 1548               		.cfi_endproc
+ 1549               	.LFE3:
+ 1551               		.section	.text.command_handle_show_state,"ax",@progbits
+ 1552               	.global	command_handle_show_state
+ 1554               	command_handle_show_state:
+ 1555               	.LFB7:
+ 156:command_handlers.c **** void command_handle_show_state(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 1556               		.loc 1 156 0
+ 1557               		.cfi_startproc
+ 1558               	.LVL133:
+ 1559 0000 CF93      		push r28
+ 1560               	.LCFI20:
+ 1561               		.cfi_def_cfa_offset 3
+ 1562               		.cfi_offset 28, -2
+ 1563 0002 DF93      		push r29
+ 1564               	.LCFI21:
+ 1565               		.cfi_def_cfa_offset 4
+ 1566               		.cfi_offset 29, -3
+ 1567               	/* prologue: function */
+ 1568               	/* frame size = 0 */
+ 1569               	/* stack size = 2 */
+ 1570               	.L__stack_usage = 2
+ 1571 0004 EC01      		movw r28,r24
+ 157:command_handlers.c ****   strcpy(cmd_output, display_state_info());
+ 1572               		.loc 1 157 0
+ 1573 0006 0E94 0000 		call display_state_info
+ 1574               	.LVL134:
+ 1575 000a BC01      		movw r22,r24
+ 1576 000c CE01      		movw r24,r28
+ 1577               	/* epilogue start */
+ 158:command_handlers.c **** }
+ 1578               		.loc 1 158 0
+ 1579 000e DF91      		pop r29
+ 1580 0010 CF91      		pop r28
+ 1581               	.LVL135:
+ 157:command_handlers.c ****   strcpy(cmd_output, display_state_info());
+ 1582               		.loc 1 157 0
+ 1583 0012 0C94 0000 		jmp strcpy
+ 1584               	.LVL136:
+ 1585               		.cfi_endproc
+ 1586               	.LFE7:
+ 1588               		.section	.rodata.str1.1
+ 1589               	.LC33:
+ 1590 0138 6261 7474 		.string	"battery: "
+ 1590      6572 793A 
+ 1590      2000 
+ 1591               		.section	.text.display_voltage_info,"ax",@progbits
+ 1592               	.global	display_voltage_info
+ 1594               	display_voltage_info:
+ 1595               	.LFB4:
+  67:command_handlers.c **** char *display_voltage_info() {
+ 1596               		.loc 1 67 0
+ 1597               		.cfi_startproc
+ 1598 0000 0F93      		push r16
+ 1599               	.LCFI22:
+ 1600               		.cfi_def_cfa_offset 3
+ 1601               		.cfi_offset 16, -2
+ 1602 0002 1F93      		push r17
+ 1603               	.LCFI23:
+ 1604               		.cfi_def_cfa_offset 4
+ 1605               		.cfi_offset 17, -3
+ 1606 0004 CF93      		push r28
+ 1607               	.LCFI24:
+ 1608               		.cfi_def_cfa_offset 5
+ 1609               		.cfi_offset 28, -4
+ 1610 0006 DF93      		push r29
+ 1611               	.LCFI25:
+ 1612               		.cfi_def_cfa_offset 6
+ 1613               		.cfi_offset 29, -5
+ 1614 0008 CDB7      		in r28,__SP_L__
+ 1615 000a DEB7      		in r29,__SP_H__
+ 1616               	.LCFI26:
+ 1617               		.cfi_def_cfa_register 28
+ 1618 000c 6497      		sbiw r28,20
+ 1619               	.LCFI27:
+ 1620               		.cfi_def_cfa_offset 26
+ 1621 000e 0FB6      		in __tmp_reg__,__SREG__
+ 1622 0010 F894      		cli
+ 1623 0012 DEBF      		out __SP_H__,r29
+ 1624 0014 0FBE      		out __SREG__,__tmp_reg__
+ 1625 0016 CDBF      		out __SP_L__,r28
+ 1626               	/* prologue: function */
+ 1627               	/* frame size = 20 */
+ 1628               	/* stack size = 24 */
+ 1629               	.L__stack_usage = 24
+  72:command_handlers.c ****   utoa(g_adc_voltage[0],accu_str,10);
+ 1630               		.loc 1 72 0
+ 1631 0018 8091 0000 		lds r24,g_adc_voltage
+ 1632 001c 9091 0000 		lds r25,g_adc_voltage+1
+ 1633 0020 4AE0      		ldi r20,lo8(10)
+ 1634 0022 50E0      		ldi r21,0
+ 1635 0024 BE01      		movw r22,r28
+ 1636 0026 605F      		subi r22,-16
+ 1637 0028 7F4F      		sbci r23,-1
+ 1638 002a 0E94 0000 		call utoa
+ 1639               	.LVL137:
+  73:command_handlers.c ****   utoa(g_adc_voltage[1],x_str,10);
+ 1640               		.loc 1 73 0
+ 1641 002e 8091 0000 		lds r24,g_adc_voltage+2
+ 1642 0032 9091 0000 		lds r25,g_adc_voltage+2+1
+ 1643 0036 4AE0      		ldi r20,lo8(10)
+ 1644 0038 50E0      		ldi r21,0
+ 1645 003a BE01      		movw r22,r28
+ 1646 003c 655F      		subi r22,-11
+ 1647 003e 7F4F      		sbci r23,-1
+ 1648 0040 0E94 0000 		call utoa
+ 1649               	.LVL138:
+  74:command_handlers.c ****   utoa(g_adc_voltage[2],y_str,10);
+ 1650               		.loc 1 74 0
+ 1651 0044 8091 0000 		lds r24,g_adc_voltage+4
+ 1652 0048 9091 0000 		lds r25,g_adc_voltage+4+1
+ 1653 004c 4AE0      		ldi r20,lo8(10)
+ 1654 004e 50E0      		ldi r21,0
+ 1655 0050 BE01      		movw r22,r28
+ 1656 0052 6A5F      		subi r22,-6
+ 1657 0054 7F4F      		sbci r23,-1
+ 1658 0056 0E94 0000 		call utoa
+ 1659               	.LVL139:
+  75:command_handlers.c ****   utoa(g_adc_voltage[3],z_str,10);
+ 1660               		.loc 1 75 0
+ 1661 005a 8091 0000 		lds r24,g_adc_voltage+6
+ 1662 005e 9091 0000 		lds r25,g_adc_voltage+6+1
+ 1663 0062 4AE0      		ldi r20,lo8(10)
+ 1664 0064 50E0      		ldi r21,0
+ 1665 0066 BE01      		movw r22,r28
+ 1666 0068 6F5F      		subi r22,-1
+ 1667 006a 7F4F      		sbci r23,-1
+ 1668 006c 0E94 0000 		call utoa
+ 1669               	.LVL140:
+  76:command_handlers.c ****   strcpy(uart_buf, "battery: ");
+ 1670               		.loc 1 76 0
+ 1671 0070 00E0      		ldi r16,lo8(uart_buf)
+ 1672 0072 10E0      		ldi r17,hi8(uart_buf)
+ 1673 0074 89E0      		ldi r24,lo8(9)
+ 1674 0076 E0E0      		ldi r30,lo8(.LC33)
+ 1675 0078 F0E0      		ldi r31,hi8(.LC33)
+ 1676 007a D801      		movw r26,r16
+ 1677               		0:
+ 1678 007c 0190      		ld r0,Z+
+ 1679 007e 0D92      		st X+,r0
+ 1680 0080 8A95      		dec r24
+ 1681 0082 01F4      		brne 0b
+  77:command_handlers.c ****   strcat(uart_buf, accu_str);
+ 1682               		.loc 1 77 0
+ 1683 0084 BE01      		movw r22,r28
+ 1684 0086 605F      		subi r22,-16
+ 1685 0088 7F4F      		sbci r23,-1
+ 1686 008a 80E0      		ldi r24,lo8(uart_buf+9)
+ 1687 008c 90E0      		ldi r25,hi8(uart_buf+9)
+ 1688 008e 0E94 0000 		call strcpy
+ 1689               	.LVL141:
+  78:command_handlers.c ****   strcat(uart_buf, " x: ");
+ 1690               		.loc 1 78 0
+ 1691 0092 F801      		movw r30,r16
+ 1692               		0:
+ 1693 0094 0190      		ld __tmp_reg__,Z+
+ 1694 0096 0020      		tst __tmp_reg__
+ 1695 0098 01F4      		brne 0b
+ 1696 009a 3197      		sbiw r30,1
+ 1697 009c 40E2      		ldi r20,lo8(32)
+ 1698 009e 58E7      		ldi r21,lo8(120)
+ 1699 00a0 6AE3      		ldi r22,lo8(58)
+ 1700 00a2 70E2      		ldi r23,lo8(32)
+ 1701 00a4 4083      		st Z,r20
+ 1702 00a6 5183      		std Z+1,r21
+ 1703 00a8 6283      		std Z+2,r22
+ 1704 00aa 7383      		std Z+3,r23
+  79:command_handlers.c ****   strcat(uart_buf, x_str);
+ 1705               		.loc 1 79 0
+ 1706 00ac BE01      		movw r22,r28
+ 1707 00ae 655F      		subi r22,-11
+ 1708 00b0 7F4F      		sbci r23,-1
+ 1709 00b2 CF01      		movw r24,r30
+ 1710 00b4 0496      		adiw r24,4
+ 1711 00b6 0E94 0000 		call strcpy
+ 1712               	.LVL142:
+  80:command_handlers.c ****   strcat(uart_buf, " y: ");
+ 1713               		.loc 1 80 0
+ 1714 00ba F801      		movw r30,r16
+ 1715               		0:
+ 1716 00bc 0190      		ld __tmp_reg__,Z+
+ 1717 00be 0020      		tst __tmp_reg__
+ 1718 00c0 01F4      		brne 0b
+ 1719 00c2 3197      		sbiw r30,1
+ 1720 00c4 40E2      		ldi r20,lo8(32)
+ 1721 00c6 59E7      		ldi r21,lo8(121)
+ 1722 00c8 6AE3      		ldi r22,lo8(58)
+ 1723 00ca 70E2      		ldi r23,lo8(32)
+ 1724 00cc 4083      		st Z,r20
+ 1725 00ce 5183      		std Z+1,r21
+ 1726 00d0 6283      		std Z+2,r22
+ 1727 00d2 7383      		std Z+3,r23
+  81:command_handlers.c ****   strcat(uart_buf, y_str);
+ 1728               		.loc 1 81 0
+ 1729 00d4 BE01      		movw r22,r28
+ 1730 00d6 6A5F      		subi r22,-6
+ 1731 00d8 7F4F      		sbci r23,-1
+ 1732 00da CF01      		movw r24,r30
+ 1733 00dc 0496      		adiw r24,4
+ 1734 00de 0E94 0000 		call strcpy
+ 1735               	.LVL143:
+  82:command_handlers.c ****   strcat(uart_buf, " z: ");
+ 1736               		.loc 1 82 0
+ 1737 00e2 F801      		movw r30,r16
+ 1738               		0:
+ 1739 00e4 0190      		ld __tmp_reg__,Z+
+ 1740 00e6 0020      		tst __tmp_reg__
+ 1741 00e8 01F4      		brne 0b
+ 1742 00ea 3197      		sbiw r30,1
+ 1743 00ec 40E2      		ldi r20,lo8(32)
+ 1744 00ee 5AE7      		ldi r21,lo8(122)
+ 1745 00f0 6AE3      		ldi r22,lo8(58)
+ 1746 00f2 70E2      		ldi r23,lo8(32)
+ 1747 00f4 4083      		st Z,r20
+ 1748 00f6 5183      		std Z+1,r21
+ 1749 00f8 6283      		std Z+2,r22
+ 1750 00fa 7383      		std Z+3,r23
+  83:command_handlers.c ****   strcat(uart_buf, z_str);
+ 1751               		.loc 1 83 0
+ 1752 00fc BE01      		movw r22,r28
+ 1753 00fe 6F5F      		subi r22,-1
+ 1754 0100 7F4F      		sbci r23,-1
+ 1755 0102 CF01      		movw r24,r30
+ 1756 0104 0496      		adiw r24,4
+ 1757 0106 0E94 0000 		call strcpy
+ 1758               	.LVL144:
+  84:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 1759               		.loc 1 84 0
+ 1760 010a D801      		movw r26,r16
+ 1761               		0:
+ 1762 010c 0D90      		ld __tmp_reg__,X+
+ 1763 010e 0020      		tst __tmp_reg__
+ 1764 0110 01F4      		brne 0b
+ 1765 0112 1197      		sbiw r26,1
+ 1766 0114 8AE0      		ldi r24,lo8(10)
+ 1767 0116 E0E0      		ldi r30,lo8(.LC19)
+ 1768 0118 F0E0      		ldi r31,hi8(.LC19)
+ 1769               		0:
+ 1770 011a 0190      		ld r0,Z+
+ 1771 011c 0D92      		st X+,r0
+ 1772 011e 8A95      		dec r24
+ 1773 0120 01F4      		brne 0b
+  86:command_handlers.c **** }
+ 1774               		.loc 1 86 0
+ 1775 0122 C801      		movw r24,r16
+ 1776               	/* epilogue start */
+ 1777 0124 6496      		adiw r28,20
+ 1778 0126 0FB6      		in __tmp_reg__,__SREG__
+ 1779 0128 F894      		cli
+ 1780 012a DEBF      		out __SP_H__,r29
+ 1781 012c 0FBE      		out __SREG__,__tmp_reg__
+ 1782 012e CDBF      		out __SP_L__,r28
+ 1783 0130 DF91      		pop r29
+ 1784 0132 CF91      		pop r28
+ 1785 0134 1F91      		pop r17
+ 1786 0136 0F91      		pop r16
+ 1787 0138 0895      		ret
+ 1788               		.cfi_endproc
+ 1789               	.LFE4:
+ 1791               		.section	.text.command_handle_show_voltage,"ax",@progbits
+ 1792               	.global	command_handle_show_voltage
+ 1794               	command_handle_show_voltage:
+ 1795               	.LFB11:
+ 213:command_handlers.c **** void command_handle_show_voltage(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 1796               		.loc 1 213 0
+ 1797               		.cfi_startproc
+ 1798               	.LVL145:
+ 1799 0000 CF93      		push r28
+ 1800               	.LCFI28:
+ 1801               		.cfi_def_cfa_offset 3
+ 1802               		.cfi_offset 28, -2
+ 1803 0002 DF93      		push r29
+ 1804               	.LCFI29:
+ 1805               		.cfi_def_cfa_offset 4
+ 1806               		.cfi_offset 29, -3
+ 1807               	/* prologue: function */
+ 1808               	/* frame size = 0 */
+ 1809               	/* stack size = 2 */
+ 1810               	.L__stack_usage = 2
+ 1811 0004 EC01      		movw r28,r24
+ 214:command_handlers.c ****   strcpy(cmd_output, display_voltage_info());
+ 1812               		.loc 1 214 0
+ 1813 0006 0E94 0000 		call display_voltage_info
+ 1814               	.LVL146:
+ 1815 000a BC01      		movw r22,r24
+ 1816 000c CE01      		movw r24,r28
+ 1817               	/* epilogue start */
+ 215:command_handlers.c **** }
+ 1818               		.loc 1 215 0
+ 1819 000e DF91      		pop r29
+ 1820 0010 CF91      		pop r28
+ 1821               	.LVL147:
+ 214:command_handlers.c ****   strcpy(cmd_output, display_voltage_info());
+ 1822               		.loc 1 214 0
+ 1823 0012 0C94 0000 		jmp strcpy
+ 1824               	.LVL148:
+ 1825               		.cfi_endproc
+ 1826               	.LFE11:
+ 1828               		.section	.rodata.str1.1
+ 1829               	.LC34:
+ 1830 0142 6465 6570 		.string	"deep sleep counter (dsc): "
+ 1830      2073 6C65 
+ 1830      6570 2063 
+ 1830      6F75 6E74 
+ 1830      6572 2028 
+ 1831               	.LC35:
+ 1832 015d 7365 7474 		.string	"settle time (st): "
+ 1832      6C65 2074 
+ 1832      696D 6520 
+ 1832      2873 7429 
+ 1832      3A20 00
+ 1833               	.LC36:
+ 1834 0170 616C 6172 		.string	"alarm settle time (ast): "
+ 1834      6D20 7365 
+ 1834      7474 6C65 
+ 1834      2074 696D 
+ 1834      6520 2861 
+ 1835               	.LC37:
+ 1836 018a 696E 6469 		.string	"indicator sound (is): "
+ 1836      6361 746F 
+ 1836      7220 736F 
+ 1836      756E 6420 
+ 1836      2869 7329 
+ 1837               	.LC38:
+ 1838 01a1 626C 696E 		.string	"blink speed (bs): "
+ 1838      6B20 7370 
+ 1838      6565 6420 
+ 1838      2862 7329 
+ 1838      3A20 00
+ 1839               	.LC39:
+ 1840 01b4 616C 6172 		.string	"alarm counter (ac): "
+ 1840      6D20 636F 
+ 1840      756E 7465 
+ 1840      7220 2861 
+ 1840      6329 3A20 
+ 1841               	.LC40:
+ 1842 01c9 616C 6172 		.string	"alarm trigger (at): "
+ 1842      6D20 7472 
+ 1842      6967 6765 
+ 1842      7220 2861 
+ 1842      7429 3A20 
+ 1843               	.LC41:
+ 1844 01de 616C 6172 		.string	"alarm trigger (atc): "
+ 1844      6D20 7472 
+ 1844      6967 6765 
+ 1844      7220 2861 
+ 1844      7463 293A 
+ 1845               	.LC42:
+ 1846 01f4 616C 6172 		.string	"alarm min. threshold (amint): "
+ 1846      6D20 6D69 
+ 1846      6E2E 2074 
+ 1846      6872 6573 
+ 1846      686F 6C64 
+ 1847               	.LC43:
+ 1848 0213 616C 6172 		.string	"alarm max.threshold (amaxt): "
+ 1848      6D20 6D61 
+ 1848      782E 7468 
+ 1848      7265 7368 
+ 1848      6F6C 6420 
+ 1849               	.LC44:
+ 1850 0231 6261 636B 		.string	"backpedal (bp): "
+ 1850      7065 6461 
+ 1850      6C20 2862 
+ 1850      7029 3A20 
+ 1850      00
+ 1851               	.LC45:
+ 1852 0242 6261 636B 		.string	"backpedal threshold (bpt): "
+ 1852      7065 6461 
+ 1852      6C20 7468 
+ 1852      7265 7368 
+ 1852      6F6C 6420 
+ 1853               	.LC46:
+ 1854 025e 7374 6172 		.string	"startup sound (ss): "
+ 1854      7475 7020 
+ 1854      736F 756E 
+ 1854      6420 2873 
+ 1854      7329 3A20 
+ 1855               	.LC47:
+ 1856 0273 616C 6172 		.string	"alarm sound (as): "
+ 1856      6D20 736F 
+ 1856      756E 6420 
+ 1856      2861 7329 
+ 1856      3A20 00
+ 1857               	.LC48:
+ 1858 0286 7061 7373 		.string	"password (p): "
+ 1858      776F 7264 
+ 1858      2028 7029 
+ 1858      3A20 00
+ 1859               		.section	.text.display_conf_info,"ax",@progbits
+ 1860               	.global	display_conf_info
+ 1862               	display_conf_info:
+ 1863               	.LFB5:
+  88:command_handlers.c **** char *display_conf_info() {
+ 1864               		.loc 1 88 0
+ 1865               		.cfi_startproc
+ 1866 0000 0F93      		push r16
+ 1867               	.LCFI30:
+ 1868               		.cfi_def_cfa_offset 3
+ 1869               		.cfi_offset 16, -2
+ 1870 0002 1F93      		push r17
+ 1871               	.LCFI31:
+ 1872               		.cfi_def_cfa_offset 4
+ 1873               		.cfi_offset 17, -3
+ 1874 0004 CF93      		push r28
+ 1875               	.LCFI32:
+ 1876               		.cfi_def_cfa_offset 5
+ 1877               		.cfi_offset 28, -4
+ 1878 0006 DF93      		push r29
+ 1879               	.LCFI33:
+ 1880               		.cfi_def_cfa_offset 6
+ 1881               		.cfi_offset 29, -5
+ 1882 0008 CDB7      		in r28,__SP_L__
+ 1883 000a DEB7      		in r29,__SP_H__
+ 1884               	.LCFI34:
+ 1885               		.cfi_def_cfa_register 28
+ 1886 000c A097      		sbiw r28,32
+ 1887               	.LCFI35:
+ 1888               		.cfi_def_cfa_offset 38
+ 1889 000e 0FB6      		in __tmp_reg__,__SREG__
+ 1890 0010 F894      		cli
+ 1891 0012 DEBF      		out __SP_H__,r29
+ 1892 0014 0FBE      		out __SREG__,__tmp_reg__
+ 1893 0016 CDBF      		out __SP_L__,r28
+ 1894               	/* prologue: function */
+ 1895               	/* frame size = 32 */
+ 1896               	/* stack size = 36 */
+ 1897               	.L__stack_usage = 36
+  90:command_handlers.c ****   utoa(g_settings.deep_sleep_counter,tmp_str,10);
+ 1898               		.loc 1 90 0
+ 1899 0018 4AE0      		ldi r20,lo8(10)
+ 1900 001a 50E0      		ldi r21,0
+ 1901 001c BE01      		movw r22,r28
+ 1902 001e 6F5F      		subi r22,-1
+ 1903 0020 7F4F      		sbci r23,-1
+ 1904 0022 8091 0000 		lds r24,g_settings
+ 1905 0026 9091 0000 		lds r25,g_settings+1
+ 1906 002a 0E94 0000 		call utoa
+ 1907               	.LVL149:
+  91:command_handlers.c ****   strcpy(uart_buf, "deep sleep counter (dsc): ");
+ 1908               		.loc 1 91 0
+ 1909 002e 00E0      		ldi r16,lo8(uart_buf)
+ 1910 0030 10E0      		ldi r17,hi8(uart_buf)
+ 1911 0032 8AE1      		ldi r24,lo8(26)
+ 1912 0034 E0E0      		ldi r30,lo8(.LC34)
+ 1913 0036 F0E0      		ldi r31,hi8(.LC34)
+ 1914 0038 D801      		movw r26,r16
+ 1915               		0:
+ 1916 003a 0190      		ld r0,Z+
+ 1917 003c 0D92      		st X+,r0
+ 1918 003e 8A95      		dec r24
+ 1919 0040 01F4      		brne 0b
+  92:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 1920               		.loc 1 92 0
+ 1921 0042 BE01      		movw r22,r28
+ 1922 0044 6F5F      		subi r22,-1
+ 1923 0046 7F4F      		sbci r23,-1
+ 1924 0048 80E0      		ldi r24,lo8(uart_buf+26)
+ 1925 004a 90E0      		ldi r25,hi8(uart_buf+26)
+ 1926 004c 0E94 0000 		call strcpy
+ 1927               	.LVL150:
+  93:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 1928               		.loc 1 93 0
+ 1929 0050 D801      		movw r26,r16
+ 1930               		0:
+ 1931 0052 0D90      		ld __tmp_reg__,X+
+ 1932 0054 0020      		tst __tmp_reg__
+ 1933 0056 01F4      		brne 0b
+ 1934 0058 1197      		sbiw r26,1
+ 1935 005a 8AE0      		ldi r24,lo8(10)
+ 1936 005c E0E0      		ldi r30,lo8(.LC19)
+ 1937 005e F0E0      		ldi r31,hi8(.LC19)
+ 1938               		0:
+ 1939 0060 0190      		ld r0,Z+
+ 1940 0062 0D92      		st X+,r0
+ 1941 0064 8A95      		dec r24
+ 1942 0066 01F4      		brne 0b
+  94:command_handlers.c ****   utoa(g_settings.settle_time,tmp_str,10);
+ 1943               		.loc 1 94 0
+ 1944 0068 4AE0      		ldi r20,lo8(10)
+ 1945 006a 50E0      		ldi r21,0
+ 1946 006c BE01      		movw r22,r28
+ 1947 006e 6F5F      		subi r22,-1
+ 1948 0070 7F4F      		sbci r23,-1
+ 1949 0072 8091 0000 		lds r24,g_settings+2
+ 1950 0076 9091 0000 		lds r25,g_settings+2+1
+ 1951 007a 0E94 0000 		call utoa
+ 1952               	.LVL151:
+  95:command_handlers.c ****   strcat(uart_buf, "settle time (st): ");
+ 1953               		.loc 1 95 0
+ 1954 007e F801      		movw r30,r16
+ 1955               		0:
+ 1956 0080 0190      		ld __tmp_reg__,Z+
+ 1957 0082 0020      		tst __tmp_reg__
+ 1958 0084 01F4      		brne 0b
+ 1959 0086 CF01      		movw r24,r30
+ 1960 0088 0197      		sbiw r24,1
+ 1961 008a 8050      		subi r24,lo8(uart_buf)
+ 1962 008c 9040      		sbci r25,hi8(uart_buf)
+ 1963 008e DC01      		movw r26,r24
+ 1964 0090 A050      		subi r26,lo8(-(uart_buf))
+ 1965 0092 B040      		sbci r27,hi8(-(uart_buf))
+ 1966 0094 22E1      		ldi r18,lo8(18)
+ 1967 0096 E0E0      		ldi r30,lo8(.LC35)
+ 1968 0098 F0E0      		ldi r31,hi8(.LC35)
+ 1969               		0:
+ 1970 009a 0190      		ld r0,Z+
+ 1971 009c 0D92      		st X+,r0
+ 1972 009e 2A95      		dec r18
+ 1973 00a0 01F4      		brne 0b
+  96:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 1974               		.loc 1 96 0
+ 1975 00a2 BE01      		movw r22,r28
+ 1976 00a4 6F5F      		subi r22,-1
+ 1977 00a6 7F4F      		sbci r23,-1
+ 1978 00a8 8050      		subi r24,lo8(-(uart_buf+18))
+ 1979 00aa 9040      		sbci r25,hi8(-(uart_buf+18))
+ 1980 00ac 0E94 0000 		call strcpy
+ 1981               	.LVL152:
+  97:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 1982               		.loc 1 97 0
+ 1983 00b0 D801      		movw r26,r16
+ 1984               		0:
+ 1985 00b2 0D90      		ld __tmp_reg__,X+
+ 1986 00b4 0020      		tst __tmp_reg__
+ 1987 00b6 01F4      		brne 0b
+ 1988 00b8 1197      		sbiw r26,1
+ 1989 00ba 8AE0      		ldi r24,lo8(10)
+ 1990 00bc E0E0      		ldi r30,lo8(.LC19)
+ 1991 00be F0E0      		ldi r31,hi8(.LC19)
+ 1992               		0:
+ 1993 00c0 0190      		ld r0,Z+
+ 1994 00c2 0D92      		st X+,r0
+ 1995 00c4 8A95      		dec r24
+ 1996 00c6 01F4      		brne 0b
+  98:command_handlers.c ****   utoa(g_settings.alarm_settle_time,tmp_str,10);
+ 1997               		.loc 1 98 0
+ 1998 00c8 4AE0      		ldi r20,lo8(10)
+ 1999 00ca 50E0      		ldi r21,0
+ 2000 00cc BE01      		movw r22,r28
+ 2001 00ce 6F5F      		subi r22,-1
+ 2002 00d0 7F4F      		sbci r23,-1
+ 2003 00d2 8091 0000 		lds r24,g_settings+4
+ 2004 00d6 9091 0000 		lds r25,g_settings+4+1
+ 2005 00da 0E94 0000 		call utoa
+ 2006               	.LVL153:
+  99:command_handlers.c ****   strcat(uart_buf, "alarm settle time (ast): ");
+ 2007               		.loc 1 99 0
+ 2008 00de F801      		movw r30,r16
+ 2009               		0:
+ 2010 00e0 0190      		ld __tmp_reg__,Z+
+ 2011 00e2 0020      		tst __tmp_reg__
+ 2012 00e4 01F4      		brne 0b
+ 2013 00e6 CF01      		movw r24,r30
+ 2014 00e8 0197      		sbiw r24,1
+ 2015 00ea 8050      		subi r24,lo8(uart_buf)
+ 2016 00ec 9040      		sbci r25,hi8(uart_buf)
+ 2017 00ee DC01      		movw r26,r24
+ 2018 00f0 A050      		subi r26,lo8(-(uart_buf))
+ 2019 00f2 B040      		sbci r27,hi8(-(uart_buf))
+ 2020 00f4 29E1      		ldi r18,lo8(25)
+ 2021 00f6 E0E0      		ldi r30,lo8(.LC36)
+ 2022 00f8 F0E0      		ldi r31,hi8(.LC36)
+ 2023               		0:
+ 2024 00fa 0190      		ld r0,Z+
+ 2025 00fc 0D92      		st X+,r0
+ 2026 00fe 2A95      		dec r18
+ 2027 0100 01F4      		brne 0b
+ 100:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2028               		.loc 1 100 0
+ 2029 0102 BE01      		movw r22,r28
+ 2030 0104 6F5F      		subi r22,-1
+ 2031 0106 7F4F      		sbci r23,-1
+ 2032 0108 8050      		subi r24,lo8(-(uart_buf+25))
+ 2033 010a 9040      		sbci r25,hi8(-(uart_buf+25))
+ 2034 010c 0E94 0000 		call strcpy
+ 2035               	.LVL154:
+ 101:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2036               		.loc 1 101 0
+ 2037 0110 D801      		movw r26,r16
+ 2038               		0:
+ 2039 0112 0D90      		ld __tmp_reg__,X+
+ 2040 0114 0020      		tst __tmp_reg__
+ 2041 0116 01F4      		brne 0b
+ 2042 0118 1197      		sbiw r26,1
+ 2043 011a 8AE0      		ldi r24,lo8(10)
+ 2044 011c E0E0      		ldi r30,lo8(.LC19)
+ 2045 011e F0E0      		ldi r31,hi8(.LC19)
+ 2046               		0:
+ 2047 0120 0190      		ld r0,Z+
+ 2048 0122 0D92      		st X+,r0
+ 2049 0124 8A95      		dec r24
+ 2050 0126 01F4      		brne 0b
+ 102:command_handlers.c ****   utoa(g_settings.indicator_sound,tmp_str,10);
+ 2051               		.loc 1 102 0
+ 2052 0128 8091 0000 		lds r24,g_settings+6
+ 2053 012c 4AE0      		ldi r20,lo8(10)
+ 2054 012e 50E0      		ldi r21,0
+ 2055 0130 BE01      		movw r22,r28
+ 2056 0132 6F5F      		subi r22,-1
+ 2057 0134 7F4F      		sbci r23,-1
+ 2058 0136 90E0      		ldi r25,0
+ 2059 0138 0E94 0000 		call utoa
+ 2060               	.LVL155:
+ 103:command_handlers.c ****   strcat(uart_buf, "indicator sound (is): ");
+ 2061               		.loc 1 103 0
+ 2062 013c F801      		movw r30,r16
+ 2063               		0:
+ 2064 013e 0190      		ld __tmp_reg__,Z+
+ 2065 0140 0020      		tst __tmp_reg__
+ 2066 0142 01F4      		brne 0b
+ 2067 0144 CF01      		movw r24,r30
+ 2068 0146 0197      		sbiw r24,1
+ 2069 0148 8050      		subi r24,lo8(uart_buf)
+ 2070 014a 9040      		sbci r25,hi8(uart_buf)
+ 2071 014c DC01      		movw r26,r24
+ 2072 014e A050      		subi r26,lo8(-(uart_buf))
+ 2073 0150 B040      		sbci r27,hi8(-(uart_buf))
+ 2074 0152 26E1      		ldi r18,lo8(22)
+ 2075 0154 E0E0      		ldi r30,lo8(.LC37)
+ 2076 0156 F0E0      		ldi r31,hi8(.LC37)
+ 2077               		0:
+ 2078 0158 0190      		ld r0,Z+
+ 2079 015a 0D92      		st X+,r0
+ 2080 015c 2A95      		dec r18
+ 2081 015e 01F4      		brne 0b
+ 104:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2082               		.loc 1 104 0
+ 2083 0160 BE01      		movw r22,r28
+ 2084 0162 6F5F      		subi r22,-1
+ 2085 0164 7F4F      		sbci r23,-1
+ 2086 0166 8050      		subi r24,lo8(-(uart_buf+22))
+ 2087 0168 9040      		sbci r25,hi8(-(uart_buf+22))
+ 2088 016a 0E94 0000 		call strcpy
+ 2089               	.LVL156:
+ 105:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2090               		.loc 1 105 0
+ 2091 016e D801      		movw r26,r16
+ 2092               		0:
+ 2093 0170 0D90      		ld __tmp_reg__,X+
+ 2094 0172 0020      		tst __tmp_reg__
+ 2095 0174 01F4      		brne 0b
+ 2096 0176 1197      		sbiw r26,1
+ 2097 0178 8AE0      		ldi r24,lo8(10)
+ 2098 017a E0E0      		ldi r30,lo8(.LC19)
+ 2099 017c F0E0      		ldi r31,hi8(.LC19)
+ 2100               		0:
+ 2101 017e 0190      		ld r0,Z+
+ 2102 0180 0D92      		st X+,r0
+ 2103 0182 8A95      		dec r24
+ 2104 0184 01F4      		brne 0b
+ 106:command_handlers.c ****   utoa(g_settings.blink_speed,tmp_str,10);
+ 2105               		.loc 1 106 0
+ 2106 0186 4AE0      		ldi r20,lo8(10)
+ 2107 0188 50E0      		ldi r21,0
+ 2108 018a BE01      		movw r22,r28
+ 2109 018c 6F5F      		subi r22,-1
+ 2110 018e 7F4F      		sbci r23,-1
+ 2111 0190 8091 0000 		lds r24,g_settings+7
+ 2112 0194 9091 0000 		lds r25,g_settings+7+1
+ 2113 0198 0E94 0000 		call utoa
+ 2114               	.LVL157:
+ 107:command_handlers.c ****   strcat(uart_buf, "blink speed (bs): ");
+ 2115               		.loc 1 107 0
+ 2116 019c F801      		movw r30,r16
+ 2117               		0:
+ 2118 019e 0190      		ld __tmp_reg__,Z+
+ 2119 01a0 0020      		tst __tmp_reg__
+ 2120 01a2 01F4      		brne 0b
+ 2121 01a4 CF01      		movw r24,r30
+ 2122 01a6 0197      		sbiw r24,1
+ 2123 01a8 8050      		subi r24,lo8(uart_buf)
+ 2124 01aa 9040      		sbci r25,hi8(uart_buf)
+ 2125 01ac DC01      		movw r26,r24
+ 2126 01ae A050      		subi r26,lo8(-(uart_buf))
+ 2127 01b0 B040      		sbci r27,hi8(-(uart_buf))
+ 2128 01b2 22E1      		ldi r18,lo8(18)
+ 2129 01b4 E0E0      		ldi r30,lo8(.LC38)
+ 2130 01b6 F0E0      		ldi r31,hi8(.LC38)
+ 2131               		0:
+ 2132 01b8 0190      		ld r0,Z+
+ 2133 01ba 0D92      		st X+,r0
+ 2134 01bc 2A95      		dec r18
+ 2135 01be 01F4      		brne 0b
+ 108:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2136               		.loc 1 108 0
+ 2137 01c0 BE01      		movw r22,r28
+ 2138 01c2 6F5F      		subi r22,-1
+ 2139 01c4 7F4F      		sbci r23,-1
+ 2140 01c6 8050      		subi r24,lo8(-(uart_buf+18))
+ 2141 01c8 9040      		sbci r25,hi8(-(uart_buf+18))
+ 2142 01ca 0E94 0000 		call strcpy
+ 2143               	.LVL158:
+ 109:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2144               		.loc 1 109 0
+ 2145 01ce D801      		movw r26,r16
+ 2146               		0:
+ 2147 01d0 0D90      		ld __tmp_reg__,X+
+ 2148 01d2 0020      		tst __tmp_reg__
+ 2149 01d4 01F4      		brne 0b
+ 2150 01d6 1197      		sbiw r26,1
+ 2151 01d8 8AE0      		ldi r24,lo8(10)
+ 2152 01da E0E0      		ldi r30,lo8(.LC19)
+ 2153 01dc F0E0      		ldi r31,hi8(.LC19)
+ 2154               		0:
+ 2155 01de 0190      		ld r0,Z+
+ 2156 01e0 0D92      		st X+,r0
+ 2157 01e2 8A95      		dec r24
+ 2158 01e4 01F4      		brne 0b
+ 110:command_handlers.c ****   utoa(g_settings.alarm_counter,tmp_str,10);
+ 2159               		.loc 1 110 0
+ 2160 01e6 8091 0000 		lds r24,g_settings+9
+ 2161 01ea 4AE0      		ldi r20,lo8(10)
+ 2162 01ec 50E0      		ldi r21,0
+ 2163 01ee BE01      		movw r22,r28
+ 2164 01f0 6F5F      		subi r22,-1
+ 2165 01f2 7F4F      		sbci r23,-1
+ 2166 01f4 90E0      		ldi r25,0
+ 2167 01f6 0E94 0000 		call utoa
+ 2168               	.LVL159:
+ 111:command_handlers.c ****   strcat(uart_buf, "alarm counter (ac): ");
+ 2169               		.loc 1 111 0
+ 2170 01fa F801      		movw r30,r16
+ 2171               		0:
+ 2172 01fc 0190      		ld __tmp_reg__,Z+
+ 2173 01fe 0020      		tst __tmp_reg__
+ 2174 0200 01F4      		brne 0b
+ 2175 0202 CF01      		movw r24,r30
+ 2176 0204 0197      		sbiw r24,1
+ 2177 0206 8050      		subi r24,lo8(uart_buf)
+ 2178 0208 9040      		sbci r25,hi8(uart_buf)
+ 2179 020a DC01      		movw r26,r24
+ 2180 020c A050      		subi r26,lo8(-(uart_buf))
+ 2181 020e B040      		sbci r27,hi8(-(uart_buf))
+ 2182 0210 24E1      		ldi r18,lo8(20)
+ 2183 0212 E0E0      		ldi r30,lo8(.LC39)
+ 2184 0214 F0E0      		ldi r31,hi8(.LC39)
+ 2185               		0:
+ 2186 0216 0190      		ld r0,Z+
+ 2187 0218 0D92      		st X+,r0
+ 2188 021a 2A95      		dec r18
+ 2189 021c 01F4      		brne 0b
+ 112:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2190               		.loc 1 112 0
+ 2191 021e BE01      		movw r22,r28
+ 2192 0220 6F5F      		subi r22,-1
+ 2193 0222 7F4F      		sbci r23,-1
+ 2194 0224 8050      		subi r24,lo8(-(uart_buf+20))
+ 2195 0226 9040      		sbci r25,hi8(-(uart_buf+20))
+ 2196 0228 0E94 0000 		call strcpy
+ 2197               	.LVL160:
+ 113:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2198               		.loc 1 113 0
+ 2199 022c D801      		movw r26,r16
+ 2200               		0:
+ 2201 022e 0D90      		ld __tmp_reg__,X+
+ 2202 0230 0020      		tst __tmp_reg__
+ 2203 0232 01F4      		brne 0b
+ 2204 0234 1197      		sbiw r26,1
+ 2205 0236 8AE0      		ldi r24,lo8(10)
+ 2206 0238 E0E0      		ldi r30,lo8(.LC19)
+ 2207 023a F0E0      		ldi r31,hi8(.LC19)
+ 2208               		0:
+ 2209 023c 0190      		ld r0,Z+
+ 2210 023e 0D92      		st X+,r0
+ 2211 0240 8A95      		dec r24
+ 2212 0242 01F4      		brne 0b
+ 114:command_handlers.c ****   utoa(g_settings.alarm_trigger,tmp_str,10);
+ 2213               		.loc 1 114 0
+ 2214 0244 8091 0000 		lds r24,g_settings+10
+ 2215 0248 4AE0      		ldi r20,lo8(10)
+ 2216 024a 50E0      		ldi r21,0
+ 2217 024c BE01      		movw r22,r28
+ 2218 024e 6F5F      		subi r22,-1
+ 2219 0250 7F4F      		sbci r23,-1
+ 2220 0252 90E0      		ldi r25,0
+ 2221 0254 0E94 0000 		call utoa
+ 2222               	.LVL161:
+ 115:command_handlers.c ****   strcat(uart_buf, "alarm trigger (at): ");
+ 2223               		.loc 1 115 0
+ 2224 0258 F801      		movw r30,r16
+ 2225               		0:
+ 2226 025a 0190      		ld __tmp_reg__,Z+
+ 2227 025c 0020      		tst __tmp_reg__
+ 2228 025e 01F4      		brne 0b
+ 2229 0260 CF01      		movw r24,r30
+ 2230 0262 0197      		sbiw r24,1
+ 2231 0264 8050      		subi r24,lo8(uart_buf)
+ 2232 0266 9040      		sbci r25,hi8(uart_buf)
+ 2233 0268 DC01      		movw r26,r24
+ 2234 026a A050      		subi r26,lo8(-(uart_buf))
+ 2235 026c B040      		sbci r27,hi8(-(uart_buf))
+ 2236 026e 24E1      		ldi r18,lo8(20)
+ 2237 0270 E0E0      		ldi r30,lo8(.LC40)
+ 2238 0272 F0E0      		ldi r31,hi8(.LC40)
+ 2239               		0:
+ 2240 0274 0190      		ld r0,Z+
+ 2241 0276 0D92      		st X+,r0
+ 2242 0278 2A95      		dec r18
+ 2243 027a 01F4      		brne 0b
+ 116:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2244               		.loc 1 116 0
+ 2245 027c BE01      		movw r22,r28
+ 2246 027e 6F5F      		subi r22,-1
+ 2247 0280 7F4F      		sbci r23,-1
+ 2248 0282 8050      		subi r24,lo8(-(uart_buf+20))
+ 2249 0284 9040      		sbci r25,hi8(-(uart_buf+20))
+ 2250 0286 0E94 0000 		call strcpy
+ 2251               	.LVL162:
+ 117:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2252               		.loc 1 117 0
+ 2253 028a D801      		movw r26,r16
+ 2254               		0:
+ 2255 028c 0D90      		ld __tmp_reg__,X+
+ 2256 028e 0020      		tst __tmp_reg__
+ 2257 0290 01F4      		brne 0b
+ 2258 0292 1197      		sbiw r26,1
+ 2259 0294 8AE0      		ldi r24,lo8(10)
+ 2260 0296 E0E0      		ldi r30,lo8(.LC19)
+ 2261 0298 F0E0      		ldi r31,hi8(.LC19)
+ 2262               		0:
+ 2263 029a 0190      		ld r0,Z+
+ 2264 029c 0D92      		st X+,r0
+ 2265 029e 8A95      		dec r24
+ 2266 02a0 01F4      		brne 0b
+ 118:command_handlers.c ****   utoa(g_settings.alarm_trigger_counter,tmp_str,10);
+ 2267               		.loc 1 118 0
+ 2268 02a2 8091 0000 		lds r24,g_settings+11
+ 2269 02a6 4AE0      		ldi r20,lo8(10)
+ 2270 02a8 50E0      		ldi r21,0
+ 2271 02aa BE01      		movw r22,r28
+ 2272 02ac 6F5F      		subi r22,-1
+ 2273 02ae 7F4F      		sbci r23,-1
+ 2274 02b0 90E0      		ldi r25,0
+ 2275 02b2 0E94 0000 		call utoa
+ 2276               	.LVL163:
+ 119:command_handlers.c ****   strcat(uart_buf, "alarm trigger (atc): ");
+ 2277               		.loc 1 119 0
+ 2278 02b6 F801      		movw r30,r16
+ 2279               		0:
+ 2280 02b8 0190      		ld __tmp_reg__,Z+
+ 2281 02ba 0020      		tst __tmp_reg__
+ 2282 02bc 01F4      		brne 0b
+ 2283 02be CF01      		movw r24,r30
+ 2284 02c0 0197      		sbiw r24,1
+ 2285 02c2 8050      		subi r24,lo8(uart_buf)
+ 2286 02c4 9040      		sbci r25,hi8(uart_buf)
+ 2287 02c6 DC01      		movw r26,r24
+ 2288 02c8 A050      		subi r26,lo8(-(uart_buf))
+ 2289 02ca B040      		sbci r27,hi8(-(uart_buf))
+ 2290 02cc 25E1      		ldi r18,lo8(21)
+ 2291 02ce E0E0      		ldi r30,lo8(.LC41)
+ 2292 02d0 F0E0      		ldi r31,hi8(.LC41)
+ 2293               		0:
+ 2294 02d2 0190      		ld r0,Z+
+ 2295 02d4 0D92      		st X+,r0
+ 2296 02d6 2A95      		dec r18
+ 2297 02d8 01F4      		brne 0b
+ 120:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2298               		.loc 1 120 0
+ 2299 02da BE01      		movw r22,r28
+ 2300 02dc 6F5F      		subi r22,-1
+ 2301 02de 7F4F      		sbci r23,-1
+ 2302 02e0 8050      		subi r24,lo8(-(uart_buf+21))
+ 2303 02e2 9040      		sbci r25,hi8(-(uart_buf+21))
+ 2304 02e4 0E94 0000 		call strcpy
+ 2305               	.LVL164:
+ 121:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2306               		.loc 1 121 0
+ 2307 02e8 D801      		movw r26,r16
+ 2308               		0:
+ 2309 02ea 0D90      		ld __tmp_reg__,X+
+ 2310 02ec 0020      		tst __tmp_reg__
+ 2311 02ee 01F4      		brne 0b
+ 2312 02f0 1197      		sbiw r26,1
+ 2313 02f2 8AE0      		ldi r24,lo8(10)
+ 2314 02f4 E0E0      		ldi r30,lo8(.LC19)
+ 2315 02f6 F0E0      		ldi r31,hi8(.LC19)
+ 2316               		0:
+ 2317 02f8 0190      		ld r0,Z+
+ 2318 02fa 0D92      		st X+,r0
+ 2319 02fc 8A95      		dec r24
+ 2320 02fe 01F4      		brne 0b
+ 122:command_handlers.c ****   utoa(g_settings.alarm_thres_min,tmp_str,10);
+ 2321               		.loc 1 122 0
+ 2322 0300 8091 0000 		lds r24,g_settings+12
+ 2323 0304 4AE0      		ldi r20,lo8(10)
+ 2324 0306 50E0      		ldi r21,0
+ 2325 0308 BE01      		movw r22,r28
+ 2326 030a 6F5F      		subi r22,-1
+ 2327 030c 7F4F      		sbci r23,-1
+ 2328 030e 90E0      		ldi r25,0
+ 2329 0310 0E94 0000 		call utoa
+ 2330               	.LVL165:
+ 123:command_handlers.c ****   strcat(uart_buf, "alarm min. threshold (amint): ");
+ 2331               		.loc 1 123 0
+ 2332 0314 F801      		movw r30,r16
+ 2333               		0:
+ 2334 0316 0190      		ld __tmp_reg__,Z+
+ 2335 0318 0020      		tst __tmp_reg__
+ 2336 031a 01F4      		brne 0b
+ 2337 031c CF01      		movw r24,r30
+ 2338 031e 0197      		sbiw r24,1
+ 2339 0320 8050      		subi r24,lo8(uart_buf)
+ 2340 0322 9040      		sbci r25,hi8(uart_buf)
+ 2341 0324 DC01      		movw r26,r24
+ 2342 0326 A050      		subi r26,lo8(-(uart_buf))
+ 2343 0328 B040      		sbci r27,hi8(-(uart_buf))
+ 2344 032a 2EE1      		ldi r18,lo8(30)
+ 2345 032c E0E0      		ldi r30,lo8(.LC42)
+ 2346 032e F0E0      		ldi r31,hi8(.LC42)
+ 2347               		0:
+ 2348 0330 0190      		ld r0,Z+
+ 2349 0332 0D92      		st X+,r0
+ 2350 0334 2A95      		dec r18
+ 2351 0336 01F4      		brne 0b
+ 124:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2352               		.loc 1 124 0
+ 2353 0338 BE01      		movw r22,r28
+ 2354 033a 6F5F      		subi r22,-1
+ 2355 033c 7F4F      		sbci r23,-1
+ 2356 033e 8050      		subi r24,lo8(-(uart_buf+30))
+ 2357 0340 9040      		sbci r25,hi8(-(uart_buf+30))
+ 2358 0342 0E94 0000 		call strcpy
+ 2359               	.LVL166:
+ 125:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2360               		.loc 1 125 0
+ 2361 0346 D801      		movw r26,r16
+ 2362               		0:
+ 2363 0348 0D90      		ld __tmp_reg__,X+
+ 2364 034a 0020      		tst __tmp_reg__
+ 2365 034c 01F4      		brne 0b
+ 2366 034e 1197      		sbiw r26,1
+ 2367 0350 8AE0      		ldi r24,lo8(10)
+ 2368 0352 E0E0      		ldi r30,lo8(.LC19)
+ 2369 0354 F0E0      		ldi r31,hi8(.LC19)
+ 2370               		0:
+ 2371 0356 0190      		ld r0,Z+
+ 2372 0358 0D92      		st X+,r0
+ 2373 035a 8A95      		dec r24
+ 2374 035c 01F4      		brne 0b
+ 126:command_handlers.c ****   utoa(g_settings.alarm_thres_max,tmp_str,10);
+ 2375               		.loc 1 126 0
+ 2376 035e 4AE0      		ldi r20,lo8(10)
+ 2377 0360 50E0      		ldi r21,0
+ 2378 0362 BE01      		movw r22,r28
+ 2379 0364 6F5F      		subi r22,-1
+ 2380 0366 7F4F      		sbci r23,-1
+ 2381 0368 8091 0000 		lds r24,g_settings+13
+ 2382 036c 9091 0000 		lds r25,g_settings+13+1
+ 2383 0370 0E94 0000 		call utoa
+ 2384               	.LVL167:
+ 127:command_handlers.c ****   strcat(uart_buf, "alarm max.threshold (amaxt): ");
+ 2385               		.loc 1 127 0
+ 2386 0374 F801      		movw r30,r16
+ 2387               		0:
+ 2388 0376 0190      		ld __tmp_reg__,Z+
+ 2389 0378 0020      		tst __tmp_reg__
+ 2390 037a 01F4      		brne 0b
+ 2391 037c CF01      		movw r24,r30
+ 2392 037e 0197      		sbiw r24,1
+ 2393 0380 8050      		subi r24,lo8(uart_buf)
+ 2394 0382 9040      		sbci r25,hi8(uart_buf)
+ 2395 0384 DC01      		movw r26,r24
+ 2396 0386 A050      		subi r26,lo8(-(uart_buf))
+ 2397 0388 B040      		sbci r27,hi8(-(uart_buf))
+ 2398 038a 2DE1      		ldi r18,lo8(29)
+ 2399 038c E0E0      		ldi r30,lo8(.LC43)
+ 2400 038e F0E0      		ldi r31,hi8(.LC43)
+ 2401               		0:
+ 2402 0390 0190      		ld r0,Z+
+ 2403 0392 0D92      		st X+,r0
+ 2404 0394 2A95      		dec r18
+ 2405 0396 01F4      		brne 0b
+ 128:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2406               		.loc 1 128 0
+ 2407 0398 BE01      		movw r22,r28
+ 2408 039a 6F5F      		subi r22,-1
+ 2409 039c 7F4F      		sbci r23,-1
+ 2410 039e 8050      		subi r24,lo8(-(uart_buf+29))
+ 2411 03a0 9040      		sbci r25,hi8(-(uart_buf+29))
+ 2412 03a2 0E94 0000 		call strcpy
+ 2413               	.LVL168:
+ 129:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2414               		.loc 1 129 0
+ 2415 03a6 D801      		movw r26,r16
+ 2416               		0:
+ 2417 03a8 0D90      		ld __tmp_reg__,X+
+ 2418 03aa 0020      		tst __tmp_reg__
+ 2419 03ac 01F4      		brne 0b
+ 2420 03ae 1197      		sbiw r26,1
+ 2421 03b0 8AE0      		ldi r24,lo8(10)
+ 2422 03b2 E0E0      		ldi r30,lo8(.LC19)
+ 2423 03b4 F0E0      		ldi r31,hi8(.LC19)
+ 2424               		0:
+ 2425 03b6 0190      		ld r0,Z+
+ 2426 03b8 0D92      		st X+,r0
+ 2427 03ba 8A95      		dec r24
+ 2428 03bc 01F4      		brne 0b
+ 130:command_handlers.c ****   utoa(g_settings.backpedal,tmp_str,10);
+ 2429               		.loc 1 130 0
+ 2430 03be 8091 0000 		lds r24,g_settings+15
+ 2431 03c2 4AE0      		ldi r20,lo8(10)
+ 2432 03c4 50E0      		ldi r21,0
+ 2433 03c6 BE01      		movw r22,r28
+ 2434 03c8 6F5F      		subi r22,-1
+ 2435 03ca 7F4F      		sbci r23,-1
+ 2436 03cc 90E0      		ldi r25,0
+ 2437 03ce 0E94 0000 		call utoa
+ 2438               	.LVL169:
+ 131:command_handlers.c ****   strcat(uart_buf, "backpedal (bp): ");
+ 2439               		.loc 1 131 0
+ 2440 03d2 F801      		movw r30,r16
+ 2441               		0:
+ 2442 03d4 0190      		ld __tmp_reg__,Z+
+ 2443 03d6 0020      		tst __tmp_reg__
+ 2444 03d8 01F4      		brne 0b
+ 2445 03da CF01      		movw r24,r30
+ 2446 03dc 0197      		sbiw r24,1
+ 2447 03de 8050      		subi r24,lo8(uart_buf)
+ 2448 03e0 9040      		sbci r25,hi8(uart_buf)
+ 2449 03e2 DC01      		movw r26,r24
+ 2450 03e4 A050      		subi r26,lo8(-(uart_buf))
+ 2451 03e6 B040      		sbci r27,hi8(-(uart_buf))
+ 2452 03e8 20E1      		ldi r18,lo8(16)
+ 2453 03ea E0E0      		ldi r30,lo8(.LC44)
+ 2454 03ec F0E0      		ldi r31,hi8(.LC44)
+ 2455               		0:
+ 2456 03ee 0190      		ld r0,Z+
+ 2457 03f0 0D92      		st X+,r0
+ 2458 03f2 2A95      		dec r18
+ 2459 03f4 01F4      		brne 0b
+ 132:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2460               		.loc 1 132 0
+ 2461 03f6 BE01      		movw r22,r28
+ 2462 03f8 6F5F      		subi r22,-1
+ 2463 03fa 7F4F      		sbci r23,-1
+ 2464 03fc 8050      		subi r24,lo8(-(uart_buf+16))
+ 2465 03fe 9040      		sbci r25,hi8(-(uart_buf+16))
+ 2466 0400 0E94 0000 		call strcpy
+ 2467               	.LVL170:
+ 133:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2468               		.loc 1 133 0
+ 2469 0404 D801      		movw r26,r16
+ 2470               		0:
+ 2471 0406 0D90      		ld __tmp_reg__,X+
+ 2472 0408 0020      		tst __tmp_reg__
+ 2473 040a 01F4      		brne 0b
+ 2474 040c 1197      		sbiw r26,1
+ 2475 040e 8AE0      		ldi r24,lo8(10)
+ 2476 0410 E0E0      		ldi r30,lo8(.LC19)
+ 2477 0412 F0E0      		ldi r31,hi8(.LC19)
+ 2478               		0:
+ 2479 0414 0190      		ld r0,Z+
+ 2480 0416 0D92      		st X+,r0
+ 2481 0418 8A95      		dec r24
+ 2482 041a 01F4      		brne 0b
+ 134:command_handlers.c ****   utoa(g_settings.backpedal_thres_min,tmp_str,10);
+ 2483               		.loc 1 134 0
+ 2484 041c 4AE0      		ldi r20,lo8(10)
+ 2485 041e 50E0      		ldi r21,0
+ 2486 0420 BE01      		movw r22,r28
+ 2487 0422 6F5F      		subi r22,-1
+ 2488 0424 7F4F      		sbci r23,-1
+ 2489 0426 8091 0000 		lds r24,g_settings+16
+ 2490 042a 9091 0000 		lds r25,g_settings+16+1
+ 2491 042e 0E94 0000 		call utoa
+ 2492               	.LVL171:
+ 135:command_handlers.c ****   strcat(uart_buf, "backpedal threshold (bpt): ");
+ 2493               		.loc 1 135 0
+ 2494 0432 F801      		movw r30,r16
+ 2495               		0:
+ 2496 0434 0190      		ld __tmp_reg__,Z+
+ 2497 0436 0020      		tst __tmp_reg__
+ 2498 0438 01F4      		brne 0b
+ 2499 043a CF01      		movw r24,r30
+ 2500 043c 0197      		sbiw r24,1
+ 2501 043e 8050      		subi r24,lo8(uart_buf)
+ 2502 0440 9040      		sbci r25,hi8(uart_buf)
+ 2503 0442 DC01      		movw r26,r24
+ 2504 0444 A050      		subi r26,lo8(-(uart_buf))
+ 2505 0446 B040      		sbci r27,hi8(-(uart_buf))
+ 2506 0448 2CE1      		ldi r18,lo8(28)
+ 2507 044a E0E0      		ldi r30,lo8(.LC45)
+ 2508 044c F0E0      		ldi r31,hi8(.LC45)
+ 2509               		0:
+ 2510 044e 0190      		ld r0,Z+
+ 2511 0450 0D92      		st X+,r0
+ 2512 0452 2A95      		dec r18
+ 2513 0454 01F4      		brne 0b
+ 136:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2514               		.loc 1 136 0
+ 2515 0456 BE01      		movw r22,r28
+ 2516 0458 6F5F      		subi r22,-1
+ 2517 045a 7F4F      		sbci r23,-1
+ 2518 045c 8050      		subi r24,lo8(-(uart_buf+27))
+ 2519 045e 9040      		sbci r25,hi8(-(uart_buf+27))
+ 2520 0460 0E94 0000 		call strcpy
+ 2521               	.LVL172:
+ 137:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2522               		.loc 1 137 0
+ 2523 0464 D801      		movw r26,r16
+ 2524               		0:
+ 2525 0466 0D90      		ld __tmp_reg__,X+
+ 2526 0468 0020      		tst __tmp_reg__
+ 2527 046a 01F4      		brne 0b
+ 2528 046c 1197      		sbiw r26,1
+ 2529 046e 8AE0      		ldi r24,lo8(10)
+ 2530 0470 E0E0      		ldi r30,lo8(.LC19)
+ 2531 0472 F0E0      		ldi r31,hi8(.LC19)
+ 2532               		0:
+ 2533 0474 0190      		ld r0,Z+
+ 2534 0476 0D92      		st X+,r0
+ 2535 0478 8A95      		dec r24
+ 2536 047a 01F4      		brne 0b
+ 138:command_handlers.c ****   utoa(g_settings.startup_sound,tmp_str,10);
+ 2537               		.loc 1 138 0
+ 2538 047c 8091 0000 		lds r24,g_settings+18
+ 2539 0480 4AE0      		ldi r20,lo8(10)
+ 2540 0482 50E0      		ldi r21,0
+ 2541 0484 BE01      		movw r22,r28
+ 2542 0486 6F5F      		subi r22,-1
+ 2543 0488 7F4F      		sbci r23,-1
+ 2544 048a 90E0      		ldi r25,0
+ 2545 048c 0E94 0000 		call utoa
+ 2546               	.LVL173:
+ 139:command_handlers.c ****   strcat(uart_buf, "startup sound (ss): ");
+ 2547               		.loc 1 139 0
+ 2548 0490 F801      		movw r30,r16
+ 2549               		0:
+ 2550 0492 0190      		ld __tmp_reg__,Z+
+ 2551 0494 0020      		tst __tmp_reg__
+ 2552 0496 01F4      		brne 0b
+ 2553 0498 CF01      		movw r24,r30
+ 2554 049a 0197      		sbiw r24,1
+ 2555 049c 8050      		subi r24,lo8(uart_buf)
+ 2556 049e 9040      		sbci r25,hi8(uart_buf)
+ 2557 04a0 DC01      		movw r26,r24
+ 2558 04a2 A050      		subi r26,lo8(-(uart_buf))
+ 2559 04a4 B040      		sbci r27,hi8(-(uart_buf))
+ 2560 04a6 24E1      		ldi r18,lo8(20)
+ 2561 04a8 E0E0      		ldi r30,lo8(.LC46)
+ 2562 04aa F0E0      		ldi r31,hi8(.LC46)
+ 2563               		0:
+ 2564 04ac 0190      		ld r0,Z+
+ 2565 04ae 0D92      		st X+,r0
+ 2566 04b0 2A95      		dec r18
+ 2567 04b2 01F4      		brne 0b
+ 140:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2568               		.loc 1 140 0
+ 2569 04b4 BE01      		movw r22,r28
+ 2570 04b6 6F5F      		subi r22,-1
+ 2571 04b8 7F4F      		sbci r23,-1
+ 2572 04ba 8050      		subi r24,lo8(-(uart_buf+20))
+ 2573 04bc 9040      		sbci r25,hi8(-(uart_buf+20))
+ 2574 04be 0E94 0000 		call strcpy
+ 2575               	.LVL174:
+ 141:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2576               		.loc 1 141 0
+ 2577 04c2 D801      		movw r26,r16
+ 2578               		0:
+ 2579 04c4 0D90      		ld __tmp_reg__,X+
+ 2580 04c6 0020      		tst __tmp_reg__
+ 2581 04c8 01F4      		brne 0b
+ 2582 04ca 1197      		sbiw r26,1
+ 2583 04cc 8AE0      		ldi r24,lo8(10)
+ 2584 04ce E0E0      		ldi r30,lo8(.LC19)
+ 2585 04d0 F0E0      		ldi r31,hi8(.LC19)
+ 2586               		0:
+ 2587 04d2 0190      		ld r0,Z+
+ 2588 04d4 0D92      		st X+,r0
+ 2589 04d6 8A95      		dec r24
+ 2590 04d8 01F4      		brne 0b
+ 142:command_handlers.c ****   utoa(g_settings.alarm_sound,tmp_str,10);
+ 2591               		.loc 1 142 0
+ 2592 04da 8091 0000 		lds r24,g_settings+19
+ 2593 04de 4AE0      		ldi r20,lo8(10)
+ 2594 04e0 50E0      		ldi r21,0
+ 2595 04e2 BE01      		movw r22,r28
+ 2596 04e4 6F5F      		subi r22,-1
+ 2597 04e6 7F4F      		sbci r23,-1
+ 2598 04e8 90E0      		ldi r25,0
+ 2599 04ea 0E94 0000 		call utoa
+ 2600               	.LVL175:
+ 143:command_handlers.c ****   strcat(uart_buf, "alarm sound (as): ");
+ 2601               		.loc 1 143 0
+ 2602 04ee F801      		movw r30,r16
+ 2603               		0:
+ 2604 04f0 0190      		ld __tmp_reg__,Z+
+ 2605 04f2 0020      		tst __tmp_reg__
+ 2606 04f4 01F4      		brne 0b
+ 2607 04f6 CF01      		movw r24,r30
+ 2608 04f8 0197      		sbiw r24,1
+ 2609 04fa 8050      		subi r24,lo8(uart_buf)
+ 2610 04fc 9040      		sbci r25,hi8(uart_buf)
+ 2611 04fe DC01      		movw r26,r24
+ 2612 0500 A050      		subi r26,lo8(-(uart_buf))
+ 2613 0502 B040      		sbci r27,hi8(-(uart_buf))
+ 2614 0504 22E1      		ldi r18,lo8(18)
+ 2615 0506 E0E0      		ldi r30,lo8(.LC47)
+ 2616 0508 F0E0      		ldi r31,hi8(.LC47)
+ 2617               		0:
+ 2618 050a 0190      		ld r0,Z+
+ 2619 050c 0D92      		st X+,r0
+ 2620 050e 2A95      		dec r18
+ 2621 0510 01F4      		brne 0b
+ 144:command_handlers.c ****   strcat(uart_buf, tmp_str);
+ 2622               		.loc 1 144 0
+ 2623 0512 BE01      		movw r22,r28
+ 2624 0514 6F5F      		subi r22,-1
+ 2625 0516 7F4F      		sbci r23,-1
+ 2626 0518 8050      		subi r24,lo8(-(uart_buf+18))
+ 2627 051a 9040      		sbci r25,hi8(-(uart_buf+18))
+ 2628 051c 0E94 0000 		call strcpy
+ 2629               	.LVL176:
+ 145:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2630               		.loc 1 145 0
+ 2631 0520 F801      		movw r30,r16
+ 2632               		0:
+ 2633 0522 0190      		ld __tmp_reg__,Z+
+ 2634 0524 0020      		tst __tmp_reg__
+ 2635 0526 01F4      		brne 0b
+ 2636 0528 CF01      		movw r24,r30
+ 2637 052a 0197      		sbiw r24,1
+ 2638 052c 8050      		subi r24,lo8(uart_buf)
+ 2639 052e 9040      		sbci r25,hi8(uart_buf)
+ 2640 0530 DC01      		movw r26,r24
+ 2641 0532 A050      		subi r26,lo8(-(uart_buf))
+ 2642 0534 B040      		sbci r27,hi8(-(uart_buf))
+ 2643 0536 29E0      		ldi r18,lo8(9)
+ 2644 0538 E0E0      		ldi r30,lo8(.LC19)
+ 2645 053a F0E0      		ldi r31,hi8(.LC19)
+ 2646               		0:
+ 2647 053c 0190      		ld r0,Z+
+ 2648 053e 0D92      		st X+,r0
+ 2649 0540 2A95      		dec r18
+ 2650 0542 01F4      		brne 0b
+ 146:command_handlers.c ****   strcat(uart_buf, "password (p): ");
+ 2651               		.loc 1 146 0
+ 2652 0544 DC01      		movw r26,r24
+ 2653 0546 A050      		subi r26,lo8(-(uart_buf+9))
+ 2654 0548 B040      		sbci r27,hi8(-(uart_buf+9))
+ 2655 054a 2EE0      		ldi r18,lo8(14)
+ 2656 054c E0E0      		ldi r30,lo8(.LC48)
+ 2657 054e F0E0      		ldi r31,hi8(.LC48)
+ 2658               		0:
+ 2659 0550 0190      		ld r0,Z+
+ 2660 0552 0D92      		st X+,r0
+ 2661 0554 2A95      		dec r18
+ 2662 0556 01F4      		brne 0b
+ 147:command_handlers.c ****   strcat(uart_buf, g_settings.passwd);
+ 2663               		.loc 1 147 0
+ 2664 0558 60E0      		ldi r22,lo8(g_settings+20)
+ 2665 055a 70E0      		ldi r23,hi8(g_settings+20)
+ 2666 055c 8050      		subi r24,lo8(-(uart_buf+23))
+ 2667 055e 9040      		sbci r25,hi8(-(uart_buf+23))
+ 2668 0560 0E94 0000 		call strcpy
+ 2669               	.LVL177:
+ 148:command_handlers.c ****   strcat(uart_buf, "\x1B[1B\x1B[2K\x0D");
+ 2670               		.loc 1 148 0
+ 2671 0564 D801      		movw r26,r16
+ 2672               		0:
+ 2673 0566 0D90      		ld __tmp_reg__,X+
+ 2674 0568 0020      		tst __tmp_reg__
+ 2675 056a 01F4      		brne 0b
+ 2676 056c 1197      		sbiw r26,1
+ 2677 056e 8AE0      		ldi r24,lo8(10)
+ 2678 0570 E0E0      		ldi r30,lo8(.LC19)
+ 2679 0572 F0E0      		ldi r31,hi8(.LC19)
+ 2680               		0:
+ 2681 0574 0190      		ld r0,Z+
+ 2682 0576 0D92      		st X+,r0
+ 2683 0578 8A95      		dec r24
+ 2684 057a 01F4      		brne 0b
+ 150:command_handlers.c **** }
+ 2685               		.loc 1 150 0
+ 2686 057c C801      		movw r24,r16
+ 2687               	/* epilogue start */
+ 2688 057e A096      		adiw r28,32
+ 2689 0580 0FB6      		in __tmp_reg__,__SREG__
+ 2690 0582 F894      		cli
+ 2691 0584 DEBF      		out __SP_H__,r29
+ 2692 0586 0FBE      		out __SREG__,__tmp_reg__
+ 2693 0588 CDBF      		out __SP_L__,r28
+ 2694 058a DF91      		pop r29
+ 2695 058c CF91      		pop r28
+ 2696 058e 1F91      		pop r17
+ 2697 0590 0F91      		pop r16
+ 2698 0592 0895      		ret
+ 2699               		.cfi_endproc
+ 2700               	.LFE5:
+ 2702               		.section	.text.command_handle_show_conf,"ax",@progbits
+ 2703               	.global	command_handle_show_conf
+ 2705               	command_handle_show_conf:
+ 2706               	.LFB10:
+ 209:command_handlers.c **** void command_handle_show_conf(char *cmd_output, char (*args)[CMD_MAX_ARGS_SIZE]) {
+ 2707               		.loc 1 209 0
+ 2708               		.cfi_startproc
+ 2709               	.LVL178:
+ 2710 0000 CF93      		push r28
+ 2711               	.LCFI36:
+ 2712               		.cfi_def_cfa_offset 3
+ 2713               		.cfi_offset 28, -2
+ 2714 0002 DF93      		push r29
+ 2715               	.LCFI37:
+ 2716               		.cfi_def_cfa_offset 4
+ 2717               		.cfi_offset 29, -3
+ 2718               	/* prologue: function */
+ 2719               	/* frame size = 0 */
+ 2720               	/* stack size = 2 */
+ 2721               	.L__stack_usage = 2
+ 2722 0004 EC01      		movw r28,r24
+ 210:command_handlers.c ****   strcpy(cmd_output, display_conf_info());
+ 2723               		.loc 1 210 0
+ 2724 0006 0E94 0000 		call display_conf_info
+ 2725               	.LVL179:
+ 2726 000a BC01      		movw r22,r24
+ 2727 000c CE01      		movw r24,r28
+ 2728               	/* epilogue start */
+ 211:command_handlers.c **** }
+ 2729               		.loc 1 211 0
+ 2730 000e DF91      		pop r29
+ 2731 0010 CF91      		pop r28
+ 2732               	.LVL180:
+ 210:command_handlers.c ****   strcpy(cmd_output, display_conf_info());
+ 2733               		.loc 1 210 0
+ 2734 0012 0C94 0000 		jmp strcpy
+ 2735               	.LVL181:
+ 2736               		.cfi_endproc
+ 2737               	.LFE10:
+ 2739               		.section	.progmem.data,"a",@progbits
+ 2742               	show_conf_info:
+ 2743 0000 7368 6F77 		.string	"show conf: show EEPROM configuration"
+ 2743      2063 6F6E 
+ 2743      663A 2073 
+ 2743      686F 7720 
+ 2743      4545 5052 
+ 2746               	set_conf_info:
+ 2747 0025 7365 7420 		.string	"set conf [variable abbr.] [value]: set configuration values / RESET DEVICE to use new val
+ 2747      636F 6E66 
+ 2747      205B 7661 
+ 2747      7269 6162 
+ 2747      6C65 2061 
+ 2750               	set_sense_info:
+ 2751 0083 7365 7420 		.string	"set dsense [16bits] (enable/disable) [16bits] (high/low): set dynamic senses"
+ 2751      6473 656E 
+ 2751      7365 205B 
+ 2751      3136 6269 
+ 2751      7473 5D20 
+ 2754               	show_voltage_info:
+ 2755 00d0 7368 6F77 		.string	"show voltage: show current battery and accelerometer x/y/z axis voltages"
+ 2755      2076 6F6C 
+ 2755      7461 6765 
+ 2755      3A20 7368 
+ 2755      6F77 2063 
+ 2758               	show_state_info:
+ 2759 0119 7368 6F77 		.string	"show state: show current state, senses and event queue"
+ 2759      2073 7461 
+ 2759      7465 3A20 
+ 2759      7368 6F77 
+ 2759      2063 7572 
+ 2762               	show_version_info:
+ 2763 0150 7368 6F77 		.string	"show version: show firmware version"
+ 2763      2076 6572 
+ 2763      7369 6F6E 
+ 2763      3A20 7368 
+ 2763      6F77 2066 
+ 2766               	reset_info:
+ 2767 0174 7265 7365 		.string	"reset: reboot the microcontroller"
+ 2767      743A 2072 
+ 2767      6562 6F6F 
+ 2767      7420 7468 
+ 2767      6520 6D69 
+ 2770               	help_info:
+ 2771 0196 6865 6C70 		.string	"help: show command overview"
+ 2771      3A20 7368 
+ 2771      6F77 2063 
+ 2771      6F6D 6D61 
+ 2771      6E64 206F 
+ 2772               		.comm	uart_buf,512,1
+ 2773               		.comm	byte_buf,9,1
+ 2774               		.text
+ 2775               	.Letext0:
+ 2776               		.file 2 "/usr/lib/gcc/avr/4.8.0/include/stddef.h"
+ 2777               		.file 3 "/usr/avr/include/stdint.h"
+ 2778               		.file 4 "settings.h"
+ 2779               		.file 5 "command_handlers.h"
+ 2780               		.file 6 "/usr/avr/include/avr/pgmspace.h"
+ 2781               		.file 7 "/usr/avr/include/stdlib.h"
+ 2782               		.file 8 "/usr/avr/include/string.h"
+ 2783               		.file 9 "/usr/avr/include/avr/eeprom.h"
+ 2784               		.file 10 "command.h"
+ 2785               		.file 11 "<built-in>"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 command_handlers.c
+     /tmp/ccHqgrWO.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccHqgrWO.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccHqgrWO.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccHqgrWO.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/ccHqgrWO.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccHqgrWO.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccHqgrWO.s:17     .text.command_handle_reset:0000000000000000 command_handle_reset
+     /tmp/ccHqgrWO.s:47     .text.command_handle_show_version:0000000000000000 command_handle_show_version
+     /tmp/ccHqgrWO.s:71     .text.command_handle_set_sense:0000000000000000 command_handle_set_sense
+     /tmp/ccHqgrWO.s:184    .text.command_handle_set_conf:0000000000000000 command_handle_set_conf
+     /tmp/ccHqgrWO.s:570    .text.command_handle_help:0000000000000000 command_handle_help
+     /tmp/ccHqgrWO.s:2770   .progmem.data:0000000000000196 help_info
+                            *COM*:0000000000000200 uart_buf
+     /tmp/ccHqgrWO.s:2766   .progmem.data:0000000000000174 reset_info
+     /tmp/ccHqgrWO.s:2762   .progmem.data:0000000000000150 show_version_info
+     /tmp/ccHqgrWO.s:2758   .progmem.data:0000000000000119 show_state_info
+     /tmp/ccHqgrWO.s:2754   .progmem.data:00000000000000d0 show_voltage_info
+     /tmp/ccHqgrWO.s:2750   .progmem.data:0000000000000083 set_sense_info
+     /tmp/ccHqgrWO.s:2746   .progmem.data:0000000000000025 set_conf_info
+     /tmp/ccHqgrWO.s:2742   .progmem.data:0000000000000000 show_conf_info
+     /tmp/ccHqgrWO.s:801    .text.btob:0000000000000000 btob
+                            *COM*:0000000000000009 byte_buf
+     /tmp/ccHqgrWO.s:895    .text.register_commands:0000000000000000 register_commands
+     /tmp/ccHqgrWO.s:1554   .text.command_handle_show_state:0000000000000000 command_handle_show_state
+     /tmp/ccHqgrWO.s:2705   .text.command_handle_show_conf:0000000000000000 command_handle_show_conf
+     /tmp/ccHqgrWO.s:1794   .text.command_handle_show_voltage:0000000000000000 command_handle_show_voltage
+     /tmp/ccHqgrWO.s:996    .text.display_state_info:0000000000000000 display_state_info
+     /tmp/ccHqgrWO.s:1594   .text.display_voltage_info:0000000000000000 display_voltage_info
+     /tmp/ccHqgrWO.s:1862   .text.display_conf_info:0000000000000000 display_conf_info
+
+UNDEFINED SYMBOLS
+g_mcu_reset
+g_firmware_version
+strcpy_P
+g_senses
+strtol
+g_dyn_senses
+g_dyn_senses_status
+strcmp
+atoi
+g_rom_settings
+__eeupd_word_m1284p
+__eeupd_byte_m1284p
+__eeupd_block_m1284p
+strcat_P
+memcpy
+command_register
+g_state
+strcpy
+g_adc_voltage
+utoa
+g_settings
+__do_copy_data
+__do_clear_bss

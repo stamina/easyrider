@@ -1,0 +1,722 @@
+   1               		.file	"usart.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               		.section	.text.uart_init,"ax",@progbits
+  12               	.global	uart_init
+  14               	uart_init:
+  15               	.LFB2:
+  16               		.file 1 "usart.c"
+   1:usart.c       **** /*
+   2:usart.c       ****  *
+   3:usart.c       ****  *  Copyright (C) 2013 Bas Brugman
+   4:usart.c       ****  *  http://www.visionnaire.nl
+   5:usart.c       ****  *
+   6:usart.c       ****  *  Licensed under the Apache License, Version 2.0 (the "License");
+   7:usart.c       ****  *  you may not use this file except in compliance with the License.
+   8:usart.c       ****  *  You may obtain a copy of the License at
+   9:usart.c       ****  *
+  10:usart.c       ****  *    http://www.apache.org/licenses/LICENSE-2.0
+  11:usart.c       ****  *
+  12:usart.c       ****  *  Unless required by applicable law or agreed to in writing, software
+  13:usart.c       ****  *  distributed under the License is distributed on an "AS IS" BASIS,
+  14:usart.c       ****  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15:usart.c       ****  *  See the License for the specific language governing permissions and
+  16:usart.c       ****  *  limitations under the License.
+  17:usart.c       ****  *
+  18:usart.c       ****  */
+  19:usart.c       **** #include <avr/io.h>
+  20:usart.c       **** #include <avr/interrupt.h>
+  21:usart.c       **** #include <stdlib.h>
+  22:usart.c       **** #include  "usart.h"
+  23:usart.c       **** 
+  24:usart.c       **** // Initialization
+  25:usart.c       **** // NOTE that I'm using the UART1 rx/tx pins of the atmega1284p, not UART0
+  26:usart.c       **** void uart_init() {
+  17               		.loc 1 26 0
+  18               		.cfi_startproc
+  19               	/* prologue: function */
+  20               	/* frame size = 0 */
+  21               	/* stack size = 0 */
+  22               	.L__stack_usage = 0
+  27:usart.c       ****   cli(); // Disable global interrupts
+  23               		.loc 1 27 0
+  24               	/* #APP */
+  25               	 ;  27 "usart.c" 1
+  26 0000 F894      		cli
+  27               	 ;  0 "" 2
+  28:usart.c       ****   UBRR1 = ((F_CPU / (USART_BAUDRATE * 8UL)) - 1); // set baudrate, using 8 as multiplier because we
+  28               		.loc 1 28 0
+  29               	/* #NOAPP */
+  30 0002 81E8      		ldi r24,lo8(-127)
+  31 0004 90E0      		ldi r25,0
+  32 0006 9093 CD00 		sts 204+1,r25
+  33 000a 8093 CC00 		sts 204,r24
+  29:usart.c       **** 	UCSR1A = (1 << U2X1); // enable 2x speed
+  34               		.loc 1 29 0
+  35 000e 82E0      		ldi r24,lo8(2)
+  36 0010 8093 C800 		sts 200,r24
+  30:usart.c       ****   // Turn on the reception and transmission circuitry and Reception Complete Interrupt
+  31:usart.c       **** 	UCSR1B = (1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1);
+  37               		.loc 1 31 0
+  38 0014 88E9      		ldi r24,lo8(-104)
+  39 0016 8093 C900 		sts 201,r24
+  32:usart.c       **** 	UCSR1C = (1 << UCSZ11) | (1 << UCSZ10); // set 8 bits data size (default no parity bit, 1 stop bit
+  40               		.loc 1 32 0
+  41 001a 86E0      		ldi r24,lo8(6)
+  42 001c 8093 CA00 		sts 202,r24
+  33:usart.c       ****   tx_buffer_head = tx_buffer_tail = 0; // init buffer
+  43               		.loc 1 33 0
+  44 0020 1092 0000 		sts tx_buffer_tail,__zero_reg__
+  45 0024 1092 0000 		sts tx_buffer_head,__zero_reg__
+  34:usart.c       ****   rx_buffer_head = rx_buffer_tail = 0; // init buffer
+  46               		.loc 1 34 0
+  47 0028 1092 0000 		sts rx_buffer_tail,__zero_reg__
+  48 002c 1092 0000 		sts rx_buffer_head,__zero_reg__
+  35:usart.c       ****   sei(); // Enable global interrupts
+  49               		.loc 1 35 0
+  50               	/* #APP */
+  51               	 ;  35 "usart.c" 1
+  52 0030 7894      		sei
+  53               	 ;  0 "" 2
+  54               	/* #NOAPP */
+  55 0032 0895      		ret
+  56               		.cfi_endproc
+  57               	.LFE2:
+  59               		.section	.text.uart_put,"ax",@progbits
+  60               	.global	uart_put
+  62               	uart_put:
+  63               	.LFB3:
+  36:usart.c       **** }
+  37:usart.c       **** 
+  38:usart.c       **** // Transmit a byte
+  39:usart.c       **** void uart_put(uint8_t c) {
+  64               		.loc 1 39 0
+  65               		.cfi_startproc
+  66               	.LVL0:
+  67               	/* prologue: function */
+  68               	/* frame size = 0 */
+  69               	/* stack size = 0 */
+  70               	.L__stack_usage = 0
+  40:usart.c       **** 	uint8_t i;
+  41:usart.c       **** 	i = tx_buffer_head + 1; // advance head
+  71               		.loc 1 41 0
+  72 0000 2091 0000 		lds r18,tx_buffer_head
+  73 0004 2F5F      		subi r18,lo8(-(1))
+  74               	.LVL1:
+  75               	.L4:
+  42:usart.c       **** 	if (i >= TX_BUFFER_SIZE) i = 0; // go to first index if buffer full
+  43:usart.c       ****   // NOTE: the hard wait below is not desirable when big UART transfers are part of the main progra
+  44:usart.c       ****   // Change it to an if (tx_buffer_tail != i)
+  45:usart.c       **** 	while (tx_buffer_tail == i); // wait until space in buffer
+  76               		.loc 1 45 0 discriminator 1
+  77 0006 9091 0000 		lds r25,tx_buffer_tail
+  78 000a 9217      		cp r25,r18
+  79 000c 01F0      		breq .L4
+  46:usart.c       ****   tx_buffer[i] = c; // put char in buffer
+  80               		.loc 1 46 0
+  81 000e E22F      		mov r30,r18
+  82 0010 F0E0      		ldi r31,0
+  83 0012 E050      		subi r30,lo8(-(tx_buffer))
+  84 0014 F040      		sbci r31,hi8(-(tx_buffer))
+  85 0016 8083      		st Z,r24
+  47:usart.c       ****   tx_buffer_head = i; // set new head
+  86               		.loc 1 47 0
+  87 0018 2093 0000 		sts tx_buffer_head,r18
+  48:usart.c       ****   // Turn on the reception and transmission circuitry and Reception Complete and
+  49:usart.c       ****   // USART Data Register Empty interrupts
+  50:usart.c       ****   UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UDRIE1);
+  88               		.loc 1 50 0
+  89 001c 88EB      		ldi r24,lo8(-72)
+  90               	.LVL2:
+  91 001e 8093 C900 		sts 201,r24
+  92 0022 0895      		ret
+  93               		.cfi_endproc
+  94               	.LFE3:
+  96               		.section	.text.uart_get,"ax",@progbits
+  97               	.global	uart_get
+  99               	uart_get:
+ 100               	.LFB4:
+  51:usart.c       **** }
+  52:usart.c       **** 
+  53:usart.c       **** // Receive a byte, always call uart_available() first
+  54:usart.c       **** uint8_t uart_get(void) {
+ 101               		.loc 1 54 0
+ 102               		.cfi_startproc
+ 103               	/* prologue: function */
+ 104               	/* frame size = 0 */
+ 105               	/* stack size = 0 */
+ 106               	.L__stack_usage = 0
+  55:usart.c       ****   uint8_t c, i;
+  56:usart.c       ****   i = rx_buffer_tail + 1; // advance tail
+ 107               		.loc 1 56 0
+ 108 0000 9091 0000 		lds r25,rx_buffer_tail
+ 109 0004 9F5F      		subi r25,lo8(-(1))
+ 110               	.LVL3:
+  57:usart.c       ****   if (i >= RX_BUFFER_SIZE) i = 0; // got to first index if buffer full
+  58:usart.c       ****   c = rx_buffer[i]; // get char from buffer
+ 111               		.loc 1 58 0
+ 112 0006 E92F      		mov r30,r25
+ 113 0008 F0E0      		ldi r31,0
+ 114 000a E050      		subi r30,lo8(-(rx_buffer))
+ 115 000c F040      		sbci r31,hi8(-(rx_buffer))
+ 116 000e 8081      		ld r24,Z
+ 117               	.LVL4:
+  59:usart.c       ****   rx_buffer_tail = i; // set new tail
+ 118               		.loc 1 59 0
+ 119 0010 9093 0000 		sts rx_buffer_tail,r25
+  60:usart.c       ****   return c; // return char
+  61:usart.c       **** }
+ 120               		.loc 1 61 0
+ 121 0014 0895      		ret
+ 122               		.cfi_endproc
+ 123               	.LFE4:
+ 125               		.section	.text.uart_put_str,"ax",@progbits
+ 126               	.global	uart_put_str
+ 128               	uart_put_str:
+ 129               	.LFB5:
+  62:usart.c       **** 
+  63:usart.c       **** // Writes a string from flash to the uart
+  64:usart.c       **** void uart_put_str(const char *str) {
+ 130               		.loc 1 64 0
+ 131               		.cfi_startproc
+ 132               	.LVL5:
+ 133               	/* prologue: function */
+ 134               	/* frame size = 0 */
+ 135               	/* stack size = 0 */
+ 136               	.L__stack_usage = 0
+  65:usart.c       **** 	while (*str) {
+ 137               		.loc 1 65 0
+ 138 0000 FC01      		movw r30,r24
+ 139 0002 2081      		ld r18,Z
+ 140 0004 2223      		tst r18
+ 141 0006 01F0      		breq .L7
+ 142 0008 DC01      		movw r26,r24
+ 143 000a 1196      		adiw r26,1
+ 144               	.LBB9:
+ 145               	.LBB10:
+  50:usart.c       ****   UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UDRIE1);
+ 146               		.loc 1 50 0
+ 147 000c 38EB      		ldi r19,lo8(-72)
+ 148               	.LVL6:
+ 149               	.L12:
+  41:usart.c       **** 	i = tx_buffer_head + 1; // advance head
+ 150               		.loc 1 41 0
+ 151 000e 9091 0000 		lds r25,tx_buffer_head
+ 152 0012 9F5F      		subi r25,lo8(-(1))
+ 153               	.LVL7:
+ 154               	.L10:
+  45:usart.c       **** 	while (tx_buffer_tail == i); // wait until space in buffer
+ 155               		.loc 1 45 0
+ 156 0014 8091 0000 		lds r24,tx_buffer_tail
+ 157 0018 9817      		cp r25,r24
+ 158 001a 01F0      		breq .L10
+  46:usart.c       ****   tx_buffer[i] = c; // put char in buffer
+ 159               		.loc 1 46 0
+ 160 001c E92F      		mov r30,r25
+ 161 001e F0E0      		ldi r31,0
+ 162 0020 E050      		subi r30,lo8(-(tx_buffer))
+ 163 0022 F040      		sbci r31,hi8(-(tx_buffer))
+ 164 0024 2083      		st Z,r18
+  47:usart.c       ****   tx_buffer_head = i; // set new head
+ 165               		.loc 1 47 0
+ 166 0026 9093 0000 		sts tx_buffer_head,r25
+  50:usart.c       ****   UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UDRIE1);
+ 167               		.loc 1 50 0
+ 168 002a 3093 C900 		sts 201,r19
+ 169               	.LVL8:
+ 170               	.LBE10:
+ 171               	.LBE9:
+ 172               		.loc 1 65 0
+ 173 002e 2D91      		ld r18,X+
+ 174               	.LVL9:
+ 175 0030 2111      		cpse r18,__zero_reg__
+ 176 0032 00C0      		rjmp .L12
+ 177               	.LVL10:
+ 178               	.L7:
+ 179 0034 0895      		ret
+ 180               		.cfi_endproc
+ 181               	.LFE5:
+ 183               		.section	.text.uart_put_int,"ax",@progbits
+ 184               	.global	uart_put_int
+ 186               	uart_put_int:
+ 187               	.LFB6:
+  66:usart.c       **** 		uart_put(*str);
+  67:usart.c       ****     str++;
+  68:usart.c       **** 	}
+  69:usart.c       **** }
+  70:usart.c       **** 
+  71:usart.c       **** // Writes an integer as a string
+  72:usart.c       **** void uart_put_int(const uint16_t dec) {
+ 188               		.loc 1 72 0
+ 189               		.cfi_startproc
+ 190               	.LVL11:
+ 191 0000 CF93      		push r28
+ 192               	.LCFI0:
+ 193               		.cfi_def_cfa_offset 3
+ 194               		.cfi_offset 28, -2
+ 195 0002 DF93      		push r29
+ 196               	.LCFI1:
+ 197               		.cfi_def_cfa_offset 4
+ 198               		.cfi_offset 29, -3
+ 199 0004 CDB7      		in r28,__SP_L__
+ 200 0006 DEB7      		in r29,__SP_H__
+ 201               	.LCFI2:
+ 202               		.cfi_def_cfa_register 28
+ 203 0008 2A97      		sbiw r28,10
+ 204               	.LCFI3:
+ 205               		.cfi_def_cfa_offset 14
+ 206 000a 0FB6      		in __tmp_reg__,__SREG__
+ 207 000c F894      		cli
+ 208 000e DEBF      		out __SP_H__,r29
+ 209 0010 0FBE      		out __SREG__,__tmp_reg__
+ 210 0012 CDBF      		out __SP_L__,r28
+ 211               	/* prologue: function */
+ 212               	/* frame size = 10 */
+ 213               	/* stack size = 12 */
+ 214               	.L__stack_usage = 12
+ 215               	.LVL12:
+  73:usart.c       ****   char str[10];
+  74:usart.c       ****   char *p = str;
+  75:usart.c       ****   utoa(dec,str,10);
+ 216               		.loc 1 75 0
+ 217 0014 4AE0      		ldi r20,lo8(10)
+ 218 0016 50E0      		ldi r21,0
+ 219 0018 BE01      		movw r22,r28
+ 220 001a 6F5F      		subi r22,-1
+ 221 001c 7F4F      		sbci r23,-1
+ 222 001e 0E94 0000 		call utoa
+ 223               	.LVL13:
+  76:usart.c       **** 	while (*p) {
+ 224               		.loc 1 76 0
+ 225 0022 2981      		ldd r18,Y+1
+ 226 0024 2223      		tst r18
+ 227 0026 01F0      		breq .L16
+ 228 0028 DE01      		movw r26,r28
+ 229 002a 1296      		adiw r26,2
+ 230               	.LBB11:
+ 231               	.LBB12:
+  50:usart.c       ****   UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UDRIE1);
+ 232               		.loc 1 50 0
+ 233 002c 38EB      		ldi r19,lo8(-72)
+ 234               	.LVL14:
+ 235               	.L21:
+  41:usart.c       **** 	i = tx_buffer_head + 1; // advance head
+ 236               		.loc 1 41 0
+ 237 002e 9091 0000 		lds r25,tx_buffer_head
+ 238 0032 9F5F      		subi r25,lo8(-(1))
+ 239               	.LVL15:
+ 240               	.L19:
+  45:usart.c       **** 	while (tx_buffer_tail == i); // wait until space in buffer
+ 241               		.loc 1 45 0
+ 242 0034 8091 0000 		lds r24,tx_buffer_tail
+ 243 0038 9817      		cp r25,r24
+ 244 003a 01F0      		breq .L19
+  46:usart.c       ****   tx_buffer[i] = c; // put char in buffer
+ 245               		.loc 1 46 0
+ 246 003c E92F      		mov r30,r25
+ 247 003e F0E0      		ldi r31,0
+ 248 0040 E050      		subi r30,lo8(-(tx_buffer))
+ 249 0042 F040      		sbci r31,hi8(-(tx_buffer))
+ 250 0044 2083      		st Z,r18
+  47:usart.c       ****   tx_buffer_head = i; // set new head
+ 251               		.loc 1 47 0
+ 252 0046 9093 0000 		sts tx_buffer_head,r25
+  50:usart.c       ****   UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UDRIE1);
+ 253               		.loc 1 50 0
+ 254 004a 3093 C900 		sts 201,r19
+ 255               	.LVL16:
+ 256               	.LBE12:
+ 257               	.LBE11:
+ 258               		.loc 1 76 0
+ 259 004e 2D91      		ld r18,X+
+ 260               	.LVL17:
+ 261 0050 2111      		cpse r18,__zero_reg__
+ 262 0052 00C0      		rjmp .L21
+ 263               	.LVL18:
+ 264               	.L16:
+ 265               	/* epilogue start */
+  77:usart.c       **** 		uart_put(*p);
+  78:usart.c       ****     p++;
+  79:usart.c       **** 	}
+  80:usart.c       **** }
+ 266               		.loc 1 80 0
+ 267 0054 2A96      		adiw r28,10
+ 268 0056 0FB6      		in __tmp_reg__,__SREG__
+ 269 0058 F894      		cli
+ 270 005a DEBF      		out __SP_H__,r29
+ 271 005c 0FBE      		out __SREG__,__tmp_reg__
+ 272 005e CDBF      		out __SP_L__,r28
+ 273 0060 DF91      		pop r29
+ 274 0062 CF91      		pop r28
+ 275 0064 0895      		ret
+ 276               		.cfi_endproc
+ 277               	.LFE6:
+ 279               		.section	.text.uart_put_str_P,"ax",@progbits
+ 280               	.global	uart_put_str_P
+ 282               	uart_put_str_P:
+ 283               	.LFB7:
+  81:usart.c       **** 
+  82:usart.c       **** // Writes a string from Flash (PROGMEM) to the uart
+  83:usart.c       **** void uart_put_str_P(const char *str) {
+ 284               		.loc 1 83 0
+ 285               		.cfi_startproc
+ 286               	.LVL19:
+ 287               	/* prologue: function */
+ 288               	/* frame size = 0 */
+ 289               	/* stack size = 0 */
+ 290               	.L__stack_usage = 0
+ 291               	.LBB13:
+  84:usart.c       **** 	char c;
+  85:usart.c       **** 	while (1) {
+  86:usart.c       **** 		c = pgm_read_byte(str++);
+ 292               		.loc 1 86 0
+ 293 0000 9C01      		movw r18,r24
+ 294 0002 2F5F      		subi r18,-1
+ 295 0004 3F4F      		sbci r19,-1
+ 296               	.LVL20:
+ 297 0006 FC01      		movw r30,r24
+ 298               	/* #APP */
+ 299               	 ;  86 "usart.c" 1
+ 300 0008 8491      		lpm r24, Z
+ 301               		
+ 302               	 ;  0 "" 2
+ 303               	.LVL21:
+ 304               	/* #NOAPP */
+ 305               	.LBE13:
+  87:usart.c       **** 		if (!c) break;
+ 306               		.loc 1 87 0
+ 307 000a 8823      		tst r24
+ 308 000c 01F0      		breq .L25
+ 309 000e F901      		movw r30,r18
+ 310               	.LVL22:
+ 311               	.LBB14:
+ 312               	.LBB15:
+  50:usart.c       ****   UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UDRIE1);
+ 313               		.loc 1 50 0
+ 314 0010 38EB      		ldi r19,lo8(-72)
+ 315               	.LVL23:
+ 316               	.L30:
+  41:usart.c       **** 	i = tx_buffer_head + 1; // advance head
+ 317               		.loc 1 41 0
+ 318 0012 2091 0000 		lds r18,tx_buffer_head
+ 319 0016 2F5F      		subi r18,lo8(-(1))
+ 320               	.LVL24:
+ 321               	.L28:
+  45:usart.c       **** 	while (tx_buffer_tail == i); // wait until space in buffer
+ 322               		.loc 1 45 0
+ 323 0018 9091 0000 		lds r25,tx_buffer_tail
+ 324 001c 2917      		cp r18,r25
+ 325 001e 01F0      		breq .L28
+  46:usart.c       ****   tx_buffer[i] = c; // put char in buffer
+ 326               		.loc 1 46 0
+ 327 0020 A22F      		mov r26,r18
+ 328 0022 B0E0      		ldi r27,0
+ 329 0024 A050      		subi r26,lo8(-(tx_buffer))
+ 330 0026 B040      		sbci r27,hi8(-(tx_buffer))
+ 331 0028 8C93      		st X,r24
+  47:usart.c       ****   tx_buffer_head = i; // set new head
+ 332               		.loc 1 47 0
+ 333 002a 2093 0000 		sts tx_buffer_head,r18
+  50:usart.c       ****   UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UDRIE1);
+ 334               		.loc 1 50 0
+ 335 002e 3093 C900 		sts 201,r19
+ 336               	.LVL25:
+ 337               	.LBE15:
+ 338               	.LBE14:
+ 339               	.LBB16:
+  86:usart.c       **** 		c = pgm_read_byte(str++);
+ 340               		.loc 1 86 0
+ 341               	/* #APP */
+ 342               	 ;  86 "usart.c" 1
+ 343 0032 8491      		lpm r24, Z
+ 344               		
+ 345               	 ;  0 "" 2
+ 346               	.LVL26:
+ 347               	/* #NOAPP */
+ 348 0034 3196      		adiw r30,1
+ 349               	.LVL27:
+ 350               	.LBE16:
+ 351               		.loc 1 87 0
+ 352 0036 8111      		cpse r24,__zero_reg__
+ 353 0038 00C0      		rjmp .L30
+ 354               	.LVL28:
+ 355               	.L25:
+ 356 003a 0895      		ret
+ 357               		.cfi_endproc
+ 358               	.LFE7:
+ 360               		.section	.text.__vector_29,"ax",@progbits
+ 361               	.global	__vector_29
+ 363               	__vector_29:
+ 364               	.LFB8:
+  88:usart.c       **** 		uart_put(c);
+  89:usart.c       **** 	}
+  90:usart.c       **** }
+  91:usart.c       **** 
+  92:usart.c       **** // USART1 data register empty Interrupt
+  93:usart.c       **** // Move a character from the transmit buffer to the data register.
+  94:usart.c       **** // If the transmit buffer is empty the UDRE interrupt is disabled until another uart_put() is calle
+  95:usart.c       **** ISR(USART1_UDRE_vect) {
+ 365               		.loc 1 95 0
+ 366               		.cfi_startproc
+ 367 0000 1F92      		push r1
+ 368               	.LCFI4:
+ 369               		.cfi_def_cfa_offset 3
+ 370               		.cfi_offset 1, -2
+ 371 0002 0F92      		push r0
+ 372               	.LCFI5:
+ 373               		.cfi_def_cfa_offset 4
+ 374               		.cfi_offset 0, -3
+ 375 0004 0FB6      		in r0,__SREG__
+ 376 0006 0F92      		push r0
+ 377 0008 1124      		clr __zero_reg__
+ 378 000a 0BB6      		in r0,__RAMPZ__
+ 379 000c 0F92      		push r0
+ 380 000e 8F93      		push r24
+ 381               	.LCFI6:
+ 382               		.cfi_def_cfa_offset 5
+ 383               		.cfi_offset 24, -4
+ 384 0010 9F93      		push r25
+ 385               	.LCFI7:
+ 386               		.cfi_def_cfa_offset 6
+ 387               		.cfi_offset 25, -5
+ 388 0012 EF93      		push r30
+ 389               	.LCFI8:
+ 390               		.cfi_def_cfa_offset 7
+ 391               		.cfi_offset 30, -6
+ 392 0014 FF93      		push r31
+ 393               	.LCFI9:
+ 394               		.cfi_def_cfa_offset 8
+ 395               		.cfi_offset 31, -7
+ 396               	/* prologue: Signal */
+ 397               	/* frame size = 0 */
+ 398               	/* stack size = 8 */
+ 399               	.L__stack_usage = 8
+  96:usart.c       **** 	uint8_t i;
+  97:usart.c       **** 	if (tx_buffer_head == tx_buffer_tail) {
+ 400               		.loc 1 97 0
+ 401 0016 9091 0000 		lds r25,tx_buffer_head
+ 402 001a 8091 0000 		lds r24,tx_buffer_tail
+ 403 001e 9817      		cp r25,r24
+ 404 0020 01F0      		breq .L37
+  98:usart.c       ****     UCSR1B &= ~(1 << UDRIE1); // buffer is empty, disable interrupt
+  99:usart.c       **** 	} else { // fill transmit register with next byte to send
+ 100:usart.c       **** 		i = tx_buffer_tail + 1; // get tail + 1
+ 405               		.loc 1 100 0
+ 406 0022 8091 0000 		lds r24,tx_buffer_tail
+ 407 0026 8F5F      		subi r24,lo8(-(1))
+ 408               	.LVL29:
+ 101:usart.c       **** 		if (i >= TX_BUFFER_SIZE) i = 0; // go to first index if buffer full
+ 102:usart.c       **** 		UDR1 = tx_buffer[i]; // send byte
+ 409               		.loc 1 102 0
+ 410 0028 E82F      		mov r30,r24
+ 411 002a F0E0      		ldi r31,0
+ 412 002c E050      		subi r30,lo8(-(tx_buffer))
+ 413 002e F040      		sbci r31,hi8(-(tx_buffer))
+ 414 0030 9081      		ld r25,Z
+ 415 0032 9093 CE00 		sts 206,r25
+ 103:usart.c       **** 		tx_buffer_tail = i; // set new tail
+ 416               		.loc 1 103 0
+ 417 0036 8093 0000 		sts tx_buffer_tail,r24
+ 418               	.LVL30:
+ 419               	.L34:
+ 420               	/* epilogue start */
+ 104:usart.c       **** 	}
+ 105:usart.c       **** }
+ 421               		.loc 1 105 0
+ 422 003a FF91      		pop r31
+ 423 003c EF91      		pop r30
+ 424 003e 9F91      		pop r25
+ 425 0040 8F91      		pop r24
+ 426 0042 0F90      		pop r0
+ 427 0044 0BBE      		out __RAMPZ__,r0
+ 428 0046 0F90      		pop r0
+ 429 0048 0FBE      		out __SREG__,r0
+ 430 004a 0F90      		pop r0
+ 431 004c 1F90      		pop r1
+ 432 004e 1895      		reti
+ 433               	.L37:
+  98:usart.c       ****     UCSR1B &= ~(1 << UDRIE1); // buffer is empty, disable interrupt
+ 434               		.loc 1 98 0
+ 435 0050 8091 C900 		lds r24,201
+ 436 0054 8F7D      		andi r24,lo8(-33)
+ 437 0056 8093 C900 		sts 201,r24
+ 438 005a 00C0      		rjmp .L34
+ 439               		.cfi_endproc
+ 440               	.LFE8:
+ 442               		.section	.text.__vector_28,"ax",@progbits
+ 443               	.global	__vector_28
+ 445               	__vector_28:
+ 446               	.LFB9:
+ 106:usart.c       **** 
+ 107:usart.c       **** // Receive Complete Interrupt
+ 108:usart.c       **** ISR(USART1_RX_vect) {
+ 447               		.loc 1 108 0
+ 448               		.cfi_startproc
+ 449 0000 1F92      		push r1
+ 450               	.LCFI10:
+ 451               		.cfi_def_cfa_offset 3
+ 452               		.cfi_offset 1, -2
+ 453 0002 0F92      		push r0
+ 454               	.LCFI11:
+ 455               		.cfi_def_cfa_offset 4
+ 456               		.cfi_offset 0, -3
+ 457 0004 0FB6      		in r0,__SREG__
+ 458 0006 0F92      		push r0
+ 459 0008 1124      		clr __zero_reg__
+ 460 000a 0BB6      		in r0,__RAMPZ__
+ 461 000c 0F92      		push r0
+ 462 000e 2F93      		push r18
+ 463               	.LCFI12:
+ 464               		.cfi_def_cfa_offset 5
+ 465               		.cfi_offset 18, -4
+ 466 0010 8F93      		push r24
+ 467               	.LCFI13:
+ 468               		.cfi_def_cfa_offset 6
+ 469               		.cfi_offset 24, -5
+ 470 0012 9F93      		push r25
+ 471               	.LCFI14:
+ 472               		.cfi_def_cfa_offset 7
+ 473               		.cfi_offset 25, -6
+ 474 0014 EF93      		push r30
+ 475               	.LCFI15:
+ 476               		.cfi_def_cfa_offset 8
+ 477               		.cfi_offset 30, -7
+ 478 0016 FF93      		push r31
+ 479               	.LCFI16:
+ 480               		.cfi_def_cfa_offset 9
+ 481               		.cfi_offset 31, -8
+ 482               	/* prologue: Signal */
+ 483               	/* frame size = 0 */
+ 484               	/* stack size = 9 */
+ 485               	.L__stack_usage = 9
+ 109:usart.c       **** 	uint8_t c, i;
+ 110:usart.c       **** 	c = UDR1; // receive byte
+ 486               		.loc 1 110 0
+ 487 0018 2091 CE00 		lds r18,206
+ 488               	.LVL31:
+ 111:usart.c       **** 	i = rx_buffer_head + 1; // advance head 
+ 489               		.loc 1 111 0
+ 490 001c 8091 0000 		lds r24,rx_buffer_head
+ 491 0020 8F5F      		subi r24,lo8(-(1))
+ 492               	.LVL32:
+ 112:usart.c       **** 	if (i >= RX_BUFFER_SIZE) i = 0; // go to first index if buffer full
+ 113:usart.c       **** 	if (i != rx_buffer_tail) { // not full
+ 493               		.loc 1 113 0
+ 494 0022 9091 0000 		lds r25,rx_buffer_tail
+ 495 0026 8917      		cp r24,r25
+ 496 0028 01F0      		breq .L38
+ 114:usart.c       **** 		rx_buffer[i] = c; // put in read buffer
+ 497               		.loc 1 114 0
+ 498 002a E82F      		mov r30,r24
+ 499 002c F0E0      		ldi r31,0
+ 500 002e E050      		subi r30,lo8(-(rx_buffer))
+ 501 0030 F040      		sbci r31,hi8(-(rx_buffer))
+ 502 0032 2083      		st Z,r18
+ 115:usart.c       **** 		rx_buffer_head = i; // set new head
+ 503               		.loc 1 115 0
+ 504 0034 8093 0000 		sts rx_buffer_head,r24
+ 505               	.L38:
+ 506               	/* epilogue start */
+ 116:usart.c       **** 	}
+ 117:usart.c       **** }
+ 507               		.loc 1 117 0
+ 508 0038 FF91      		pop r31
+ 509 003a EF91      		pop r30
+ 510 003c 9F91      		pop r25
+ 511 003e 8F91      		pop r24
+ 512               	.LVL33:
+ 513 0040 2F91      		pop r18
+ 514               	.LVL34:
+ 515 0042 0F90      		pop r0
+ 516 0044 0BBE      		out __RAMPZ__,r0
+ 517 0046 0F90      		pop r0
+ 518 0048 0FBE      		out __SREG__,r0
+ 519 004a 0F90      		pop r0
+ 520 004c 1F90      		pop r1
+ 521 004e 1895      		reti
+ 522               		.cfi_endproc
+ 523               	.LFE9:
+ 525               		.section	.text.uart_available,"ax",@progbits
+ 526               	.global	uart_available
+ 528               	uart_available:
+ 529               	.LFB10:
+ 118:usart.c       **** 
+ 119:usart.c       **** // Return the number of bytes waiting in the receive buffer.
+ 120:usart.c       **** // Call this before uart_get() to check if it will need
+ 121:usart.c       **** // to wait for a byte to arrive.
+ 122:usart.c       **** uint8_t uart_available(void) {
+ 530               		.loc 1 122 0
+ 531               		.cfi_startproc
+ 532               	/* prologue: function */
+ 533               	/* frame size = 0 */
+ 534               	/* stack size = 0 */
+ 535               	.L__stack_usage = 0
+ 123:usart.c       **** 	uint8_t head, tail;
+ 124:usart.c       **** 	head = rx_buffer_head;
+ 536               		.loc 1 124 0
+ 537 0000 8091 0000 		lds r24,rx_buffer_head
+ 538               	.LVL35:
+ 125:usart.c       **** 	tail = rx_buffer_tail;
+ 539               		.loc 1 125 0
+ 540 0004 9091 0000 		lds r25,rx_buffer_tail
+ 541               	.LVL36:
+ 126:usart.c       **** 	if (head >= tail) return head - tail; // return count of bytes inbetween
+ 127:usart.c       **** 	return RX_BUFFER_SIZE + head - tail; // head has rolled over to start, return count of bytes inbet
+ 128:usart.c       **** }
+ 542               		.loc 1 128 0
+ 543 0008 891B      		sub r24,r25
+ 544               	.LVL37:
+ 545 000a 0895      		ret
+ 546               		.cfi_endproc
+ 547               	.LFE10:
+ 549               		.local	rx_buffer_tail
+ 550               		.comm	rx_buffer_tail,1,1
+ 551               		.local	rx_buffer_head
+ 552               		.comm	rx_buffer_head,1,1
+ 553               		.local	rx_buffer
+ 554               		.comm	rx_buffer,256,1
+ 555               		.local	tx_buffer_tail
+ 556               		.comm	tx_buffer_tail,1,1
+ 557               		.local	tx_buffer_head
+ 558               		.comm	tx_buffer_head,1,1
+ 559               		.local	tx_buffer
+ 560               		.comm	tx_buffer,256,1
+ 561               		.text
+ 562               	.Letext0:
+ 563               		.file 2 "/usr/avr/include/stdint.h"
+ 564               		.file 3 "usart.h"
+ 565               		.file 4 "/usr/avr/include/stdlib.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 usart.c
+     /tmp/ccBfm8LI.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccBfm8LI.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccBfm8LI.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccBfm8LI.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/ccBfm8LI.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccBfm8LI.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccBfm8LI.s:14     .text.uart_init:0000000000000000 uart_init
+     /tmp/ccBfm8LI.s:554    .bss:0000000000000102 tx_buffer_tail
+     /tmp/ccBfm8LI.s:556    .bss:0000000000000103 tx_buffer_head
+                             .bss:0000000000000000 rx_buffer_tail
+     /tmp/ccBfm8LI.s:550    .bss:0000000000000001 rx_buffer_head
+     /tmp/ccBfm8LI.s:62     .text.uart_put:0000000000000000 uart_put
+     /tmp/ccBfm8LI.s:558    .bss:0000000000000104 tx_buffer
+     /tmp/ccBfm8LI.s:99     .text.uart_get:0000000000000000 uart_get
+     /tmp/ccBfm8LI.s:552    .bss:0000000000000002 rx_buffer
+     /tmp/ccBfm8LI.s:128    .text.uart_put_str:0000000000000000 uart_put_str
+     /tmp/ccBfm8LI.s:186    .text.uart_put_int:0000000000000000 uart_put_int
+     /tmp/ccBfm8LI.s:282    .text.uart_put_str_P:0000000000000000 uart_put_str_P
+     /tmp/ccBfm8LI.s:363    .text.__vector_29:0000000000000000 __vector_29
+     /tmp/ccBfm8LI.s:445    .text.__vector_28:0000000000000000 __vector_28
+     /tmp/ccBfm8LI.s:528    .text.uart_available:0000000000000000 uart_available
+
+UNDEFINED SYMBOLS
+utoa
+__do_clear_bss

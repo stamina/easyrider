@@ -1,10 +1,15 @@
 EasyRider Telemetrics
 ---------------------
 
-Version 1.0 bug fixes and changes:
-
-[ ] TODO: Add some outgoing signals over uart, like when a state changes, or when the mcu starts etc.
+[ ] TODO: Split software and design files in seperate directories, when EasyRider REV B. is being developed.
+[ ] TODO: Add some raw incoming/outgoing data signals over UART, like when a state changes, or when the mcu starts etc.
+          This is needed for easy communication with a second mcu.
       -> implement in wrapper functions like set_substate
+      -> switchable raw/console UART mode (raw == direct 2nd mcu comm. / console is connecting with terminal prog.)
+
+Version 1.0 bug fixes:
+----------------------
+
 [X] BUG: Claxon mosfet switched aan bij veel toeren, voor zeer korte tijd -> oscillation?
       -> FIXED: Gemeten met scope: elke keer precies 15ms gate trigger, dus physical sense (drukknop claxon) maakt
          contact -> vergroten van 3x 5ms "debouncing" algoritme in code naar 6x
@@ -101,7 +106,7 @@ Statistics
 
 (2.9Ah Gel battery)
 
-Power EasyRider Board:
+Power EasyRider Board REV A:
   Normal mode:     54mA
   Sleep mode:      44mA
   Alarm mode:      80mA (indicator relay on/off)
@@ -124,7 +129,7 @@ BOM "EasyRider" REV A
 [X] 1x 6 amp fuse holder voor 5x20
 [X] 1x 1A PTC 3,2 x 1,5 mm, hoog 1,05 mm -> van littelfuse "M" marking 15V!
 [X] 1x 25V Varistor JVR05N390K (5mm pitch)
-[X] 1x 1000uf cap electrolytic for filtering 
+[X] 1x 220uf cap electrolytic for filtering 
 [X] 1x 47uf low ESR cap electrolytic for filtering 
 [X] 1x 10uf output filter cap for LF33CV
 [X] 2x 100nf cap electrolytic for filtering
@@ -136,14 +141,16 @@ BOM "EasyRider" REV A
 [X] 1x P-Channel MOSFET IRF4905PBF 
 [X] 1x NPN 2N3904 transistor
 [X] 1x reset button 4 pins 
-[X] 1x buzzer
+[X] 1x buzzer (4.1khz 83db met sticker bovenop PK12N40PETQ)
 [X] 1x 3mm blue status led 
 [X] 1x shrouded ISP 6 pin (2x3) header (zie dangerousprototypes.com lib)
 [X] 1x 2 pin header UART 
 [X] 1x MMA7361 Freescale Accelerometer breakout pins 
 [X] 1x 24 pin main wire connector
 
+Extra: (external or added later on)
 [X] 1x flyback diode parallel across claxon: SB540E SCHOTTKY 40V 5A
+[X] 1x 1000uf cap electrolytic for filtering 
 
 Schematic/Board
 ---------------
@@ -207,3 +214,38 @@ NOTE: Cream (solderpaste) en milling/measures layers niet nodig.
 
 You then click process job and the Excellon file will be generated.
 You now simply combine all these files into a single zip file and upload it via the Eurocircuits website.
+
+BOM "EasyRider" SMD version REV B
+---------------------------------
+
+[ ] PCB: blue solder mask and gold plating finish
+[ ] FUSE, SMD, 1206, SLOW BLOW, 6A (LittleFuse?)
+[ ] SMD passives: 0603 en 0805 
+    -> 220 ohm -> 0805 1/8Watt, 10k 1/10Watt 0603
+    -> sense pins 330 ohm gebruiken, 0603
+    -> top brands caps, at least 105C or even 125C rated: nichicon, panasonic, rubycon, nippon-chemi-con, vishay, yageo
+[ ] Ander board house ?? (goedkoper)
+[ ] Volt reg: 3.3V LDO -> LF33CV TO-263 SMD, ground pad met 6 via's als heatsink, ong. 1 square inch
+[ ] Caps niet te dicht bij hitte vregs
+[ ] Rijwind koeling PCB mogelijk via een hose?
+[ ] PCB: separate ground poly's for high current regs, connected as star at ground pin
+[ ] 9x Meder Reed Relais: CRR05-1A SMD
+[ ] 9x smd led + resistor bij relais coils, for testing
+[ ] 9x protection diode for back-EMF to prevent killing the indication leds
+[ ] 2x IC transistor arrays (ULN2003LV by Ti, includes protection diodes) voor relais en driver mosfet (claxon)
+    -> 1 IC met 4 en 1 IC met 5 relais, om zo de Power diss. te verdelen
+[ ] 74HC595 -> heartbeat pin aansturen met een shift register
+    -> naar wat "common-anode" RGB status leds op de overige ULN2003LV ports
+[ ] P-Channel MOSFET claxon: SUD10P06-280L (TO-252 package) 
+[ ] Current-sensor: ACS714ELCTR-05B-T 5V/5A -> zie https://www.sparkfun.com/products/8883 voor opamp gain en tips
+[ ] Voltage divider extra cap 0.1uf
+[ ] JTAG pin breakout extra 
+[ ] Molex 24pin angled connector
+[ ] Battery backup for RTC, cr2032?
+[ ] Headers for TIVA Launchpad board and wifi/gps/microSD boards
+[ ] USART TXB0104 levelshifter tussen AVR en Tiva -> 2pins JUMPER for testing purposes or disabling
+[ ] Logo's voor breakouts -> AVRISP, WIFI, GPS en ACCEL. 
+[ ] RPM meten vanaf yellow/black wire, die naar de bobine loopt, simpel RC filter + voltage divider + zener protectie
+    -> rising edge counter, welke pin?
+
+

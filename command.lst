@@ -1,0 +1,804 @@
+   1               		.file	"command.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               		.section	.text.command_register,"ax",@progbits
+  12               	.global	command_register
+  14               	command_register:
+  15               	.LFB2:
+  16               		.file 1 "command.c"
+   1:command.c     **** /*
+   2:command.c     ****  *
+   3:command.c     ****  *  Copyright (C) 2013 Bas Brugman
+   4:command.c     ****  *  http://www.visionnaire.nl
+   5:command.c     ****  *
+   6:command.c     ****  *  Licensed under the Apache License, Version 2.0 (the "License");
+   7:command.c     ****  *  you may not use this file except in compliance with the License.
+   8:command.c     ****  *  You may obtain a copy of the License at
+   9:command.c     ****  *
+  10:command.c     ****  *    http://www.apache.org/licenses/LICENSE-2.0
+  11:command.c     ****  *
+  12:command.c     ****  *  Unless required by applicable law or agreed to in writing, software
+  13:command.c     ****  *  distributed under the License is distributed on an "AS IS" BASIS,
+  14:command.c     ****  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15:command.c     ****  *  See the License for the specific language governing permissions and
+  16:command.c     ****  *  limitations under the License.
+  17:command.c     ****  *
+  18:command.c     ****  */
+  19:command.c     **** #include <stdlib.h>
+  20:command.c     **** #include <stdint.h>
+  21:command.c     **** #include <string.h>
+  22:command.c     **** #include <avr/io.h>
+  23:command.c     **** #include <avr/pgmspace.h>
+  24:command.c     **** 
+  25:command.c     **** #include  "command.h"
+  26:command.c     **** 
+  27:command.c     **** #define CMD_HANDLER_SIZE  64
+  28:command.c     **** 
+  29:command.c     **** static char g_cmd_input[256];
+  30:command.c     **** static char g_cmd_output[256];
+  31:command.c     **** static char g_cmd_args[CMD_MAX_ARGS][CMD_MAX_ARGS_SIZE];
+  32:command.c     **** static uint8_t g_handler_pos;
+  33:command.c     **** static tCommandHandler g_handlers[CMD_HANDLER_SIZE];
+  34:command.c     **** static void (*g_input)(uint8_t, char*);
+  35:command.c     **** static void (*g_output)(const char*, uint8_t, uint8_t);
+  36:command.c     **** 
+  37:command.c     **** const char CMD_NOT_FOUND[] PROGMEM = "Command not found.";
+  38:command.c     **** 
+  39:command.c     **** void command_init(void (*input)(uint8_t event, char* cmd), void (*output)(const char* str, uint8_t 
+  40:command.c     ****   g_input = input;
+  41:command.c     ****   g_output = output;
+  42:command.c     ****   // register generic commands
+  43:command.c     ****   show_prompt();
+  44:command.c     **** }
+  45:command.c     **** 
+  46:command.c     **** uint8_t command_register(const char *cmd, const char *info, uint8_t priv, void (*handler)(char *cmd
+  17               		.loc 1 46 0
+  18               		.cfi_startproc
+  19               	.LVL0:
+  20 0000 8F92      		push r8
+  21               	.LCFI0:
+  22               		.cfi_def_cfa_offset 3
+  23               		.cfi_offset 8, -2
+  24 0002 9F92      		push r9
+  25               	.LCFI1:
+  26               		.cfi_def_cfa_offset 4
+  27               		.cfi_offset 9, -3
+  28 0004 BF92      		push r11
+  29               	.LCFI2:
+  30               		.cfi_def_cfa_offset 5
+  31               		.cfi_offset 11, -4
+  32 0006 CF92      		push r12
+  33               	.LCFI3:
+  34               		.cfi_def_cfa_offset 6
+  35               		.cfi_offset 12, -5
+  36 0008 DF92      		push r13
+  37               	.LCFI4:
+  38               		.cfi_def_cfa_offset 7
+  39               		.cfi_offset 13, -6
+  40 000a EF92      		push r14
+  41               	.LCFI5:
+  42               		.cfi_def_cfa_offset 8
+  43               		.cfi_offset 14, -7
+  44 000c FF92      		push r15
+  45               	.LCFI6:
+  46               		.cfi_def_cfa_offset 9
+  47               		.cfi_offset 15, -8
+  48 000e 0F93      		push r16
+  49               	.LCFI7:
+  50               		.cfi_def_cfa_offset 10
+  51               		.cfi_offset 16, -9
+  52 0010 1F93      		push r17
+  53               	.LCFI8:
+  54               		.cfi_def_cfa_offset 11
+  55               		.cfi_offset 17, -10
+  56 0012 CF93      		push r28
+  57               	.LCFI9:
+  58               		.cfi_def_cfa_offset 12
+  59               		.cfi_offset 28, -11
+  60 0014 DF93      		push r29
+  61               	.LCFI10:
+  62               		.cfi_def_cfa_offset 13
+  63               		.cfi_offset 29, -12
+  64 0016 1F92      		push __zero_reg__
+  65               	.LCFI11:
+  66               		.cfi_def_cfa_offset 14
+  67 0018 CDB7      		in r28,__SP_L__
+  68 001a DEB7      		in r29,__SP_H__
+  69               	.LCFI12:
+  70               		.cfi_def_cfa_register 28
+  71               	/* prologue: function */
+  72               	/* frame size = 1 */
+  73               	/* stack size = 12 */
+  74               	.L__stack_usage = 12
+  75 001c 7C01      		movw r14,r24
+  76 001e 6B01      		movw r12,r22
+  77 0020 8901      		movw r16,r18
+  47:command.c     ****   g_handlers[g_handler_pos].cmd = malloc(sizeof(tCommand));
+  78               		.loc 1 47 0
+  79 0022 B090 0000 		lds r11,g_handler_pos
+  80 0026 8B2C      		mov r8,r11
+  81 0028 912C      		mov r9,__zero_reg__
+  82 002a 85E0      		ldi r24,lo8(5)
+  83 002c 90E0      		ldi r25,0
+  84               	.LVL1:
+  85 002e 4983      		std Y+1,r20
+  86 0030 0E94 0000 		call malloc
+  87               	.LVL2:
+  88 0034 FC01      		movw r30,r24
+  89 0036 C401      		movw r24,r8
+  90 0038 880F      		lsl r24
+  91 003a 991F      		rol r25
+  92 003c 880F      		lsl r24
+  93 003e 991F      		rol r25
+  94 0040 8050      		subi r24,lo8(-(g_handlers))
+  95 0042 9040      		sbci r25,hi8(-(g_handlers))
+  96 0044 DC01      		movw r26,r24
+  97 0046 1196      		adiw r26,1
+  98 0048 FC93      		st X,r31
+  99 004a EE93      		st -X,r30
+  48:command.c     ****   if (g_handlers[g_handler_pos].cmd == NULL) {
+ 100               		.loc 1 48 0
+ 101 004c 4981      		ldd r20,Y+1
+ 102 004e 3097      		sbiw r30,0
+ 103 0050 01F0      		breq .L3
+  49:command.c     ****    return 0;  
+  50:command.c     ****   }
+  51:command.c     ****   g_handlers[g_handler_pos].cmd->cmd_info = info;
+ 104               		.loc 1 51 0
+ 105 0052 D182      		std Z+1,r13
+ 106 0054 C082      		st Z,r12
+  52:command.c     ****   g_handlers[g_handler_pos].cmd->cmd_text = cmd;
+ 107               		.loc 1 52 0
+ 108 0056 F382      		std Z+3,r15
+ 109 0058 E282      		std Z+2,r14
+  53:command.c     ****   g_handlers[g_handler_pos].cmd->privileged = priv;
+ 110               		.loc 1 53 0
+ 111 005a 4483      		std Z+4,r20
+  54:command.c     ****   g_handlers[g_handler_pos].cmd_cb_t = handler;
+ 112               		.loc 1 54 0
+ 113 005c 1396      		adiw r26,2+1
+ 114 005e 1C93      		st X,r17
+ 115 0060 0E93      		st -X,r16
+ 116 0062 1297      		sbiw r26,2
+  55:command.c     ****   g_handler_pos++;
+ 117               		.loc 1 55 0
+ 118 0064 B394      		inc r11
+ 119 0066 B092 0000 		sts g_handler_pos,r11
+  56:command.c     ****   return 1;
+ 120               		.loc 1 56 0
+ 121 006a 81E0      		ldi r24,lo8(1)
+ 122               	.L2:
+ 123               	/* epilogue start */
+  57:command.c     **** }
+ 124               		.loc 1 57 0
+ 125 006c 0F90      		pop __tmp_reg__
+ 126 006e DF91      		pop r29
+ 127 0070 CF91      		pop r28
+ 128 0072 1F91      		pop r17
+ 129 0074 0F91      		pop r16
+ 130               	.LVL3:
+ 131 0076 FF90      		pop r15
+ 132 0078 EF90      		pop r14
+ 133               	.LVL4:
+ 134 007a DF90      		pop r13
+ 135 007c CF90      		pop r12
+ 136               	.LVL5:
+ 137 007e BF90      		pop r11
+ 138 0080 9F90      		pop r9
+ 139 0082 8F90      		pop r8
+ 140 0084 0895      		ret
+ 141               	.LVL6:
+ 142               	.L3:
+  49:command.c     ****    return 0;  
+ 143               		.loc 1 49 0
+ 144 0086 80E0      		ldi r24,0
+ 145 0088 00C0      		rjmp .L2
+ 146               		.cfi_endproc
+ 147               	.LFE2:
+ 149               		.section	.rodata.str1.1,"aMS",@progbits,1
+ 150               	.LC0:
+ 151 0000 2000      		.string	" "
+ 152               		.section	.text.command_launch,"ax",@progbits
+ 153               	.global	command_launch
+ 155               	command_launch:
+ 156               	.LFB4:
+  58:command.c     **** 
+  59:command.c     **** void command_process() {
+  60:command.c     ****   uint8_t idx;
+  61:command.c     ****   g_input(0, g_cmd_input);
+  62:command.c     ****   if (*g_cmd_input) { // received a command string
+  63:command.c     ****     idx = command_launch();
+  64:command.c     ****     if (idx != CMD_HANDLER_SIZE) {
+  65:command.c     ****       g_handlers[idx].cmd_cb_t(g_cmd_output, g_cmd_args); // call handler
+  66:command.c     ****       g_output(g_cmd_output, 0, 3);
+  67:command.c     ****     } else {
+  68:command.c     ****       g_output(CMD_NOT_FOUND, 1, 3);
+  69:command.c     ****     }
+  70:command.c     ****     show_prompt();
+  71:command.c     ****   }
+  72:command.c     **** } 
+  73:command.c     **** 
+  74:command.c     **** uint8_t command_launch() {
+ 157               		.loc 1 74 0
+ 158               		.cfi_startproc
+ 159 0000 1F93      		push r17
+ 160               	.LCFI13:
+ 161               		.cfi_def_cfa_offset 3
+ 162               		.cfi_offset 17, -2
+ 163 0002 CF93      		push r28
+ 164               	.LCFI14:
+ 165               		.cfi_def_cfa_offset 4
+ 166               		.cfi_offset 28, -3
+ 167 0004 DF93      		push r29
+ 168               	.LCFI15:
+ 169               		.cfi_def_cfa_offset 5
+ 170               		.cfi_offset 29, -4
+ 171               	/* prologue: function */
+ 172               	/* frame size = 0 */
+ 173               	/* stack size = 3 */
+ 174               	.L__stack_usage = 3
+ 175               	.LVL7:
+ 176               	.LBB5:
+ 177               	.LBB6:
+  75:command.c     ****   uint8_t i, x, n = 0;
+  76:command.c     ****   char const *cmd;
+  77:command.c     ****   char *arg_part;
+  78:command.c     ****   clear_cmd_args(); // clear previous args
+  79:command.c     ****   // check input command to all registered commands
+  80:command.c     ****   for (i = 0; i < CMD_HANDLER_SIZE; i++) {
+  81:command.c     ****     cmd = g_handlers[i].cmd->cmd_text;
+  82:command.c     ****     x = 0;
+  83:command.c     ****     while (*cmd && (*cmd == g_cmd_input[x])) {
+  84:command.c     ****       x++;
+  85:command.c     ****       cmd++;
+  86:command.c     ****     }
+  87:command.c     ****     // input command string matches a fully registered command string
+  88:command.c     ****     if ((x) && (x == strlen(g_handlers[i].cmd->cmd_text))) {
+  89:command.c     ****       arg_part = strtok(&g_cmd_input[x], " ");
+  90:command.c     ****       while (*arg_part) {
+  91:command.c     ****         if (strlen(arg_part) <= CMD_MAX_ARGS_SIZE) {
+  92:command.c     ****           strcpy(g_cmd_args[n++], arg_part);
+  93:command.c     ****         }
+  94:command.c     ****         arg_part = strtok(NULL, " ");
+  95:command.c     ****       }
+  96:command.c     ****       return i; // handler index
+  97:command.c     ****     }
+  98:command.c     ****   }
+  99:command.c     ****   return CMD_HANDLER_SIZE; // no handler found
+ 100:command.c     **** }
+ 101:command.c     **** 
+ 102:command.c     **** void clear_cmd_args() {
+ 103:command.c     ****   for (int i = 0; i < CMD_MAX_ARGS; i++) {
+ 104:command.c     ****     g_cmd_args[i][0] = '\0';
+ 178               		.loc 1 104 0
+ 179 0006 1092 0000 		sts g_cmd_args,__zero_reg__
+ 180               	.LVL8:
+ 181 000a 1092 0000 		sts g_cmd_args+32,__zero_reg__
+ 182               	.LVL9:
+ 183 000e 1092 0000 		sts g_cmd_args+64,__zero_reg__
+ 184               	.LVL10:
+ 185 0012 1092 0000 		sts g_cmd_args+96,__zero_reg__
+ 186               	.LVL11:
+ 187 0016 1092 0000 		sts g_cmd_args+128,__zero_reg__
+ 188               	.LVL12:
+ 189 001a 1092 0000 		sts g_cmd_args+160,__zero_reg__
+ 190               	.LVL13:
+ 191 001e 1092 0000 		sts g_cmd_args+192,__zero_reg__
+ 192               	.LVL14:
+ 193 0022 1092 0000 		sts g_cmd_args+224,__zero_reg__
+ 194               	.LVL15:
+ 195 0026 1092 0000 		sts g_cmd_args+256,__zero_reg__
+ 196               	.LVL16:
+ 197 002a 1092 0000 		sts g_cmd_args+288,__zero_reg__
+ 198               	.LVL17:
+ 199               	.LBE6:
+ 200               	.LBE5:
+  83:command.c     ****     while (*cmd && (*cmd == g_cmd_input[x])) {
+ 201               		.loc 1 83 0
+ 202 002e 5091 0000 		lds r21,g_cmd_input
+ 203 0032 20E0      		ldi r18,lo8(g_handlers)
+ 204 0034 30E0      		ldi r19,hi8(g_handlers)
+ 205 0036 10E0      		ldi r17,0
+ 206               	.L14:
+ 207               	.LVL18:
+  81:command.c     ****     cmd = g_handlers[i].cmd->cmd_text;
+ 208               		.loc 1 81 0
+ 209 0038 D901      		movw r26,r18
+ 210 003a ED91      		ld r30,X+
+ 211 003c FC91      		ld r31,X
+ 212 003e C281      		ldd r28,Z+2
+ 213 0040 D381      		ldd r29,Z+3
+ 214               	.LVL19:
+  83:command.c     ****     while (*cmd && (*cmd == g_cmd_input[x])) {
+ 215               		.loc 1 83 0
+ 216 0042 8881      		ld r24,Y
+ 217 0044 8823      		tst r24
+ 218 0046 01F0      		breq .L6
+ 219 0048 8513      		cpse r24,r21
+ 220 004a 00C0      		rjmp .L6
+ 221 004c DE01      		movw r26,r28
+ 222 004e 1196      		adiw r26,1
+  82:command.c     ****     x = 0;
+ 223               		.loc 1 82 0
+ 224 0050 80E0      		ldi r24,0
+ 225 0052 00C0      		rjmp .L10
+ 226               	.LVL20:
+ 227               	.L7:
+  83:command.c     ****     while (*cmd && (*cmd == g_cmd_input[x])) {
+ 228               		.loc 1 83 0 discriminator 2
+ 229 0054 E82F      		mov r30,r24
+ 230 0056 F0E0      		ldi r31,0
+ 231 0058 E050      		subi r30,lo8(-(g_cmd_input))
+ 232 005a F040      		sbci r31,hi8(-(g_cmd_input))
+ 233 005c 4081      		ld r20,Z
+ 234 005e 9413      		cpse r25,r20
+ 235 0060 00C0      		rjmp .L9
+ 236               	.LVL21:
+ 237               	.L10:
+  84:command.c     ****       x++;
+ 238               		.loc 1 84 0
+ 239 0062 8F5F      		subi r24,lo8(-(1))
+ 240               	.LVL22:
+  83:command.c     ****     while (*cmd && (*cmd == g_cmd_input[x])) {
+ 241               		.loc 1 83 0
+ 242 0064 9D91      		ld r25,X+
+ 243               	.LVL23:
+ 244 0066 9111      		cpse r25,__zero_reg__
+ 245 0068 00C0      		rjmp .L7
+ 246               	.L9:
+  88:command.c     ****     if ((x) && (x == strlen(g_handlers[i].cmd->cmd_text))) {
+ 247               		.loc 1 88 0
+ 248 006a 8823      		tst r24
+ 249 006c 01F0      		breq .L6
+  88:command.c     ****     if ((x) && (x == strlen(g_handlers[i].cmd->cmd_text))) {
+ 250               		.loc 1 88 0 is_stmt 0 discriminator 1
+ 251 006e FE01      		movw r30,r28
+ 252               		0:
+ 253 0070 0190      		ld __tmp_reg__,Z+
+ 254 0072 0020      		tst __tmp_reg__
+ 255 0074 01F4      		brne 0b
+ 256 0076 3197      		sbiw r30,1
+ 257 0078 EC1B      		sub r30,r28
+ 258 007a FD0B      		sbc r31,r29
+ 259 007c 90E0      		ldi r25,0
+ 260 007e 8E17      		cp r24,r30
+ 261 0080 9F07      		cpc r25,r31
+ 262 0082 01F0      		breq .L22
+ 263               	.LVL24:
+ 264               	.L6:
+  80:command.c     ****   for (i = 0; i < CMD_HANDLER_SIZE; i++) {
+ 265               		.loc 1 80 0 is_stmt 1
+ 266 0084 1F5F      		subi r17,lo8(-(1))
+ 267               	.LVL25:
+ 268 0086 2C5F      		subi r18,-4
+ 269 0088 3F4F      		sbci r19,-1
+ 270 008a 1034      		cpi r17,lo8(64)
+ 271 008c 01F4      		brne .L14
+  99:command.c     ****   return CMD_HANDLER_SIZE; // no handler found
+ 272               		.loc 1 99 0
+ 273 008e 80E4      		ldi r24,lo8(64)
+ 274               	/* epilogue start */
+ 100:command.c     **** }
+ 275               		.loc 1 100 0
+ 276 0090 DF91      		pop r29
+ 277 0092 CF91      		pop r28
+ 278 0094 1F91      		pop r17
+ 279               	.LVL26:
+ 280 0096 0895      		ret
+ 281               	.LVL27:
+ 282               	.L22:
+  89:command.c     ****       arg_part = strtok(&g_cmd_input[x], " ");
+ 283               		.loc 1 89 0
+ 284 0098 60E0      		ldi r22,lo8(.LC0)
+ 285 009a 70E0      		ldi r23,hi8(.LC0)
+ 286 009c 8050      		subi r24,lo8(-(g_cmd_input))
+ 287 009e 9040      		sbci r25,hi8(-(g_cmd_input))
+ 288               	.LVL28:
+ 289 00a0 0E94 0000 		call strtok
+ 290               	.LVL29:
+ 291 00a4 DC01      		movw r26,r24
+ 292               	.LVL30:
+  90:command.c     ****       while (*arg_part) {
+ 293               		.loc 1 90 0
+ 294 00a6 8C91      		ld r24,X
+ 295               	.LVL31:
+ 296 00a8 8823      		tst r24
+ 297 00aa 01F0      		breq .L17
+  75:command.c     ****   uint8_t i, x, n = 0;
+ 298               		.loc 1 75 0
+ 299 00ac C0E0      		ldi r28,0
+ 300 00ae 00C0      		rjmp .L13
+ 301               	.LVL32:
+ 302               	.L12:
+  94:command.c     ****         arg_part = strtok(NULL, " ");
+ 303               		.loc 1 94 0
+ 304 00b0 60E0      		ldi r22,lo8(.LC0)
+ 305 00b2 70E0      		ldi r23,hi8(.LC0)
+ 306 00b4 80E0      		ldi r24,0
+ 307 00b6 90E0      		ldi r25,0
+ 308 00b8 0E94 0000 		call strtok
+ 309               	.LVL33:
+ 310 00bc DC01      		movw r26,r24
+ 311               	.LVL34:
+  90:command.c     ****       while (*arg_part) {
+ 312               		.loc 1 90 0
+ 313 00be 9C91      		ld r25,X
+ 314 00c0 9923      		tst r25
+ 315 00c2 01F0      		breq .L17
+ 316               	.LVL35:
+ 317               	.L13:
+  91:command.c     ****         if (strlen(arg_part) <= CMD_MAX_ARGS_SIZE) {
+ 318               		.loc 1 91 0
+ 319 00c4 FD01      		movw r30,r26
+ 320               		0:
+ 321 00c6 0190      		ld __tmp_reg__,Z+
+ 322 00c8 0020      		tst __tmp_reg__
+ 323 00ca 01F4      		brne 0b
+ 324 00cc 3197      		sbiw r30,1
+ 325 00ce EA1B      		sub r30,r26
+ 326 00d0 FB0B      		sbc r31,r27
+ 327 00d2 E132      		cpi r30,33
+ 328 00d4 F105      		cpc r31,__zero_reg__
+ 329 00d6 00F4      		brsh .L12
+  92:command.c     ****           strcpy(g_cmd_args[n++], arg_part);
+ 330               		.loc 1 92 0
+ 331 00d8 D1E0      		ldi r29,lo8(1)
+ 332 00da DC0F      		add r29,r28
+ 333               	.LVL36:
+ 334 00dc 20E2      		ldi r18,lo8(32)
+ 335 00de C29F      		mul r28,r18
+ 336 00e0 C001      		movw r24,r0
+ 337 00e2 1124      		clr __zero_reg__
+ 338 00e4 AF01      		movw r20,r30
+ 339 00e6 4F5F      		subi r20,-1
+ 340 00e8 5F4F      		sbci r21,-1
+ 341 00ea BD01      		movw r22,r26
+ 342 00ec 8050      		subi r24,lo8(-(g_cmd_args))
+ 343 00ee 9040      		sbci r25,hi8(-(g_cmd_args))
+ 344 00f0 0E94 0000 		call memcpy
+ 345               	.LVL37:
+ 346 00f4 CD2F      		mov r28,r29
+ 347 00f6 00C0      		rjmp .L12
+ 348               	.LVL38:
+ 349               	.L17:
+ 350 00f8 812F      		mov r24,r17
+ 351               	/* epilogue start */
+ 100:command.c     **** }
+ 352               		.loc 1 100 0
+ 353 00fa DF91      		pop r29
+ 354 00fc CF91      		pop r28
+ 355 00fe 1F91      		pop r17
+ 356               	.LVL39:
+ 357 0100 0895      		ret
+ 358               		.cfi_endproc
+ 359               	.LFE4:
+ 361               		.section	.text.clear_cmd_args,"ax",@progbits
+ 362               	.global	clear_cmd_args
+ 364               	clear_cmd_args:
+ 365               	.LFB5:
+ 102:command.c     **** void clear_cmd_args() {
+ 366               		.loc 1 102 0
+ 367               		.cfi_startproc
+ 368               	/* prologue: function */
+ 369               	/* frame size = 0 */
+ 370               	/* stack size = 0 */
+ 371               	.L__stack_usage = 0
+ 372               	.LVL40:
+ 373               	.LBB7:
+ 374               		.loc 1 104 0
+ 375 0000 1092 0000 		sts g_cmd_args,__zero_reg__
+ 376               	.LVL41:
+ 377 0004 1092 0000 		sts g_cmd_args+32,__zero_reg__
+ 378               	.LVL42:
+ 379 0008 1092 0000 		sts g_cmd_args+64,__zero_reg__
+ 380               	.LVL43:
+ 381 000c 1092 0000 		sts g_cmd_args+96,__zero_reg__
+ 382               	.LVL44:
+ 383 0010 1092 0000 		sts g_cmd_args+128,__zero_reg__
+ 384               	.LVL45:
+ 385 0014 1092 0000 		sts g_cmd_args+160,__zero_reg__
+ 386               	.LVL46:
+ 387 0018 1092 0000 		sts g_cmd_args+192,__zero_reg__
+ 388               	.LVL47:
+ 389 001c 1092 0000 		sts g_cmd_args+224,__zero_reg__
+ 390               	.LVL48:
+ 391 0020 1092 0000 		sts g_cmd_args+256,__zero_reg__
+ 392               	.LVL49:
+ 393 0024 1092 0000 		sts g_cmd_args+288,__zero_reg__
+ 394               	.LVL50:
+ 395 0028 0895      		ret
+ 396               	.LBE7:
+ 397               		.cfi_endproc
+ 398               	.LFE5:
+ 400               		.section	.rodata.str1.1
+ 401               	.LC1:
+ 402 0002 4000      		.string	"@"
+ 403               	.LC2:
+ 404 0004 3E20 00   		.string	"> "
+ 405               		.section	.text.show_prompt,"ax",@progbits
+ 406               	.global	show_prompt
+ 408               	show_prompt:
+ 409               	.LFB6:
+ 105:command.c     ****   }
+ 106:command.c     **** }
+ 107:command.c     **** 
+ 108:command.c     **** void show_prompt() {
+ 410               		.loc 1 108 0
+ 411               		.cfi_startproc
+ 412 0000 CF93      		push r28
+ 413               	.LCFI16:
+ 414               		.cfi_def_cfa_offset 3
+ 415               		.cfi_offset 28, -2
+ 416 0002 DF93      		push r29
+ 417               	.LCFI17:
+ 418               		.cfi_def_cfa_offset 4
+ 419               		.cfi_offset 29, -3
+ 420               	/* prologue: function */
+ 421               	/* frame size = 0 */
+ 422               	/* stack size = 2 */
+ 423               	.L__stack_usage = 2
+ 424               	.LVL51:
+ 425 0004 C0E0      		ldi r28,lo8(g_logo)
+ 426 0006 D0E0      		ldi r29,hi8(g_logo)
+ 427               	.LVL52:
+ 428               	.L26:
+ 429               	.LBB8:
+ 430               	.LBB9:
+ 109:command.c     ****   for (uint8_t i = 0; i < 4; i++) {
+ 110:command.c     ****     g_output((const char*)pgm_read_word(&g_logo[i]), 1, 2);
+ 431               		.loc 1 110 0 discriminator 2
+ 432 0008 FE01      		movw r30,r28
+ 433               	/* #APP */
+ 434               	 ;  110 "command.c" 1
+ 435 000a 8591      		lpm r24, Z+
+ 436 000c 9491      		lpm r25, Z
+ 437               		
+ 438               	 ;  0 "" 2
+ 439               	.LVL53:
+ 440               	/* #NOAPP */
+ 441               	.LBE9:
+ 442 000e E091 0000 		lds r30,g_output
+ 443 0012 F091 0000 		lds r31,g_output+1
+ 444 0016 42E0      		ldi r20,lo8(2)
+ 445 0018 61E0      		ldi r22,lo8(1)
+ 446 001a 0995      		icall
+ 447               	.LVL54:
+ 448 001c 2296      		adiw r28,2
+ 109:command.c     ****   for (uint8_t i = 0; i < 4; i++) {
+ 449               		.loc 1 109 0 discriminator 2
+ 450 001e 80E0      		ldi r24,hi8(g_logo+8)
+ 451 0020 C030      		cpi r28,lo8(g_logo+8)
+ 452 0022 D807      		cpc r29,r24
+ 453 0024 01F4      		brne .L26
+ 454               	.LBE8:
+ 111:command.c     ****   }
+ 112:command.c     ****   g_output(g_user, 0, 0);
+ 455               		.loc 1 112 0
+ 456 0026 E091 0000 		lds r30,g_output
+ 457 002a F091 0000 		lds r31,g_output+1
+ 458 002e 40E0      		ldi r20,0
+ 459 0030 60E0      		ldi r22,0
+ 460 0032 8091 0000 		lds r24,g_user
+ 461 0036 9091 0000 		lds r25,g_user+1
+ 462 003a 0995      		icall
+ 463               	.LVL55:
+ 113:command.c     ****   g_output("@", 0, 0);
+ 464               		.loc 1 113 0
+ 465 003c E091 0000 		lds r30,g_output
+ 466 0040 F091 0000 		lds r31,g_output+1
+ 467 0044 40E0      		ldi r20,0
+ 468 0046 60E0      		ldi r22,0
+ 469 0048 80E0      		ldi r24,lo8(.LC1)
+ 470 004a 90E0      		ldi r25,hi8(.LC1)
+ 471 004c 0995      		icall
+ 472               	.LVL56:
+ 114:command.c     ****   g_output(g_appname, 0, 0);
+ 473               		.loc 1 114 0
+ 474 004e E091 0000 		lds r30,g_output
+ 475 0052 F091 0000 		lds r31,g_output+1
+ 476 0056 40E0      		ldi r20,0
+ 477 0058 60E0      		ldi r22,0
+ 478 005a 8091 0000 		lds r24,g_appname
+ 479 005e 9091 0000 		lds r25,g_appname+1
+ 480 0062 0995      		icall
+ 481               	.LVL57:
+ 115:command.c     ****   g_output("> ", 0, 0);
+ 482               		.loc 1 115 0
+ 483 0064 E091 0000 		lds r30,g_output
+ 484 0068 F091 0000 		lds r31,g_output+1
+ 485 006c 40E0      		ldi r20,0
+ 486 006e 60E0      		ldi r22,0
+ 487 0070 80E0      		ldi r24,lo8(.LC2)
+ 488 0072 90E0      		ldi r25,hi8(.LC2)
+ 489               	/* epilogue start */
+ 116:command.c     **** }
+ 490               		.loc 1 116 0
+ 491 0074 DF91      		pop r29
+ 492 0076 CF91      		pop r28
+ 115:command.c     ****   g_output("> ", 0, 0);
+ 493               		.loc 1 115 0
+ 494 0078 0994      		ijmp
+ 495               	.LVL58:
+ 496               		.cfi_endproc
+ 497               	.LFE6:
+ 499               		.section	.text.command_init,"ax",@progbits
+ 500               	.global	command_init
+ 502               	command_init:
+ 503               	.LFB1:
+  39:command.c     **** void command_init(void (*input)(uint8_t event, char* cmd), void (*output)(const char* str, uint8_t 
+ 504               		.loc 1 39 0
+ 505               		.cfi_startproc
+ 506               	.LVL59:
+ 507               	/* prologue: function */
+ 508               	/* frame size = 0 */
+ 509               	/* stack size = 0 */
+ 510               	.L__stack_usage = 0
+  40:command.c     ****   g_input = input;
+ 511               		.loc 1 40 0
+ 512 0000 9093 0000 		sts g_input+1,r25
+ 513 0004 8093 0000 		sts g_input,r24
+  41:command.c     ****   g_output = output;
+ 514               		.loc 1 41 0
+ 515 0008 7093 0000 		sts g_output+1,r23
+ 516 000c 6093 0000 		sts g_output,r22
+  43:command.c     ****   show_prompt();
+ 517               		.loc 1 43 0
+ 518 0010 0C94 0000 		jmp show_prompt
+ 519               	.LVL60:
+ 520               		.cfi_endproc
+ 521               	.LFE1:
+ 523               		.section	.text.command_process,"ax",@progbits
+ 524               	.global	command_process
+ 526               	command_process:
+ 527               	.LFB3:
+  59:command.c     **** void command_process() {
+ 528               		.loc 1 59 0
+ 529               		.cfi_startproc
+ 530               	/* prologue: function */
+ 531               	/* frame size = 0 */
+ 532               	/* stack size = 0 */
+ 533               	.L__stack_usage = 0
+  61:command.c     ****   g_input(0, g_cmd_input);
+ 534               		.loc 1 61 0
+ 535 0000 E091 0000 		lds r30,g_input
+ 536 0004 F091 0000 		lds r31,g_input+1
+ 537 0008 60E0      		ldi r22,lo8(g_cmd_input)
+ 538 000a 70E0      		ldi r23,hi8(g_cmd_input)
+ 539 000c 80E0      		ldi r24,0
+ 540 000e 0995      		icall
+ 541               	.LVL61:
+  62:command.c     ****   if (*g_cmd_input) { // received a command string
+ 542               		.loc 1 62 0
+ 543 0010 8091 0000 		lds r24,g_cmd_input
+ 544 0014 8111      		cpse r24,__zero_reg__
+ 545 0016 00C0      		rjmp .L32
+ 546 0018 0895      		ret
+ 547               	.L32:
+  63:command.c     ****     idx = command_launch();
+ 548               		.loc 1 63 0
+ 549 001a 0E94 0000 		call command_launch
+ 550               	.LVL62:
+  64:command.c     ****     if (idx != CMD_HANDLER_SIZE) {
+ 551               		.loc 1 64 0
+ 552 001e 8034      		cpi r24,lo8(64)
+ 553 0020 01F0      		breq .L30
+  65:command.c     ****       g_handlers[idx].cmd_cb_t(g_cmd_output, g_cmd_args); // call handler
+ 554               		.loc 1 65 0
+ 555 0022 E82F      		mov r30,r24
+ 556 0024 F0E0      		ldi r31,0
+ 557 0026 EE0F      		lsl r30
+ 558 0028 FF1F      		rol r31
+ 559 002a EE0F      		lsl r30
+ 560 002c FF1F      		rol r31
+ 561 002e E050      		subi r30,lo8(-(g_handlers))
+ 562 0030 F040      		sbci r31,hi8(-(g_handlers))
+ 563 0032 0280      		ldd __tmp_reg__,Z+2
+ 564 0034 F381      		ldd r31,Z+3
+ 565 0036 E02D      		mov r30,__tmp_reg__
+ 566 0038 60E0      		ldi r22,lo8(g_cmd_args)
+ 567 003a 70E0      		ldi r23,hi8(g_cmd_args)
+ 568 003c 80E0      		ldi r24,lo8(g_cmd_output)
+ 569 003e 90E0      		ldi r25,hi8(g_cmd_output)
+ 570               	.LVL63:
+ 571 0040 0995      		icall
+ 572               	.LVL64:
+  66:command.c     ****       g_output(g_cmd_output, 0, 3);
+ 573               		.loc 1 66 0
+ 574 0042 E091 0000 		lds r30,g_output
+ 575 0046 F091 0000 		lds r31,g_output+1
+ 576 004a 43E0      		ldi r20,lo8(3)
+ 577 004c 60E0      		ldi r22,0
+ 578 004e 80E0      		ldi r24,lo8(g_cmd_output)
+ 579 0050 90E0      		ldi r25,hi8(g_cmd_output)
+ 580 0052 0995      		icall
+ 581               	.LVL65:
+  70:command.c     ****     show_prompt();
+ 582               		.loc 1 70 0
+ 583 0054 0C94 0000 		jmp show_prompt
+ 584               	.LVL66:
+ 585               	.L30:
+  68:command.c     ****       g_output(CMD_NOT_FOUND, 1, 3);
+ 586               		.loc 1 68 0
+ 587 0058 E091 0000 		lds r30,g_output
+ 588 005c F091 0000 		lds r31,g_output+1
+ 589 0060 43E0      		ldi r20,lo8(3)
+ 590 0062 61E0      		ldi r22,lo8(1)
+ 591 0064 80E0      		ldi r24,lo8(CMD_NOT_FOUND)
+ 592 0066 90E0      		ldi r25,hi8(CMD_NOT_FOUND)
+ 593               	.LVL67:
+ 594 0068 0995      		icall
+ 595               	.LVL68:
+  70:command.c     ****     show_prompt();
+ 596               		.loc 1 70 0
+ 597 006a 0C94 0000 		jmp show_prompt
+ 598               	.LVL69:
+ 599               		.cfi_endproc
+ 600               	.LFE3:
+ 602               	.global	CMD_NOT_FOUND
+ 603               		.section	.progmem.data,"a",@progbits
+ 606               	CMD_NOT_FOUND:
+ 607 0000 436F 6D6D 		.string	"Command not found."
+ 607      616E 6420 
+ 607      6E6F 7420 
+ 607      666F 756E 
+ 607      642E 00
+ 608               		.local	g_output
+ 609               		.comm	g_output,2,1
+ 610               		.local	g_input
+ 611               		.comm	g_input,2,1
+ 612               		.local	g_handlers
+ 613               		.comm	g_handlers,256,1
+ 614               		.local	g_handler_pos
+ 615               		.comm	g_handler_pos,1,1
+ 616               		.local	g_cmd_args
+ 617               		.comm	g_cmd_args,320,1
+ 618               		.local	g_cmd_output
+ 619               		.comm	g_cmd_output,256,1
+ 620               		.local	g_cmd_input
+ 621               		.comm	g_cmd_input,256,1
+ 622               		.text
+ 623               	.Letext0:
+ 624               		.file 2 "/usr/lib/gcc/avr/4.8.0/include/stddef.h"
+ 625               		.file 3 "/usr/avr/include/stdint.h"
+ 626               		.file 4 "command.h"
+ 627               		.file 5 "/usr/avr/include/stdlib.h"
+ 628               		.file 6 "/usr/avr/include/string.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 command.c
+     /tmp/ccqA6KpN.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccqA6KpN.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccqA6KpN.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccqA6KpN.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/ccqA6KpN.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccqA6KpN.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccqA6KpN.s:14     .text.command_register:0000000000000000 command_register
+     /tmp/ccqA6KpN.s:613    .bss:0000000000000104 g_handler_pos
+     /tmp/ccqA6KpN.s:611    .bss:0000000000000004 g_handlers
+     /tmp/ccqA6KpN.s:155    .text.command_launch:0000000000000000 command_launch
+     /tmp/ccqA6KpN.s:615    .bss:0000000000000105 g_cmd_args
+     /tmp/ccqA6KpN.s:619    .bss:0000000000000345 g_cmd_input
+     /tmp/ccqA6KpN.s:364    .text.clear_cmd_args:0000000000000000 clear_cmd_args
+     /tmp/ccqA6KpN.s:408    .text.show_prompt:0000000000000000 show_prompt
+                             .bss:0000000000000000 g_output
+     /tmp/ccqA6KpN.s:502    .text.command_init:0000000000000000 command_init
+     /tmp/ccqA6KpN.s:609    .bss:0000000000000002 g_input
+     /tmp/ccqA6KpN.s:526    .text.command_process:0000000000000000 command_process
+     /tmp/ccqA6KpN.s:617    .bss:0000000000000245 g_cmd_output
+     /tmp/ccqA6KpN.s:606    .progmem.data:0000000000000000 CMD_NOT_FOUND
+
+UNDEFINED SYMBOLS
+malloc
+strtok
+memcpy
+g_logo
+g_user
+g_appname
+__do_copy_data
+__do_clear_bss

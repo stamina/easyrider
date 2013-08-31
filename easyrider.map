@@ -1,0 +1,1394 @@
+Archive member included because of file (symbol)
+
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+                              easyrider.o (__udivmodhi4)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+                              easyrider.o (__divmodhi4)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o (exit)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+                              easyrider.o (__do_copy_data)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+                              easyrider.o (__do_clear_bss)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+                              command.o (malloc)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+                              easyrider.o (rand)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+                              command_handlers.o (strtol)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o)
+                              command_handlers.o (atoi)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o) (isspace)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcat_P.o)
+                              command_handlers.o (strcat_P)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy_P.o)
+                              command_handlers.o (strcpy_P)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+                              command.o (strtok)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(memcpy.o)
+                              command.o (memcpy)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcmp.o)
+                              easyrider.o (strcmp)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy.o)
+                              easyrider.o (strcpy)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok_r.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o) (strtok_r)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(mul10.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o) (__mulhi_const_10)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+                              usart.o (utoa)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_block_atmega1284p.o)
+                              easyrider.o (__eerd_block_m1284p)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_byte_atmega1284p.o)
+                              easyrider.o (__eerd_byte_m1284p)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_word_atmega1284p.o)
+                              easyrider.o (__eerd_word_m1284p)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_block_atmega1284p.o)
+                              command_handlers.o (__eeupd_block_m1284p)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_byte_atmega1284p.o)
+                              command_handlers.o (__eeupd_byte_m1284p)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+                              command_handlers.o (__eeupd_word_m1284p)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o) (errno)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(cty_isfalse.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o) (__ctype_isfalse)
+/usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strrev.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o) (strrev)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o) (__muluhisi3)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o) (__mulohisi3)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o) (__mulsi3)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o) (__udivmodsi4)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o) (__divmodsi4)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+                              /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o) (__negsi2)
+/usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+                              /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o) (__umulhisi3)
+
+Allocating common symbols
+Common symbol       size              file
+
+g_senses            0x2               easyrider.o
+errno               0x2               /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+byte_buf            0x9               easyrider.o
+__brkval            0x2               /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+uart_buf            0x200             easyrider.o
+g_mcu_reset         0x1               easyrider.o
+g_adc_voltage       0x8               easyrider.o
+g_dyn_senses        0x2               easyrider.o
+__flp               0x2               /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+g_dyn_senses_status
+                    0x2               easyrider.o
+g_state             0x2               easyrider.o
+
+Discarded input sections
+
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+ .text          0x0000000000000000        0x0 easyrider.o
+ .text          0x0000000000000000        0x0 usart.o
+ .text.uart_put_int
+                0x0000000000000000       0x66 usart.o
+ .text          0x0000000000000000        0x0 command.o
+ .text.clear_cmd_args
+                0x0000000000000000       0x2a command.o
+ .text          0x0000000000000000        0x0 command_handlers.o
+ .bss           0x0000000000000000        0x0 command_handlers.o
+ .text.btob     0x0000000000000000       0x4e command_handlers.o
+ .text          0x0000000000000000        0x0 command_usart.o
+ .text.command_usart_parse
+                0x0000000000000000       0x22 command_usart.o
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .text.libgcc.mul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .text.libgcc.mul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .text.libgcc.mul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .text.libgcc.div
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc.mul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc.div
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.mul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.div
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcat_P.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcat_P.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy_P.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy_P.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(memcpy.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(memcpy.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcmp.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcmp.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok_r.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok_r.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(mul10.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(mul10.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_block_atmega1284p.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_block_atmega1284p.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_byte_atmega1284p.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_byte_atmega1284p.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_word_atmega1284p.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_word_atmega1284p.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_block_atmega1284p.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_block_atmega1284p.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_byte_atmega1284p.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_byte_atmega1284p.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(cty_isfalse.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(cty_isfalse.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strrev.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strrev.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .text.libgcc.div
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .text.libgcc.div
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .text.libgcc.div
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .text.libgcc.mul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .text.libgcc.mul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .text.libgcc.mul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .text          0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+ .bss           0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+ .text.libgcc.div
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+ .text.libgcc   0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+ .text.libgcc.prologue
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+ .text.libgcc.builtins
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+ .text.libgcc.fmul
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+ .text.libgcc.fixed
+                0x0000000000000000        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x0000000000000000 0x0000000000020000 xr
+data             0x0000000000800100 0x000000000000ff00 rw !x
+eeprom           0x0000000000810000 0x0000000000010000 rw !x
+fuse             0x0000000000820000 0x0000000000000400 rw !x
+lock             0x0000000000830000 0x0000000000000400 rw !x
+signature        0x0000000000840000 0x0000000000000400 rw !x
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+Address of section .data set to 0x800100
+LOAD /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+LOAD easyrider.o
+LOAD usart.o
+LOAD command.o
+LOAD command_handlers.o
+LOAD command_usart.o
+LOAD /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libm.a
+START GROUP
+LOAD /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a
+LOAD /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libm.a
+LOAD /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a
+END GROUP
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x0000000000000000     0x5162
+ *(.vectors)
+ .vectors       0x0000000000000000       0x8c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+                0x0000000000000000                __vectors
+                0x0000000000000000                __vector_default
+ *(.vectors)
+ *(.progmem.gcc*)
+ *(.progmem*)
+ .progmem.data  0x000000000000008c     0x12cd easyrider.o
+                0x000000000000008c                g_music_popcorn
+                0x000000000000078c                g_music_pipi
+                0x0000000000000964                g_music_larry
+                0x0000000000000be4                g_music_furelise
+                0x0000000000000c88                g_music_frogger
+                0x0000000000000f70                g_music_alarm
+                0x00000000000012c8                g_firmware_version
+                0x00000000000012e9                g_logo
+                0x00000000000012f1                g_logo4
+                0x000000000000133f                g_logo3
+                0x0000000000001349                g_logo2
+                0x0000000000001353                g_logo1
+ .progmem.data  0x0000000000001359       0x13 command.o
+                0x0000000000001359                CMD_NOT_FOUND
+ .progmem.data  0x000000000000136c      0x1b2 command_handlers.o
+                0x000000000000151e                . = ALIGN (0x2)
+                0x000000000000151e                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x000000000000151e        0x0 linker stubs
+ *(.trampolines*)
+                0x000000000000151e                __trampolines_end = .
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x000000000000151e                __ctors_start = .
+ *(.ctors)
+                0x000000000000151e                __ctors_end = .
+                0x000000000000151e                __dtors_start = .
+ *(.dtors)
+                0x000000000000151e                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ .init0         0x000000000000151e        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+                0x000000000000151e                __init
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ .init2         0x000000000000151e        0xc /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+ *(.init2)
+ *(.init3)
+ *(.init3)
+ *(.init4)
+ .init4         0x000000000000152a       0x1a /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+                0x000000000000152a                __do_copy_data
+ .init4         0x0000000000001544       0x10 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+                0x0000000000001544                __do_clear_bss
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x0000000000001554        0x6 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+ *(.init9)
+ *(.text)
+ .text          0x000000000000155a        0x4 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+                0x000000000000155a                __vector_22
+                0x000000000000155a                __vector_1
+                0x000000000000155a                __vector_34
+                0x000000000000155a                __vector_12
+                0x000000000000155a                __bad_interrupt
+                0x000000000000155a                __vector_6
+                0x000000000000155a                __vector_31
+                0x000000000000155a                __vector_3
+                0x000000000000155a                __vector_23
+                0x000000000000155a                __vector_30
+                0x000000000000155a                __vector_25
+                0x000000000000155a                __vector_11
+                0x000000000000155a                __vector_17
+                0x000000000000155a                __vector_19
+                0x000000000000155a                __vector_7
+                0x000000000000155a                __vector_27
+                0x000000000000155a                __vector_5
+                0x000000000000155a                __vector_33
+                0x000000000000155a                __vector_4
+                0x000000000000155a                __vector_9
+                0x000000000000155a                __vector_2
+                0x000000000000155a                __vector_21
+                0x000000000000155a                __vector_15
+                0x000000000000155a                __vector_8
+                0x000000000000155a                __vector_26
+                0x000000000000155a                __vector_14
+                0x000000000000155a                __vector_10
+                0x000000000000155a                __vector_18
+                0x000000000000155a                __vector_20
+                0x000000000000155e                . = ALIGN (0x2)
+ *(.text.*)
+ .text.check_battery_read
+                0x000000000000155e       0x20 easyrider.o
+ .text.check_ri_on
+                0x000000000000157e       0x3e easyrider.o
+ .text.check_li_on
+                0x00000000000015bc       0x3e easyrider.o
+ .text.check_brake_on
+                0x00000000000015fa       0x3e easyrider.o
+ .text.check_warning_on
+                0x0000000000001638       0x3e easyrider.o
+ .text.check_pilot_on
+                0x0000000000001676       0x3e easyrider.o
+ .text.check_light_on
+                0x00000000000016b4       0x3e easyrider.o
+ .text.check_backpedal_on
+                0x00000000000016f2       0x3e easyrider.o
+ .text.check_claxon_on
+                0x0000000000001730       0x3e easyrider.o
+ .text.check_ign_on
+                0x000000000000176e       0x20 easyrider.o
+ .text.check_alarm_on
+                0x000000000000178e       0x20 easyrider.o
+ .text.check_ri_off
+                0x00000000000017ae       0x10 easyrider.o
+ .text.check_li_off
+                0x00000000000017be       0x14 easyrider.o
+ .text.check_claxon_off
+                0x00000000000017d2       0x18 easyrider.o
+ .text.check_pilot_off
+                0x00000000000017ea       0x16 easyrider.o
+ .text.check_brake_off
+                0x0000000000001800       0x18 easyrider.o
+ .text.check_warning_off
+                0x0000000000001818       0x10 easyrider.o
+ .text.check_light_off
+                0x0000000000001828       0x1c easyrider.o
+ .text.check_ign_off
+                0x0000000000001844       0x20 easyrider.o
+ .text.check_alarm_off
+                0x0000000000001864       0x20 easyrider.o
+ .text.reset_ports
+                0x0000000000001884       0x7c easyrider.o
+ .text.process_ri_off
+                0x0000000000001900       0x4a easyrider.o
+ .text.process_ri_on
+                0x000000000000194a       0x80 easyrider.o
+ .text.process_li_off
+                0x00000000000019ca       0x4a easyrider.o
+ .text.process_li_on
+                0x0000000000001a14       0x80 easyrider.o
+ .text.process_claxon_on
+                0x0000000000001a94       0x46 easyrider.o
+ .text.process_claxon_off
+                0x0000000000001ada       0x3e easyrider.o
+ .text.process_warning_on
+                0x0000000000001b18       0x9a easyrider.o
+ .text.process_warning_off
+                0x0000000000001bb2       0x4e easyrider.o
+ .text.process_backpedal
+                0x0000000000001c00       0xa2 easyrider.o
+ .text.process_ign_on
+                0x0000000000001ca2       0x32 easyrider.o
+ .text.process_brake_on
+                0x0000000000001cd4       0x46 easyrider.o
+ .text.process_brake_off
+                0x0000000000001d1a       0x3e easyrider.o
+ .text.process_pilot_on
+                0x0000000000001d58       0x46 easyrider.o
+ .text.process_pilot_off
+                0x0000000000001d9e       0x3e easyrider.o
+ .text.process_light_on
+                0x0000000000001ddc       0x46 easyrider.o
+ .text.process_light_off
+                0x0000000000001e22       0x3e easyrider.o
+ .text.process_alarm_on
+                0x0000000000001e60       0x36 easyrider.o
+ .text.process_battery
+                0x0000000000001e96       0x76 easyrider.o
+ .text.process_alarm_off
+                0x0000000000001f0c       0x50 easyrider.o
+ .text.process_ign_off
+                0x0000000000001f5c       0x52 easyrider.o
+ .text.__vector_24
+                0x0000000000001fae       0xc2 easyrider.o
+                0x0000000000001fae                __vector_24
+ .text.__vector_16
+                0x0000000000002070       0xba easyrider.o
+                0x0000000000002070                __vector_16
+ .text.__vector_13
+                0x000000000000212a       0x5a easyrider.o
+                0x000000000000212a                __vector_13
+ .text.__vector_32
+                0x0000000000002184       0x24 easyrider.o
+                0x0000000000002184                __vector_32
+ .text.startup.main
+                0x00000000000021a8     0x1406 easyrider.o
+                0x00000000000021a8                main
+ .text.uart_init
+                0x00000000000035ae       0x34 usart.o
+                0x00000000000035ae                uart_init
+ .text.uart_put
+                0x00000000000035e2       0x24 usart.o
+                0x00000000000035e2                uart_put
+ .text.uart_get
+                0x0000000000003606       0x16 usart.o
+                0x0000000000003606                uart_get
+ .text.uart_put_str
+                0x000000000000361c       0x36 usart.o
+                0x000000000000361c                uart_put_str
+ .text.uart_put_str_P
+                0x0000000000003652       0x3c usart.o
+                0x0000000000003652                uart_put_str_P
+ .text.__vector_29
+                0x000000000000368e       0x5c usart.o
+                0x000000000000368e                __vector_29
+ .text.__vector_28
+                0x00000000000036ea       0x50 usart.o
+                0x00000000000036ea                __vector_28
+ .text.uart_available
+                0x000000000000373a        0xc usart.o
+                0x000000000000373a                uart_available
+ .text.command_register
+                0x0000000000003746       0x8a command.o
+                0x0000000000003746                command_register
+ .text.command_launch
+                0x00000000000037d0      0x102 command.o
+                0x00000000000037d0                command_launch
+ .text.show_prompt
+                0x00000000000038d2       0x7a command.o
+                0x00000000000038d2                show_prompt
+ .text.command_init
+                0x000000000000394c       0x12 command.o
+                0x000000000000394c                command_init
+ .text.command_process
+                0x000000000000395e       0x68 command.o
+                0x000000000000395e                command_process
+ .text.command_handle_reset
+                0x00000000000039c6       0x18 command_handlers.o
+                0x00000000000039c6                command_handle_reset
+ .text.command_handle_show_version
+                0x00000000000039de        0x8 command_handlers.o
+                0x00000000000039de                command_handle_show_version
+ .text.command_handle_set_sense
+                0x00000000000039e6       0x5c command_handlers.o
+                0x00000000000039e6                command_handle_set_sense
+ .text.command_handle_set_conf
+                0x0000000000003a42      0x24e command_handlers.o
+                0x0000000000003a42                command_handle_set_conf
+ .text.command_handle_help
+                0x0000000000003c90      0x140 command_handlers.o
+                0x0000000000003c90                command_handle_help
+ .text.register_commands
+                0x0000000000003dd0       0x80 command_handlers.o
+                0x0000000000003dd0                register_commands
+ .text.display_state_info
+                0x0000000000003e50      0x30c command_handlers.o
+                0x0000000000003e50                display_state_info
+ .text.command_handle_show_state
+                0x000000000000415c       0x12 command_handlers.o
+                0x000000000000415c                command_handle_show_state
+ .text.display_voltage_info
+                0x000000000000416e      0x12a command_handlers.o
+                0x000000000000416e                display_voltage_info
+ .text.command_handle_show_voltage
+                0x0000000000004298       0x12 command_handlers.o
+                0x0000000000004298                command_handle_show_voltage
+ .text.display_conf_info
+                0x00000000000042aa      0x55a command_handlers.o
+                0x00000000000042aa                display_conf_info
+ .text.command_handle_show_conf
+                0x0000000000004804       0x12 command_handlers.o
+                0x0000000000004804                command_handle_show_conf
+ .text.command_usart_input
+                0x0000000000004816       0x80 command_usart.o
+                0x0000000000004816                command_usart_input
+ .text.command_usart_output
+                0x0000000000004896       0x6e command_usart.o
+                0x0000000000004896                command_usart_output
+ .text.libgcc.div
+                0x0000000000004904       0x28 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+                0x0000000000004904                __udivmodhi4
+ .text.libgcc.div
+                0x000000000000492c       0x26 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+                0x000000000000492c                __divmodhi4
+                0x000000000000492c                _div
+ .text.avr-libc
+                0x0000000000004952      0x24e /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+                0x0000000000004952                malloc
+                0x0000000000004a82                free
+ .text.avr-libc
+                0x0000000000004ba0       0xae /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+                0x0000000000004c30                rand_r
+                0x0000000000004c32                rand
+                0x0000000000004c38                srand
+ .text.avr-libc
+                0x0000000000004c4e      0x262 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+                0x0000000000004c4e                strtol
+ .text.avr-libc
+                0x0000000000004eb0       0x3a /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o)
+                0x0000000000004eb0                atoi
+ .text.avr-libc
+                0x0000000000004eea       0x10 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o)
+                0x0000000000004eea                isspace
+ .text.avr-libc
+                0x0000000000004efa       0x16 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcat_P.o)
+                0x0000000000004efa                strcat_P
+ .text.avr-libc
+                0x0000000000004f10        0xe /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy_P.o)
+                0x0000000000004f10                strcpy_P
+ .text.avr-libc
+                0x0000000000004f1e        0x6 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+                0x0000000000004f1e                strtok
+ .text.avr-libc
+                0x0000000000004f24       0x12 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(memcpy.o)
+                0x0000000000004f24                memcpy
+ .text.avr-libc
+                0x0000000000004f36       0x12 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcmp.o)
+                0x0000000000004f36                strcmp
+ .text.avr-libc
+                0x0000000000004f48        0xe /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy.o)
+                0x0000000000004f48                strcpy
+ .text.avr-libc
+                0x0000000000004f56       0x4e /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok_r.o)
+                0x0000000000004f56                strtok_r
+ .text.avr-libc
+                0x0000000000004fa4       0x10 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(mul10.o)
+                0x0000000000004fa4                __mulhi_const_10
+ .text.avr-libc
+                0x0000000000004fb4       0x28 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+                0x0000000000004fb4                utoa
+ .text.avr-libc
+                0x0000000000004fdc       0x20 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_block_atmega1284p.o)
+                0x0000000000004fdc                __eerd_block_m1284p
+                0x0000000000004fe0                __eerd_blraw_m1284p
+ .text.avr-libc
+                0x0000000000004ffc       0x10 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_byte_atmega1284p.o)
+                0x0000000000004ffc                __eerd_byte_m1284p
+ .text.avr-libc
+                0x000000000000500c        0xa /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_word_atmega1284p.o)
+                0x000000000000500c                __eerd_word_m1284p
+ .text.avr-libc
+                0x0000000000005016       0x1e /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_block_atmega1284p.o)
+                0x0000000000005016                __eeupd_block_m1284p
+ .text.avr-libc
+                0x0000000000005034       0x24 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_byte_atmega1284p.o)
+                0x0000000000005034                __eeupd_byte_m1284p
+                0x0000000000005036                __eeupd_r18_m1284p
+ .text.avr-libc
+                0x0000000000005058        0x8 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+                0x0000000000005058                __eeupd_word_m1284p
+ .text.avr-libc
+                0x0000000000005060        0x6 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(cty_isfalse.o)
+                0x0000000000005060                __ctype_isfalse
+                0x0000000000005064                __ctype_istrue
+ .text.avr-libc
+                0x0000000000005066       0x20 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strrev.o)
+                0x0000000000005066                strrev
+ .text.libgcc.mul
+                0x0000000000005086       0x14 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+                0x0000000000005086                __muluhisi3
+ .text.libgcc.mul
+                0x000000000000509a        0xc /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+                0x000000000000509a                __mulshisi3
+                0x000000000000509e                __mulohisi3
+ .text.libgcc.mul
+                0x00000000000050a6       0x1e /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+                0x00000000000050a6                __mulsi3
+ .text.libgcc.div
+                0x00000000000050c4       0x44 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+                0x00000000000050c4                __udivmodsi4
+ .text.libgcc.div
+                0x0000000000005108       0x28 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+                0x0000000000005108                __divmodsi4
+ .text.libgcc.div
+                0x0000000000005130       0x10 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+                0x0000000000005130                __negsi2
+ .text.libgcc.mul
+                0x0000000000005140       0x1e /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+                0x0000000000005140                __umulhisi3
+                0x000000000000515e                . = ALIGN (0x2)
+ *(.fini9)
+ .fini9         0x000000000000515e        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+                0x000000000000515e                exit
+                0x000000000000515e                _exit
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ .fini0         0x000000000000515e        0x4 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ *(.fini0)
+                0x0000000000005162                _etext = .
+
+.data           0x0000000000800100      0x356 load address 0x0000000000005162
+                0x0000000000800100                PROVIDE (__data_start, .)
+ *(.data)
+ .data          0x0000000000800100        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+ .data          0x0000000000800100       0x9c easyrider.o
+                0x0000000000800100                g_trans
+                0x0000000000800164                g_settings
+                0x0000000000800198                g_user
+                0x000000000080019a                g_appname
+ .data          0x000000000080019c        0x0 usart.o
+ .data          0x000000000080019c        0x0 command.o
+ .data          0x000000000080019c        0x0 command_handlers.o
+ .data          0x000000000080019c        0x0 command_usart.o
+ .data          0x000000000080019c        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+ .data          0x000000000080019c        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+ .data          0x000000000080019c        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+ .data          0x000000000080019c        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+ .data          0x000000000080019c        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+ .data          0x000000000080019c        0x6 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+                0x000000000080019c                __malloc_heap_end
+                0x000000000080019e                __malloc_heap_start
+                0x00000000008001a0                __malloc_margin
+ .data          0x00000000008001a2        0x4 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcat_P.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy_P.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(memcpy.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcmp.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok_r.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(mul10.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_block_atmega1284p.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_byte_atmega1284p.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_word_atmega1284p.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_block_atmega1284p.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_byte_atmega1284p.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(cty_isfalse.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strrev.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+ .data          0x00000000008001a6        0x0 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+ *(.data*)
+ *(.rodata)
+ *(.rodata*)
+ .rodata.str1.1
+                0x00000000008001a6        0xf easyrider.o
+ .rodata.str1.1
+                0x00000000008001b5        0x5 command.o
+                                          0x7 (size before relaxing)
+ .rodata.str1.1
+                0x00000000008001ba      0x290 command_handlers.o
+                                        0x295 (size before relaxing)
+ .rodata.str1.1
+                0x000000000080044a        0xb command_usart.o
+                                         0x11 (size before relaxing)
+ *(.gnu.linkonce.d*)
+                0x0000000000800456                . = ALIGN (0x2)
+ *fill*         0x0000000000800455        0x1 
+                0x0000000000800456                _edata = .
+                0x0000000000800456                PROVIDE (__data_end, .)
+
+.bss            0x0000000000800456      0xdf5
+                0x0000000000800456                PROVIDE (__bss_start, .)
+ *(.bss)
+ .bss           0x0000000000800456      0x284 easyrider.o
+ .bss           0x00000000008006da      0x204 usart.o
+ .bss           0x00000000008008de      0x445 command.o
+ .bss           0x0000000000800d23      0x306 command_usart.o
+ .bss           0x0000000000801029        0x2 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+ *(.bss*)
+ *(COMMON)
+ COMMON         0x000000000080102b      0x21a easyrider.o
+                0x000000000080102b                g_senses
+                0x000000000080102d                byte_buf
+                0x0000000000801036                uart_buf
+                0x0000000000801236                g_mcu_reset
+                0x0000000000801237                g_adc_voltage
+                0x000000000080123f                g_dyn_senses
+                0x0000000000801241                g_dyn_senses_status
+                0x0000000000801243                g_state
+ COMMON         0x0000000000801245        0x4 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+                0x0000000000801245                __brkval
+                0x0000000000801247                __flp
+ COMMON         0x0000000000801249        0x2 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+                0x0000000000801249                errno
+                0x000000000080124b                PROVIDE (__bss_end, .)
+                0x0000000000005162                __data_load_start = LOADADDR (.data)
+                0x00000000000054b8                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x000000000080124b        0x0
+                0x000000000080124b                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x000000000080124b                PROVIDE (__noinit_end, .)
+                0x000000000080124b                _end = .
+                0x000000000080124b                PROVIDE (__heap_start, .)
+
+.eeprom         0x0000000000810000       0x34
+ *(.eeprom*)
+ .eeprom        0x0000000000810000       0x34 easyrider.o
+                0x0000000000810000                g_rom_settings
+                0x0000000000810034                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.stab           0x0000000000000000     0x2d18
+ *(.stab)
+ .stab          0x0000000000000000      0x6cc /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+ .stab          0x00000000000006cc      0x8dc /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+                                        0x8e8 (size before relaxing)
+ .stab          0x0000000000000fa8      0x42c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+                                        0x48c (size before relaxing)
+ .stab          0x00000000000013d4      0x600 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+                                        0x660 (size before relaxing)
+ .stab          0x00000000000019d4      0x174 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o)
+                                        0x180 (size before relaxing)
+ .stab          0x0000000000001b48       0x9c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o)
+                                         0xa8 (size before relaxing)
+ .stab          0x0000000000001be4       0x9c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcat_P.o)
+                                         0xa8 (size before relaxing)
+ .stab          0x0000000000001c80       0x6c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy_P.o)
+                                         0x78 (size before relaxing)
+ .stab          0x0000000000001cec      0x30c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+                                        0x318 (size before relaxing)
+ .stab          0x0000000000001ff8       0x84 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(memcpy.o)
+                                         0x90 (size before relaxing)
+ .stab          0x000000000000207c       0x84 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcmp.o)
+                                         0x90 (size before relaxing)
+ .stab          0x0000000000002100       0x6c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy.o)
+                                         0x78 (size before relaxing)
+ .stab          0x000000000000216c      0x204 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok_r.o)
+                                        0x210 (size before relaxing)
+ .stab          0x0000000000002370       0x78 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(mul10.o)
+                                         0x84 (size before relaxing)
+ .stab          0x00000000000023e8      0x12c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+                                        0x138 (size before relaxing)
+ .stab          0x0000000000002514      0x108 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_block_atmega1284p.o)
+                                        0x114 (size before relaxing)
+ .stab          0x000000000000261c       0x90 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_byte_atmega1284p.o)
+                                         0x9c (size before relaxing)
+ .stab          0x00000000000026ac       0x6c /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_word_atmega1284p.o)
+                                         0x78 (size before relaxing)
+ .stab          0x0000000000002718       0xe4 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_block_atmega1284p.o)
+                                         0xf0 (size before relaxing)
+ .stab          0x00000000000027fc      0x114 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_byte_atmega1284p.o)
+                                        0x120 (size before relaxing)
+ .stab          0x0000000000002910       0x60 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+                                         0x6c (size before relaxing)
+ .stab          0x0000000000002970      0x270 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+                                        0x27c (size before relaxing)
+ .stab          0x0000000000002be0       0x60 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(cty_isfalse.o)
+                                         0x6c (size before relaxing)
+ .stab          0x0000000000002c40       0xd8 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strrev.o)
+                                         0xe4 (size before relaxing)
+
+.stabstr        0x0000000000000000     0x1264
+ *(.stabstr)
+ .stabstr       0x0000000000000000     0x1264 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000       0x11
+ *(.comment)
+ .comment       0x0000000000000000       0x11 easyrider.o
+                                         0x12 (size before relaxing)
+ .comment       0x0000000000000000       0x12 usart.o
+ .comment       0x0000000000000000       0x12 command.o
+ .comment       0x0000000000000000       0x12 command_handlers.o
+ .comment       0x0000000000000000       0x12 command_usart.o
+ .comment       0x0000000000000000       0x12 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+ .comment       0x0000000000000000       0x12 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+ .comment       0x0000000000000000       0x12 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+ .comment       0x0000000000000000       0x12 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+ .comment       0x0000000000000000       0x12 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x0000000000000000      0x2e0
+ *(.debug_aranges)
+ .debug_aranges
+                0x0000000000000000      0x188 easyrider.o
+ .debug_aranges
+                0x0000000000000188       0x60 usart.o
+ .debug_aranges
+                0x00000000000001e8       0x48 command.o
+ .debug_aranges
+                0x0000000000000230       0x80 command_handlers.o
+ .debug_aranges
+                0x00000000000002b0       0x30 command_usart.o
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x0000000000000000     0x452f
+ *(.debug_info)
+ .debug_info    0x0000000000000000     0x1ff4 easyrider.o
+ .debug_info    0x0000000000001ff4      0x3f8 usart.o
+ .debug_info    0x00000000000023ec      0x669 command.o
+ .debug_info    0x0000000000002a55     0x175d command_handlers.o
+ .debug_info    0x00000000000041b2      0x37d command_usart.o
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev   0x0000000000000000      0xc2e
+ *(.debug_abbrev)
+ .debug_abbrev  0x0000000000000000      0x3e9 easyrider.o
+ .debug_abbrev  0x00000000000003e9      0x1d2 usart.o
+ .debug_abbrev  0x00000000000005bb      0x261 command.o
+ .debug_abbrev  0x000000000000081c      0x26d command_handlers.o
+ .debug_abbrev  0x0000000000000a89      0x1a5 command_usart.o
+
+.debug_line     0x0000000000000000      0xfec
+ *(.debug_line)
+ .debug_line    0x0000000000000000      0x9bf easyrider.o
+ .debug_line    0x00000000000009bf      0x13c usart.o
+ .debug_line    0x0000000000000afb      0x14e command.o
+ .debug_line    0x0000000000000c49      0x2d6 command_handlers.o
+ .debug_line    0x0000000000000f1f       0xcd command_usart.o
+
+.debug_frame    0x0000000000000000      0x7a8
+ *(.debug_frame)
+ .debug_frame   0x0000000000000000      0x388 easyrider.o
+ .debug_frame   0x0000000000000388      0x108 usart.o
+ .debug_frame   0x0000000000000490       0xdc command.o
+ .debug_frame   0x000000000000056c      0x1c0 command_handlers.o
+ .debug_frame   0x000000000000072c       0x7c command_usart.o
+
+.debug_str      0x0000000000000000      0xff8
+ *(.debug_str)
+ .debug_str     0x0000000000000000      0xc4d easyrider.o
+                                        0xcec (size before relaxing)
+ .debug_str     0x0000000000000c4d       0x67 usart.o
+                                        0x218 (size before relaxing)
+ .debug_str     0x0000000000000cb4      0x10b command.o
+                                        0x29e (size before relaxing)
+ .debug_str     0x0000000000000dbf      0x1ae command_handlers.o
+                                        0x51d (size before relaxing)
+ .debug_str     0x0000000000000f6d       0x8b command_usart.o
+                                        0x256 (size before relaxing)
+
+.debug_loc      0x0000000000000000     0x1a0e
+ *(.debug_loc)
+ .debug_loc     0x0000000000000000      0x817 easyrider.o
+ .debug_loc     0x0000000000000817      0x355 usart.o
+ .debug_loc     0x0000000000000b6c      0x505 command.o
+ .debug_loc     0x0000000000001071      0x6e9 command_handlers.o
+ .debug_loc     0x000000000000175a      0x2b4 command_usart.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges   0x0000000000000000      0x9a0
+ *(.debug_ranges)
+ .debug_ranges  0x0000000000000000      0x870 easyrider.o
+ .debug_ranges  0x0000000000000870       0x68 usart.o
+ .debug_ranges  0x00000000000008d8       0x38 command.o
+ .debug_ranges  0x0000000000000910       0x70 command_handlers.o
+ .debug_ranges  0x0000000000000980       0x20 command_usart.o
+
+.debug_macro
+ *(.debug_macro)
+OUTPUT(easyrider.elf elf32-avr)
+LOAD linker stubs
+
+Cross Reference Table
+
+Symbol                                            File
+CMD_NOT_FOUND                                     command.o
+__bad_interrupt                                   /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__brkval                                          /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+__bss_end                                         /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+__bss_start                                       /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+__ctype_isfalse                                   /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(cty_isfalse.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o)
+__ctype_istrue                                    /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(cty_isfalse.o)
+__data_end                                        /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+__data_load_start                                 /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+__data_start                                      /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+__divmodhi4                                       /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+                                                  easyrider.o
+__divmodsi4                                       /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+__do_clear_bss                                    /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_clear_bss.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+                                                  command_usart.o
+                                                  command_handlers.o
+                                                  command.o
+                                                  usart.o
+                                                  easyrider.o
+__do_copy_data                                    /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_copy_data.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+                                                  command_usart.o
+                                                  command_handlers.o
+                                                  command.o
+                                                  easyrider.o
+__eerd_block_m1284p                               /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_block_atmega1284p.o)
+                                                  easyrider.o
+__eerd_blraw_m1284p                               /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_block_atmega1284p.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_word_atmega1284p.o)
+__eerd_byte_m1284p                                /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_byte_atmega1284p.o)
+                                                  easyrider.o
+__eerd_word_m1284p                                /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eerd_word_atmega1284p.o)
+                                                  easyrider.o
+__eeupd_block_m1284p                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_block_atmega1284p.o)
+                                                  command_handlers.o
+__eeupd_byte_m1284p                               /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_byte_atmega1284p.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+                                                  command_handlers.o
+__eeupd_r18_m1284p                                /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_byte_atmega1284p.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_block_atmega1284p.o)
+__eeupd_word_m1284p                               /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(eeupd_word_atmega1284p.o)
+                                                  command_handlers.o
+__flp                                             /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+__heap_end                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+__heap_start                                      /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+__init                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__malloc_heap_end                                 /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+__malloc_heap_start                               /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+__malloc_margin                                   /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+__mulhi_const_10                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(mul10.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o)
+__mulohisi3                                       /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+__mulshisi3                                       /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+__mulsi3                                          /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+__muluhisi3                                       /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+                                                  /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulsi3.o)
+                                                  /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_mulshisi3.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+__negsi2                                          /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_negsi2.o)
+                                                  /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+__stack                                           /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__udivmodhi4                                      /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodhi4.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+                                                  /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+                                                  easyrider.o
+__udivmodsi4                                      /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_udivmodsi4.o)
+                                                  /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodsi4.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+__umulhisi3                                       /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_umulhisi3.o)
+                                                  /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_muluhisi3.o)
+__vector_1                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_10                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_11                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_12                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_13                                       easyrider.o
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_14                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_15                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_16                                       easyrider.o
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_17                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_18                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_19                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_2                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_20                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_21                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_22                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_23                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_24                                       easyrider.o
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_25                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_26                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_27                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_28                                       usart.o
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_29                                       usart.o
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_3                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_30                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_31                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_32                                       easyrider.o
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_33                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_34                                       /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_4                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_5                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_6                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_7                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_8                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_9                                        /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vector_default                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+__vectors                                         /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+_div                                              /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_divmodhi4.o)
+_exit                                             /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+atoi                                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(atoi.o)
+                                                  command_handlers.o
+btob                                              command_handlers.o
+byte_buf                                          command_handlers.o
+                                                  easyrider.o
+clear_cmd_args                                    command.o
+command_handle_help                               command_handlers.o
+command_handle_reset                              command_handlers.o
+command_handle_set_conf                           command_handlers.o
+command_handle_set_sense                          command_handlers.o
+command_handle_show_conf                          command_handlers.o
+command_handle_show_state                         command_handlers.o
+command_handle_show_version                       command_handlers.o
+command_handle_show_voltage                       command_handlers.o
+command_init                                      command.o
+                                                  easyrider.o
+command_launch                                    command.o
+command_process                                   command.o
+                                                  easyrider.o
+command_register                                  command.o
+                                                  command_handlers.o
+command_usart_input                               command_usart.o
+                                                  easyrider.o
+command_usart_output                              command_usart.o
+                                                  easyrider.o
+command_usart_parse                               command_usart.o
+display_conf_info                                 command_handlers.o
+display_state_info                                command_handlers.o
+display_voltage_info                              command_handlers.o
+errno                                             /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(errno.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+exit                                              /usr/lib/gcc/avr/4.8.0/avr51/libgcc.a(_exit.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+free                                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+g_adc_voltage                                     command_handlers.o
+                                                  easyrider.o
+g_appname                                         easyrider.o
+                                                  command.o
+g_dyn_senses                                      command_handlers.o
+                                                  easyrider.o
+g_dyn_senses_status                               command_handlers.o
+                                                  easyrider.o
+g_firmware_version                                easyrider.o
+                                                  command_handlers.o
+g_logo                                            easyrider.o
+                                                  command.o
+g_logo1                                           easyrider.o
+g_logo2                                           easyrider.o
+g_logo3                                           easyrider.o
+g_logo4                                           easyrider.o
+g_mcu_reset                                       command_handlers.o
+                                                  easyrider.o
+g_music_alarm                                     easyrider.o
+g_music_frogger                                   easyrider.o
+g_music_furelise                                  easyrider.o
+g_music_larry                                     easyrider.o
+g_music_pipi                                      easyrider.o
+g_music_popcorn                                   easyrider.o
+g_rom_settings                                    easyrider.o
+                                                  command_handlers.o
+g_senses                                          command_handlers.o
+                                                  easyrider.o
+g_settings                                        easyrider.o
+                                                  command_handlers.o
+g_state                                           command_handlers.o
+                                                  easyrider.o
+g_trans                                           easyrider.o
+g_user                                            easyrider.o
+                                                  command.o
+isspace                                           /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(isspace.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+main                                              easyrider.o
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/crtm1284p.o
+malloc                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(malloc.o)
+                                                  command.o
+memcpy                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(memcpy.o)
+                                                  command_handlers.o
+                                                  command.o
+rand                                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+                                                  easyrider.o
+rand_r                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+register_commands                                 command_handlers.o
+                                                  easyrider.o
+show_prompt                                       command.o
+srand                                             /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(rand.o)
+                                                  easyrider.o
+strcat_P                                          /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcat_P.o)
+                                                  command_handlers.o
+strcmp                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcmp.o)
+                                                  command_handlers.o
+                                                  easyrider.o
+strcpy                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy.o)
+                                                  command_usart.o
+                                                  command_handlers.o
+                                                  easyrider.o
+strcpy_P                                          /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strcpy_P.o)
+                                                  command_handlers.o
+strrev                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strrev.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+strtok                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+                                                  command.o
+strtok_r                                          /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok_r.o)
+                                                  /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtok.o)
+strtol                                            /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(strtol.o)
+                                                  command_handlers.o
+uart_available                                    usart.o
+                                                  command_usart.o
+uart_buf                                          command_handlers.o
+                                                  easyrider.o
+uart_get                                          usart.o
+                                                  command_usart.o
+uart_init                                         usart.o
+                                                  easyrider.o
+uart_put                                          usart.o
+                                                  command_usart.o
+uart_put_int                                      usart.o
+uart_put_str                                      usart.o
+                                                  command_usart.o
+uart_put_str_P                                    usart.o
+                                                  command_usart.o
+utoa                                              /usr/lib/gcc/avr/4.8.0/../../../../avr/lib/avr51/libc.a(utoa.o)
+                                                  command_handlers.o
+                                                  usart.o
