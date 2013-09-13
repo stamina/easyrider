@@ -29,7 +29,11 @@
 #define RX_BUFFER_SIZE 256 // receive buffer
 #define TX_BUFFER_SIZE 256 // transmit buffer
 
-// ring buffer declaration
+// ring buffer declaration:
+// the RX buffer fills from the outside world, putting new "heads" in and shrinks by getting the "tails" in the program,
+// a full RX buffer discards new data
+// the TX buffer puts new "heads" in and transmits the "tail",
+// a full TX buffer waits for a space
 static volatile uint8_t tx_buffer[TX_BUFFER_SIZE];
 static volatile uint8_t tx_buffer_head;
 static volatile uint8_t tx_buffer_tail;

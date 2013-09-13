@@ -1,13 +1,12 @@
+*info.txt* easyrider
+" vim: filetype=help foldmethod=marker foldmarker=<<<,>>> modifiable noreadonly tw=0
+" Author: Bas Brugman
+" Website: www.visionnaire.nl
+
 EasyRider Telemetrics
 ---------------------
 
-[ ] TODO: Split software and design files in seperate directories, when EasyRider REV B. is being developed.
-[ ] TODO: Add some raw incoming/outgoing data signals over UART, like when a state changes, or when the mcu starts etc.
-          This is needed for easy communication with a second mcu.
-      -> implement in wrapper functions like set_substate
-      -> switchable raw/console UART mode (raw == direct 2nd mcu comm. / console is connecting with terminal prog.)
-
-Version 1.0 bug fixes:
+Firmware 1.0 bug fixes:
 ----------------------
 
 [X] BUG: Claxon mosfet switched aan bij veel toeren, voor zeer korte tijd -> oscillation?
@@ -29,7 +28,33 @@ Version 1.0 bug fixes:
       -> Ground path van claxon terugvoeren via draad naar accu min-pole om groundloops te voorkomen
 [X] BUG: Alarm trigger werkt niet lekker: claxon/blinkers sequence niet goed en transition from alarm_settle/alarm states foutief
 
-Version 1.0 features:
+
+REV B
+-----
+
+- Hardware changes:
+
+  [ ] Engine RPM counter: http://www.avrfreaks.net/index.php?name=PNphpBB2&file=printview&t=43519&start=0
+
+REV A
+-----
+
+Firmware 1.1 features:
+----------------------
+
+- [ ] TEST: alarm claxon count and resettle
+- [ ] Splitsen hardware/software version strings
+- [ ] claxon sense -> vergroten van 3x 5ms "debouncing" algoritme in code naar 6x
+- [ ] backpedal code eruit halen
+- [ ] UART communication Tiva C (Blackadder) <-> AVR: 
+    -> state change pushes (one observer function?)
+    -> other telemetrics pushes -> voltages accu and accelerometer
+    -> switchable raw/console UART mode (raw == direct 2nd mcu comm. / console is connecting with terminal prog.)
+      [ ] RAW mode control codes:
+        
+
+Firmware 1.0 features:
+----------------------
 
 - [X] Lighting System
 - [X] Audio through Claxon and Buzzer
@@ -218,25 +243,30 @@ You now simply combine all these files into a single zip file and upload it via 
 BOM "EasyRider" SMD version REV B
 ---------------------------------
 
-[ ] PCB: blue solder mask and gold plating finish
+[ ] PCB: purple solder mask and gold plating finish
+[ ] Split software and design files in seperate git branches, when EasyRider REV B. is being developed.
+[ ] UART/SPI pins jumperen, voor combo FTDI chip/BlackAdder en SPI/microSD card
+[ ] Unused pins grounden/pullup?/jumperen voor future use
+[ ] MicroSD cardslot -> pinouts to TIVA C headers
 [ ] FUSE, SMD, 1206, SLOW BLOW, 6A (LittleFuse?)
 [ ] SMD passives: 0603 en 0805 
-    -> 220 ohm -> 0805 1/8Watt, 10k 1/10Watt 0603
-    -> sense pins 330 ohm gebruiken, 0603
+    -> 220 ohm -> 1/8 Watt 0805 
+    -> 330 ohm -> 1/10 Watt 0603
+    -> 10k ohm -> 1/10 Watt 0603
+    -> sense pins 330 ohm gebruiken
     -> top brands caps, at least 105C or even 125C rated: nichicon, panasonic, rubycon, nippon-chemi-con, vishay, yageo
-[ ] Ander board house ?? (goedkoper)
+[ ] Ander board house ?? (goedkoper) -> OSH Park in the US
 [ ] Volt reg: 3.3V LDO -> LF33CV TO-263 SMD, ground pad met 6 via's als heatsink, ong. 1 square inch
+    -> open copper alleen onder package, via's aan de zijkanten van package
 [ ] Caps niet te dicht bij hitte vregs
 [ ] Rijwind koeling PCB mogelijk via een hose?
 [ ] PCB: separate ground poly's for high current regs, connected as star at ground pin
+[ ] 1 x  claxon relay -> G5NB-1A DC5 / http://www.digikey.com/product-detail/en/G5NB-1A DC5/Z1674-ND/664721
 [ ] 9x Meder Reed Relais: CRR05-1A SMD
 [ ] 9x smd led + resistor bij relais coils, for testing
 [ ] 9x protection diode for back-EMF to prevent killing the indication leds
-[ ] 2x IC transistor arrays (ULN2003LV by Ti, includes protection diodes) voor relais en driver mosfet (claxon)
+[ ] 2x IC transistor arrays (ULN2003LV by Ti, includes protection diodes) voor relais
     -> 1 IC met 4 en 1 IC met 5 relais, om zo de Power diss. te verdelen
-[ ] 74HC595 -> heartbeat pin aansturen met een shift register
-    -> naar wat "common-anode" RGB status leds op de overige ULN2003LV ports
-[ ] P-Channel MOSFET claxon: SUD10P06-280L (TO-252 package) 
 [ ] Current-sensor: ACS714ELCTR-05B-T 5V/5A -> zie https://www.sparkfun.com/products/8883 voor opamp gain en tips
 [ ] Voltage divider extra cap 0.1uf
 [ ] JTAG pin breakout extra 
@@ -244,8 +274,11 @@ BOM "EasyRider" SMD version REV B
 [ ] Battery backup for RTC, cr2032?
 [ ] Headers for TIVA Launchpad board and wifi/gps/microSD boards
 [ ] USART TXB0104 levelshifter tussen AVR en Tiva -> 2pins JUMPER for testing purposes or disabling
-[ ] Logo's voor breakouts -> AVRISP, WIFI, GPS en ACCEL. 
+[ ] Logo's voor breakouts -> AVRISP, WIFI, GPS en ACCEL. (Ook x/y/z arrow vermelden)
 [ ] RPM meten vanaf yellow/black wire, die naar de bobine loopt, simpel RC filter + voltage divider + zener protectie
-    -> rising edge counter, welke pin?
+    -> rising edge counter, welke pin? INT0?
+    -> Voltage buffer erbij met een opamp, voor high impedance input?
+[ ] Olie temp meten, welke pin?
+[ ] Vergroten range van accu ADC -> 10v tot 15v -> naar 10bit ADC -> 1/3 voltage divider
 
 

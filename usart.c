@@ -40,8 +40,8 @@ void uart_put(uint8_t c) {
 	uint8_t i;
 	i = tx_buffer_head + 1; // advance head
 	if (i >= TX_BUFFER_SIZE) i = 0; // go to first index if buffer full
-  // NOTE: the hard wait below is not desirable when big UART transfers are part of the main program loop.
-  // Change it to an if (tx_buffer_tail != i)
+  // NOTE: the hard wait below is not desirable when big, fast UART transfers are part of the main program loop,
+  // in that case, better change it to an if (tx_buffer_tail != i) to prevent delays of other program parts
 	while (tx_buffer_tail == i); // wait until space in buffer
   tx_buffer[i] = c; // put char in buffer
   tx_buffer_head = i; // set new head
@@ -50,7 +50,7 @@ void uart_put(uint8_t c) {
   UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UDRIE1);
 }
 
-// Receive a byte, always call uart_available() first
+// Receive a byte, NOTE: always call uart_available() first, before this function
 uint8_t uart_get(void) {
   uint8_t c, i;
   i = rx_buffer_tail + 1; // advance tail
