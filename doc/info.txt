@@ -28,13 +28,14 @@ Firmware 1.0 bug fixes:
       -> Ground path van claxon terugvoeren via draad naar accu min-pole om groundloops te voorkomen
 [X] BUG: Alarm trigger werkt niet lekker: claxon/blinkers sequence niet goed en transition from alarm_settle/alarm states foutief
 
-
 REV B
 -----
 
 - Hardware changes:
-
   [ ] Engine RPM counter: http://www.avrfreaks.net/index.php?name=PNphpBB2&file=printview&t=43519&start=0
+
+- Software changes:
+  [ ] RPM counter
 
 REV A
 -----
@@ -42,16 +43,23 @@ REV A
 Firmware 1.1 features:
 ----------------------
 
-- [ ] TEST: alarm claxon count and resettle
-- [ ] Splitsen hardware/software version strings
+- [ ] Change alarm claxon count and resettle, ander algoritme -> 3de claxon sound kapt af, waarom?
+- [ ] Extra timer gebruiken en flexibler/indepent maken van elkaar: losse blink timer
+- [ ] Heartbeat LED uit in sleep mode
+- [ ] Contact uit -> naar sleep mode -> meteen muziek uit 
+- [ ] Contact uit -> alarm switch kan nog geactiveerd worden -> moet niet kunnen 
+- [ ] Muziek mag nooit met indicatie beeps conflicteren 
+- [ ] Splitsen hardware/software version strings -> beide in EEPROM
+- [ ] Bootloader -> firmware update via uart met BlackAdder (deze leest firmware van SD card)
+- [ ] "static"s nalopen
 - [ ] claxon sense -> vergroten van 3x 5ms "debouncing" algoritme in code naar 6x
 - [ ] backpedal code eruit halen
 - [ ] UART communication Tiva C (Blackadder) <-> AVR: 
     -> state change pushes (one observer function?)
     -> other telemetrics pushes -> voltages accu and accelerometer
-    -> switchable raw/console UART mode (raw == direct 2nd mcu comm. / console is connecting with terminal prog.)
-      [ ] RAW mode control codes:
-        
+    -> switchable raw/console UART mode (raw == direct 2nd mcu comm. / console == connecting with terminal prog.)
+      [ ] RAW mode control codes: ascii bytes starting from 0x80 
+- [ ] Keep track of startups/power downs, simple UART control code -> SD card save (BlackAdder taak!)
 
 Firmware 1.0 features:
 ----------------------
@@ -245,9 +253,23 @@ BOM "EasyRider" SMD version REV B
 
 [ ] PCB: purple solder mask and gold plating finish
 [ ] Split software and design files in seperate git branches, when EasyRider REV B. is being developed.
-[ ] UART/SPI pins jumperen, voor combo FTDI chip/BlackAdder en SPI/microSD card
-[ ] Unused pins grounden/pullup?/jumperen voor future use
+[ ] Software: bootloader installen -> serial programming via USB port
+  ->  USB mass storage-based bootloader:
+      http://hackaday.com/2012/12/07/mass-storage-bootloader-for-stellaris-launchpad/
+      -> of anders: usb stick met firmware file attachen -> knop drukken en flashen
+[ ] noise reduction:
+    -> Ophanging/Scheiding draadboom -> niet te dicht bij bobine
+    -> Ferite beads for noise filtering
+    -> Snubber voor claxon op aparte kleine pcb met connectors 
+    -> 100nf caps bij alle relays
+[ ] -> 5W 10R resistor external van pcb, direct aan draad
+[ ] Micro-USB connector
 [ ] MicroSD cardslot -> pinouts to TIVA C headers
+[ ] UART/SPI pins jumperen, voor combo FTDI chip/BlackAdder en SPI/microSD card
+[ ] FTDI 232RL chip erbij
+    -> DTR pin voor reset after firmware upgrades
+    -> CTS to ground pullen
+[ ] Unused pins grounden/pullup?/jumperen voor future use
 [ ] FUSE, SMD, 1206, SLOW BLOW, 6A (LittleFuse?)
 [ ] SMD passives: 0603 en 0805 
     -> 220 ohm -> 1/8 Watt 0805 
@@ -275,10 +297,13 @@ BOM "EasyRider" SMD version REV B
 [ ] Headers for TIVA Launchpad board and wifi/gps/microSD boards
 [ ] USART TXB0104 levelshifter tussen AVR en Tiva -> 2pins JUMPER for testing purposes or disabling
 [ ] Logo's voor breakouts -> AVRISP, WIFI, GPS en ACCEL. (Ook x/y/z arrow vermelden)
-[ ] RPM meten vanaf yellow/black wire, die naar de bobine loopt, simpel RC filter + voltage divider + zener protectie
-    -> rising edge counter, welke pin? INT0?
-    -> Voltage buffer erbij met een opamp, voor high impedance input?
+[ ] RPM meten vanaf pulse van hall sensor op vliegwiel:
+    -> optocoupler ertussen
+    -> falling edge counter, welke pin? INT0?
 [ ] Olie temp meten, welke pin?
 [ ] Vergroten range van accu ADC -> 10v tot 15v -> naar 10bit ADC -> 1/3 voltage divider
-
-
+[ ] FUTURE: BlackAdder Software: scriptable  maken ->
+      bijv. statusses veranderen indien parameters veranderen:
+        bij x km/u, alarmlichten aan
+        bepaalde volgorde etc.. etc..
+      

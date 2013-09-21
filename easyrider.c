@@ -150,6 +150,7 @@ uint8_t check_ign_on() {
 }
 
 uint8_t check_alarm_on() {
+  //BUG: change this..
   return ((g_state & ST_SLEEP) == g_state);
 }
 
