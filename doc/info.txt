@@ -45,7 +45,7 @@ Firmware 1.1 features:
 
 - [ ] Change alarm claxon count and resettle, ander algoritme -> 3de claxon sound kapt af, waarom?
 - [ ] Extra timer gebruiken en flexibler/indepent maken van elkaar: losse blink timer
-- [ ] Heartbeat LED uit in sleep mode
+- [ ] Heartbeat LED uit na enige tijd
 - [ ] Contact uit -> naar sleep mode -> meteen muziek uit 
 - [ ] Contact uit -> alarm switch kan nog geactiveerd worden -> moet niet kunnen 
 - [ ] Muziek mag nooit met indicatie beeps conflicteren 
@@ -54,6 +54,7 @@ Firmware 1.1 features:
 - [ ] "static"s nalopen
 - [ ] claxon sense -> vergroten van 3x 5ms "debouncing" algoritme in code naar 6x
 - [ ] backpedal code eruit halen
+- [ ] in deep-sleep mode kan de mcu alleen via reset gestart worden -> FIXME
 - [ ] UART communication Tiva C (Blackadder) <-> AVR: 
     -> state change pushes (one observer function?)
     -> other telemetrics pushes -> voltages accu and accelerometer
@@ -162,7 +163,7 @@ BOM "EasyRider" REV A
 [X] 1x 6 amp fuse holder voor 5x20
 [X] 1x 1A PTC 3,2 x 1,5 mm, hoog 1,05 mm -> van littelfuse "M" marking 15V!
 [X] 1x 25V Varistor JVR05N390K (5mm pitch)
-[X] 1x 220uf cap electrolytic for filtering 
+[X] 1x 470uf cap electrolytic for filtering 
 [X] 1x 47uf low ESR cap electrolytic for filtering 
 [X] 1x 10uf output filter cap for LF33CV
 [X] 2x 100nf cap electrolytic for filtering
@@ -269,6 +270,7 @@ BOM "EasyRider" SMD version REV B
 [ ] FTDI 232RL chip erbij
     -> DTR pin voor reset after firmware upgrades
     -> CTS to ground pullen
+    -> Zie bestaande schematics, zoals sparkfun
 [ ] Unused pins grounden/pullup?/jumperen voor future use
 [ ] FUSE, SMD, 1206, SLOW BLOW, 6A (LittleFuse?)
 [ ] SMD passives: 0603 en 0805 
@@ -283,16 +285,19 @@ BOM "EasyRider" SMD version REV B
 [ ] Caps niet te dicht bij hitte vregs
 [ ] Rijwind koeling PCB mogelijk via een hose?
 [ ] PCB: separate ground poly's for high current regs, connected as star at ground pin
-[ ] 1 x  claxon relay -> G5NB-1A DC5 / http://www.digikey.com/product-detail/en/G5NB-1A DC5/Z1674-ND/664721
+    -> ook analogue/digital grounds scheiden en star-connecten
+[ ] 1 x claxon relay -> G5NB-1A DC5
 [ ] 9x Meder Reed Relais: CRR05-1A SMD
 [ ] 9x smd led + resistor bij relais coils, for testing
 [ ] 9x protection diode for back-EMF to prevent killing the indication leds
 [ ] 2x IC transistor arrays (ULN2003LV by Ti, includes protection diodes) voor relais
     -> 1 IC met 4 en 1 IC met 5 relais, om zo de Power diss. te verdelen
+[ ] 1x 74HC165 voor 8 extra inputs -> als 1 byte over SPI richting mcu
 [ ] Current-sensor: ACS714ELCTR-05B-T 5V/5A -> zie https://www.sparkfun.com/products/8883 voor opamp gain en tips
 [ ] Voltage divider extra cap 0.1uf
 [ ] JTAG pin breakout extra 
 [ ] Molex 24pin angled connector
+    -> Vin/GND als eerste 
 [ ] Battery backup for RTC, cr2032?
 [ ] Headers for TIVA Launchpad board and wifi/gps/microSD boards
 [ ] USART TXB0104 levelshifter tussen AVR en Tiva -> 2pins JUMPER for testing purposes or disabling

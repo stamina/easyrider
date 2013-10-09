@@ -164,7 +164,7 @@
 #define TR_CNT (sizeof(g_trans)/sizeof(*g_trans))          // number of transition table entries
 
 #define C90_EVENT_BUFFER_SIZE                       64     // size of event queue (circular buffer)
-#define C90_OFFSET_ADC_READING                       1     // tweak this if your 5V VRef is a bit off
+#define C90_OFFSET_ADC_READING                       1     // tweak this if your 5V VRef is a little off, each increment is 5/1024 volt
 
 #define MUSIC_END 0                                        // end flag of music 
 #define MUSIC_P 1                                          // music pause

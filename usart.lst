@@ -112,8 +112,8 @@
   74               	.LVL1:
   75               	.L4:
   42:usart.c       **** 	if (i >= TX_BUFFER_SIZE) i = 0; // go to first index if buffer full
-  43:usart.c       ****   // NOTE: the hard wait below is not desirable when big UART transfers are part of the main progra
-  44:usart.c       ****   // Change it to an if (tx_buffer_tail != i)
+  43:usart.c       ****   // NOTE: the hard wait below is not desirable when big, fast UART transfers are part of the main 
+  44:usart.c       ****   // in that case, better change it to an if (tx_buffer_tail != i) to prevent delays of other progr
   45:usart.c       **** 	while (tx_buffer_tail == i); // wait until space in buffer
   76               		.loc 1 45 0 discriminator 1
   77 0006 9091 0000 		lds r25,tx_buffer_tail
@@ -145,7 +145,7 @@
  100               	.LFB4:
   51:usart.c       **** }
   52:usart.c       **** 
-  53:usart.c       **** // Receive a byte, always call uart_available() first
+  53:usart.c       **** // Receive a byte, NOTE: always call uart_available() first, before this function
   54:usart.c       **** uint8_t uart_get(void) {
  101               		.loc 1 54 0
  102               		.cfi_startproc
@@ -695,27 +695,27 @@
  565               		.file 4 "/usr/avr/include/stdlib.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 usart.c
-     /tmp/ccBfm8LI.s:2      *ABS*:000000000000003e __SP_H__
-     /tmp/ccBfm8LI.s:3      *ABS*:000000000000003d __SP_L__
-     /tmp/ccBfm8LI.s:4      *ABS*:000000000000003f __SREG__
-     /tmp/ccBfm8LI.s:5      *ABS*:000000000000003b __RAMPZ__
-     /tmp/ccBfm8LI.s:6      *ABS*:0000000000000000 __tmp_reg__
-     /tmp/ccBfm8LI.s:7      *ABS*:0000000000000001 __zero_reg__
-     /tmp/ccBfm8LI.s:14     .text.uart_init:0000000000000000 uart_init
-     /tmp/ccBfm8LI.s:554    .bss:0000000000000102 tx_buffer_tail
-     /tmp/ccBfm8LI.s:556    .bss:0000000000000103 tx_buffer_head
+     /tmp/ccCFRpd9.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccCFRpd9.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccCFRpd9.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccCFRpd9.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/ccCFRpd9.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccCFRpd9.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccCFRpd9.s:14     .text.uart_init:0000000000000000 uart_init
+     /tmp/ccCFRpd9.s:554    .bss:0000000000000102 tx_buffer_tail
+     /tmp/ccCFRpd9.s:556    .bss:0000000000000103 tx_buffer_head
                              .bss:0000000000000000 rx_buffer_tail
-     /tmp/ccBfm8LI.s:550    .bss:0000000000000001 rx_buffer_head
-     /tmp/ccBfm8LI.s:62     .text.uart_put:0000000000000000 uart_put
-     /tmp/ccBfm8LI.s:558    .bss:0000000000000104 tx_buffer
-     /tmp/ccBfm8LI.s:99     .text.uart_get:0000000000000000 uart_get
-     /tmp/ccBfm8LI.s:552    .bss:0000000000000002 rx_buffer
-     /tmp/ccBfm8LI.s:128    .text.uart_put_str:0000000000000000 uart_put_str
-     /tmp/ccBfm8LI.s:186    .text.uart_put_int:0000000000000000 uart_put_int
-     /tmp/ccBfm8LI.s:282    .text.uart_put_str_P:0000000000000000 uart_put_str_P
-     /tmp/ccBfm8LI.s:363    .text.__vector_29:0000000000000000 __vector_29
-     /tmp/ccBfm8LI.s:445    .text.__vector_28:0000000000000000 __vector_28
-     /tmp/ccBfm8LI.s:528    .text.uart_available:0000000000000000 uart_available
+     /tmp/ccCFRpd9.s:550    .bss:0000000000000001 rx_buffer_head
+     /tmp/ccCFRpd9.s:62     .text.uart_put:0000000000000000 uart_put
+     /tmp/ccCFRpd9.s:558    .bss:0000000000000104 tx_buffer
+     /tmp/ccCFRpd9.s:99     .text.uart_get:0000000000000000 uart_get
+     /tmp/ccCFRpd9.s:552    .bss:0000000000000002 rx_buffer
+     /tmp/ccCFRpd9.s:128    .text.uart_put_str:0000000000000000 uart_put_str
+     /tmp/ccCFRpd9.s:186    .text.uart_put_int:0000000000000000 uart_put_int
+     /tmp/ccCFRpd9.s:282    .text.uart_put_str_P:0000000000000000 uart_put_str_P
+     /tmp/ccCFRpd9.s:363    .text.__vector_29:0000000000000000 __vector_29
+     /tmp/ccCFRpd9.s:445    .text.__vector_28:0000000000000000 __vector_28
+     /tmp/ccCFRpd9.s:528    .text.uart_available:0000000000000000 uart_available
 
 UNDEFINED SYMBOLS
 utoa

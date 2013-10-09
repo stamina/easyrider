@@ -438,24 +438,24 @@
  323               		.file 4 "/usr/avr/include/stdint.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 command_usart.c
-     /tmp/cc9ylL91.s:2      *ABS*:000000000000003e __SP_H__
-     /tmp/cc9ylL91.s:3      *ABS*:000000000000003d __SP_L__
-     /tmp/cc9ylL91.s:4      *ABS*:000000000000003f __SREG__
-     /tmp/cc9ylL91.s:5      *ABS*:000000000000003b __RAMPZ__
-     /tmp/cc9ylL91.s:6      *ABS*:0000000000000000 __tmp_reg__
-     /tmp/cc9ylL91.s:7      *ABS*:0000000000000001 __zero_reg__
-     /tmp/cc9ylL91.s:14     .text.command_usart_input:0000000000000000 command_usart_input
+     /tmp/cc3KP5O9.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/cc3KP5O9.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/cc3KP5O9.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/cc3KP5O9.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/cc3KP5O9.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/cc3KP5O9.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/cc3KP5O9.s:14     .text.command_usart_input:0000000000000000 command_usart_input
                              .bss:0000000000000000 g_command_status
-     /tmp/cc9ylL91.s:302    .bss:0000000000000001 g_buffer_pos
-     /tmp/cc9ylL91.s:304    .bss:0000000000000002 g_buffer
-     /tmp/cc9ylL91.s:142    .text.command_usart_output:0000000000000000 command_usart_output
-     /tmp/cc9ylL91.s:260    .text.command_usart_parse:0000000000000000 command_usart_parse
-     /tmp/cc9ylL91.s:306    .bss:0000000000000102 rx_buffer_tail
-     /tmp/cc9ylL91.s:308    .bss:0000000000000103 rx_buffer_head
-     /tmp/cc9ylL91.s:310    .bss:0000000000000104 rx_buffer
-     /tmp/cc9ylL91.s:312    .bss:0000000000000204 tx_buffer_tail
-     /tmp/cc9ylL91.s:314    .bss:0000000000000205 tx_buffer_head
-     /tmp/cc9ylL91.s:316    .bss:0000000000000206 tx_buffer
+     /tmp/cc3KP5O9.s:302    .bss:0000000000000001 g_buffer_pos
+     /tmp/cc3KP5O9.s:304    .bss:0000000000000002 g_buffer
+     /tmp/cc3KP5O9.s:142    .text.command_usart_output:0000000000000000 command_usart_output
+     /tmp/cc3KP5O9.s:260    .text.command_usart_parse:0000000000000000 command_usart_parse
+     /tmp/cc3KP5O9.s:306    .bss:0000000000000102 rx_buffer_tail
+     /tmp/cc3KP5O9.s:308    .bss:0000000000000103 rx_buffer_head
+     /tmp/cc3KP5O9.s:310    .bss:0000000000000104 rx_buffer
+     /tmp/cc3KP5O9.s:312    .bss:0000000000000204 tx_buffer_tail
+     /tmp/cc3KP5O9.s:314    .bss:0000000000000205 tx_buffer_head
+     /tmp/cc3KP5O9.s:316    .bss:0000000000000206 tx_buffer
 
 UNDEFINED SYMBOLS
 uart_available

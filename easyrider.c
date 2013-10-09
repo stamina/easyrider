@@ -856,19 +856,18 @@ void process_alarm_on() {
 }
 
 // check if battery voltage is OK: between 12.0 and 16.0 volts
-// 10bit ADC value 0-1023: (Vmeasure*1024)/Vref
-// for 12v battery readout: my voltage divider ratio: 100K -- 18K = 0.1525 * Vmeasure
-// of the full voltage. 
-// initial voltage
-// If Vref isnt exactly 5.00v, but a bit off, tweak C90_OFFSET_ADC_READING
+// Vref = 5v, if Vref isnt exactly 5.00v, but a bit off, tweak C90_OFFSET_ADC_READING
+// for 12v battery readout: my voltage divider ratio: 2.2K -- 1K, so Vmeasure ==  0.3125 * Vin
+// 10bit ADC value 0-1023 == Vmeasure/(5/1024)
+//test
 void process_battery() {
   if (FLAG_READ_BATT) {
-    if (g_adc_voltage[0] < 370) { // battery too low
+    if (g_adc_voltage[0] < 768) { // battery too low
       // slow blink cockpit status led
       if (g_battery_blink_counter % 100 == 0) { 
         PORT_C90_LIGHT_STATUS_COCKPIT ^= (1 << PIN_C90_LIGHT_STATUS_COCKPIT);
       }
-    } else if (g_adc_voltage[0] > 500) { // battery too high
+    } else if (g_adc_voltage[0] > 1000) { // battery too high
       // fast blink cockpit status led
       if (g_battery_blink_counter % 50 == 0) { 
         PORT_C90_LIGHT_STATUS_COCKPIT ^= (1 << PIN_C90_LIGHT_STATUS_COCKPIT);
@@ -1190,6 +1189,7 @@ int main(void) {
     dispatch_events();
     while ((g_event = get_event()) != EV_VOID) { // handle the complete event queue in one go
       for (uint8_t i=0; i<TR_CNT; i++) {
+        //TODO: swap if-statements
         if (g_trans[i].check_func()) { // check if state matches
           if (g_event == g_trans[i].event) { // check if event matches
             g_trans[i].process_func(); // call event handler

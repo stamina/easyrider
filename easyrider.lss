@@ -893,6 +893,7 @@ uint8_t check_ign_on() {
 0000178e <check_alarm_on>:
 
 uint8_t check_alarm_on() {
+  //BUG: change this..
   return ((g_state & ST_SLEEP) == g_state);
     178e:	20 91 43 12 	lds	r18, 0x1243
     1792:	30 91 44 12 	lds	r19, 0x1244
@@ -5902,8 +5903,8 @@ void uart_put(uint8_t c) {
     35e2:	20 91 dd 07 	lds	r18, 0x07DD
     35e6:	2f 5f       	subi	r18, 0xFF	; 255
 	if (i >= TX_BUFFER_SIZE) i = 0; // go to first index if buffer full
-  // NOTE: the hard wait below is not desirable when big UART transfers are part of the main program loop.
-  // Change it to an if (tx_buffer_tail != i)
+  // NOTE: the hard wait below is not desirable when big, fast UART transfers are part of the main program loop,
+  // in that case, better change it to an if (tx_buffer_tail != i) to prevent delays of other program parts
 	while (tx_buffer_tail == i); // wait until space in buffer
     35e8:	90 91 dc 07 	lds	r25, 0x07DC
     35ec:	92 17       	cp	r25, r18
@@ -5926,7 +5927,7 @@ void uart_put(uint8_t c) {
 00003606 <uart_get>:
 }
 
-// Receive a byte, always call uart_available() first
+// Receive a byte, NOTE: always call uart_available() first, before this function
 uint8_t uart_get(void) {
   uint8_t c, i;
   i = rx_buffer_tail + 1; // advance tail
@@ -5972,8 +5973,8 @@ void uart_put(uint8_t c) {
     362a:	90 91 dd 07 	lds	r25, 0x07DD
     362e:	9f 5f       	subi	r25, 0xFF	; 255
 	if (i >= TX_BUFFER_SIZE) i = 0; // go to first index if buffer full
-  // NOTE: the hard wait below is not desirable when big UART transfers are part of the main program loop.
-  // Change it to an if (tx_buffer_tail != i)
+  // NOTE: the hard wait below is not desirable when big, fast UART transfers are part of the main program loop,
+  // in that case, better change it to an if (tx_buffer_tail != i) to prevent delays of other program parts
 	while (tx_buffer_tail == i); // wait until space in buffer
     3630:	80 91 dc 07 	lds	r24, 0x07DC
     3634:	98 17       	cp	r25, r24
@@ -6033,8 +6034,8 @@ void uart_put(uint8_t c) {
     3664:	20 91 dd 07 	lds	r18, 0x07DD
     3668:	2f 5f       	subi	r18, 0xFF	; 255
 	if (i >= TX_BUFFER_SIZE) i = 0; // go to first index if buffer full
-  // NOTE: the hard wait below is not desirable when big UART transfers are part of the main program loop.
-  // Change it to an if (tx_buffer_tail != i)
+  // NOTE: the hard wait below is not desirable when big, fast UART transfers are part of the main program loop,
+  // in that case, better change it to an if (tx_buffer_tail != i) to prevent delays of other program parts
 	while (tx_buffer_tail == i); // wait until space in buffer
     366a:	90 91 dc 07 	lds	r25, 0x07DC
     366e:	29 17       	cp	r18, r25
