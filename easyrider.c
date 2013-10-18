@@ -364,6 +364,7 @@ void check_sleep() {
       sleep_now();
     }
   } else {
+    // TODO: why set this repeatable?
     g_sleep_counter = g_settings.deep_sleep_counter;
   }
 }
@@ -593,7 +594,7 @@ void process_ri_on() {
       }
       FLAG_BLINK_RI = 0; // reset to wait for next timer event
       if (!get_substate(ST_RI)) { // first time to blink
-        TCNT1 = 0; // reset timer so the blink starts in an even pace
+        TCNT1 = 0; // set 0.5 sec timer counter explicitly to 0, so the first blink happens exactly 0.5 secs later
         set_substate(ST_RI);
       }
     }
@@ -676,7 +677,7 @@ void process_warning_on() {
       }
       FLAG_BLINK_WARNING = 0; // reset to wait for next timer event
       if (!get_substate(ST_WARNING)) { // first time to blink
-        TCNT1 = 0; // reset timer so the blink starts in an even pace
+        TCNT1 = 0; // set 0.5 sec timer counter explicitly to 0, so the first blink happens exactly 0.5 secs later
         // initial ON for indicators to prevent a  RI/LI ON messing with the synchronization, i.e. warning lights override indicator switches
         PORT_C90_LIGHT_RI_F |= (1 << PIN_C90_LIGHT_RI_F);
         PORT_C90_LIGHT_RI_B |= (1 << PIN_C90_LIGHT_RI_B);
@@ -857,9 +858,10 @@ void process_alarm_on() {
 
 // check if battery voltage is OK: between 12.0 and 16.0 volts
 // Vref = 5v, if Vref isnt exactly 5.00v, but a bit off, tweak C90_OFFSET_ADC_READING
-// for 12v battery readout: my voltage divider ratio: 2.2K -- 1K, so Vmeasure ==  0.3125 * Vin
-// 10bit ADC value 0-1023 == Vmeasure/(5/1024)
-//test
+// for 12v battery readout: my voltage divider ratio: 2.2K - 1K
+// Vmeasure:  0.3125 * Vbat
+// 10bit ADCvalue (0-1023): Vmeasure/(5/1024)
+// Vbat: (ADCvalue*(5/1024))/(0.3125)
 void process_battery() {
   if (FLAG_READ_BATT) {
     if (g_adc_voltage[0] < 768) { // battery too low
