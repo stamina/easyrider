@@ -257,6 +257,7 @@ BOM "EasyRider" SMD version REV B
 ---------------------------------
 
 [ ] PCB: purple solder mask and gold plating finish
+    -> ander board house (goedkoper) -> OSH Park in the US
 [ ] NOTE: let op maximum hoogte, indien components aan beide kanten geplaatst worden.
 [ ] Split software and design files in seperate git branches, when EasyRider REV B. is being developed.
 [ ] Software: bootloader installen -> serial programming via USB port
@@ -289,11 +290,9 @@ BOM "EasyRider" SMD version REV B
     -> 10k ohm -> 1/10 Watt 0603
     -> sense pins 330 ohm gebruiken
     -> top brands caps, at least 105C or even 125C rated: nichicon, panasonic, rubycon, nippon-chemi-con, vishay, yageo
-[ ] Ander board house ?? (goedkoper) -> OSH Park in the US
 [ ] Volt reg: 3.3V LDO -> LF33CV TO-263 SMD, ground pad met 6 via's als heatsink, ong. 1 square inch
     -> open copper alleen onder package, via's aan de zijkanten van package
 [ ] Caps niet te dicht bij hitte vregs
-[ ] Rijwind koeling PCB mogelijk via een hose?
 [ ] PCB: separate ground poly's for high current regs, connected as star at ground pin
     -> ook analogue/digital grounds scheiden en star-connecten
 [ ] 1 x claxon relay -> G5NB-1A DC5
