@@ -8,6 +8,9 @@ The software is written in C for the Atmel AVR ATmega1284p main microcontroller.
 The PCB was created with CadSoft Eagle 6.x, you'll find the schematic and board layout (including all components) in the /eagle directory.
 The file /doc/info.txt also contains the [BOM] and some project notes. (Partly in Dutch)
 
+_UPDATE:_ EasyRider REV B (github repo: easyriderb) is a completely new, smaller and more advanced board (mostly SMD parts) which also contains a GPS and WiFi module
+for easy tracking and communicating with a mobile phone app.
+
 ![Board and Bike](https://github.com/stamina/easyrider/raw/master/doc/easyrider.jpg "Board and Bike")
 
 Functionality
@@ -33,9 +36,5 @@ plaintext CSV to a C header file containing an array of music notes.
 
 The custom UART shell code is capable of registering commands and command handlers. E.g. typing "help" or "show state" in TeraTerm, Minicom, Putty
 or any other serial terminal program. (configuration: 19200 baud/8N1)
-
-At the moment the shell is communicating with a secondary telemetrics board, called BlackAdder (ARM Cortex-M4 based), which polls for state information. BlackAdder
-also contains a GPS and WiFi module for easy tracking and communicating with a mobile phone app (A BlackAdder github repo will be available soon).
-
 
 *[BOM]: Bill Of Materials
