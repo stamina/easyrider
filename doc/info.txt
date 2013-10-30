@@ -3,8 +3,8 @@
 " Author: Bas Brugman
 " Website: www.visionnaire.nl
 
-EasyRider Telemetrics
----------------------
+EasyRider REV A (Throughhole Edition) Telemetrics
+-------------------------------------------------
 
 Firmware 1.0 bug fixes:
 ----------------------
@@ -28,17 +28,6 @@ Firmware 1.0 bug fixes:
       -> Ground path van claxon terugvoeren via draad naar accu min-pole om groundloops te voorkomen
 [X] BUG: Alarm trigger werkt niet lekker: claxon/blinkers sequence niet goed en transition from alarm_settle/alarm states foutief
 
-REV B
------
-
-- Hardware changes:
-  [ ] Engine RPM counter: http://www.avrfreaks.net/index.php?name=PNphpBB2&file=printview&t=43519&start=0
-
-- Software changes:
-  [ ] RPM counter
-  [X] Battery discharge curve data in EEPROM plaatsen, zie datasheet manufacturer (time left vs. current consumption)
-      -> geextrapoleerd tot 1 functie: voltage decrease per min per milliamp
-
 REV A
 -----
 
@@ -47,24 +36,16 @@ Firmware 1.1 features:
 
 - [ ] Bij debounce checks, is shifting << 5 wel nodig?
 - [ ] Sound: Mountain King song erbij
-- [ ] Change alarm claxon count and resettle, ander algoritme -> 3de claxon sound kapt af, waarom?
+- [ ] Change alarm claxon algorithme: count and resettle, ander algoritme -> 3de claxon sound kapt af, waarom?
 - [ ] Extra timer gebruiken en flexibler/indepent maken van elkaar: losse blink timer
 - [ ] Heartbeat LED uit na enige tijd
 - [ ] Contact uit -> naar sleep mode -> meteen muziek uit 
 - [ ] Contact uit -> alarm switch kan nog geactiveerd worden -> moet niet kunnen 
 - [ ] Muziek mag nooit met indicatie beeps conflicteren 
 - [ ] Splitsen hardware/software version strings -> beide in EEPROM
-- [ ] Bootloader -> firmware update via uart met BlackAdder (deze leest firmware van SD card)
 - [ ] "static"s nalopen
-- [ ] claxon sense -> vergroten van 3x 5ms "debouncing" algoritme in code naar 6x
 - [ ] backpedal code eruit halen
 - [ ] in deep-sleep mode kan de mcu alleen via reset gestart worden -> FIXME
-- [ ] UART communication Tiva C (Blackadder) <-> AVR: 
-    -> state change pushes (one observer function?)
-    -> other telemetrics pushes -> voltages accu and accelerometer
-    -> switchable raw/console UART mode (raw == direct 2nd mcu comm. / console == connecting with terminal prog.)
-      [ ] RAW mode control codes: ascii bytes starting from 0x80 
-- [ ] Keep track of startups/power downs, simple UART control code -> SD card save (BlackAdder taak!)
 
 Firmware 1.0 features:
 ----------------------
@@ -252,76 +233,4 @@ NOTE: Cream (solderpaste) en milling/measures layers niet nodig.
 
 You then click process job and the Excellon file will be generated.
 You now simply combine all these files into a single zip file and upload it via the Eurocircuits website.
-
-BOM "EasyRider" SMD version REV B
----------------------------------
-
-[ ] PCB: purple solder mask and gold plating finish
-    -> ander board house (goedkoper) -> OSH Park in the US
-[ ] NOTE: let op maximum hoogte, indien components aan beide kanten geplaatst worden.
-[ ] Split software and design files in seperate git branches, when EasyRider REV B. is being developed.
-[ ] Software: bootloader installen -> serial programming via USB port
-  ->  USB mass storage-based bootloader:
-      http://hackaday.com/2012/12/07/mass-storage-bootloader-for-stellaris-launchpad/
-      -> of anders: usb stick met firmware file attachen -> knop drukken en flashen
-[ ] noise reduction:
-    -> Ophanging/Scheiding draadboom -> niet te dicht bij bobine
-    -> Ferite beads for noise filtering
-    -> Snubber voor claxon op aparte kleine pcb met connectors 
-    -> 100nf caps bij alle relays
-[ ] -> 5W 10R resistor external van pcb, direct aan draad
-[ ] Micro-USB connector
-[ ] MicroSD cardslot -> pinouts to TIVA C headers
-[ ] Thermistor
-[ ] RTC IC DS1307
-[ ] UART/SPI pins jumperen, voor combo FTDI chip/BlackAdder en SPI/microSD card
-[ ] FTDI 232RL chip erbij
-    -> DTR pin voor reset after firmware upgrades
-    -> CTS to ground pullen
-    -> Zie bestaande schematics, zoals sparkfun
-[ ] Unused pins grounden/pullup?/jumperen voor future use
-    -> ook optionele pads maken op PCB voor pull-ups/downs voor UART/I2C/SPI busses
-    -> op SPI bus ook resistor pads in serie plaatsen -> misschien problemen met SPI bootloader
-       programming indien een levelshifter IC ertussen zit. Normaal 0 ohm erop, met shifter 10K
-[ ] FUSE, SMD, 1206, SLOW BLOW, 6A (LittleFuse?)
-[ ] SMD passives: 0603 en 0805 
-    -> 220 ohm -> 1/8 Watt 0805 
-    -> 330 ohm -> 1/10 Watt 0603
-    -> 10k ohm -> 1/10 Watt 0603
-    -> sense pins 330 ohm gebruiken
-    -> top brands caps, at least 105C or even 125C rated: nichicon, panasonic, rubycon, nippon-chemi-con, vishay, yageo
-[ ] Volt reg: 3.3V LDO -> LF33CV TO-263 SMD, ground pad met 6 via's als heatsink, ong. 1 square inch
-    -> open copper alleen onder package, via's aan de zijkanten van package
-[ ] Caps niet te dicht bij hitte vregs
-[ ] PCB: separate ground poly's for high current regs, connected as star at ground pin
-    -> ook analogue/digital grounds scheiden en star-connecten
-[ ] 1 x claxon relay -> G5NB-1A DC5
-[ ] 9x Meder Reed Relais: CRR05-1A SMD
-[ ] 9x smd led + resistor bij relais coils, for testing
-[ ] 9x protection diode for back-EMF to prevent killing the indication leds
-[ ] 2x IC transistor arrays (ULN2003LV by Ti, includes protection diodes) voor relais
-    -> 1 IC met 4 en 1 IC met 5 relais, om zo de Power diss. te verdelen
-[ ] 1x 74HC165 voor 8 extra inputs -> als 1 byte over SPI richting mcu
-[ ] Current-sensor: ACS714ELCTR-05B-T 5V/5A -> zie https://www.sparkfun.com/products/8883 voor opamp gain en tips
-[ ] Voltage divider extra cap 0.1uf
-[ ] JTAG pin breakout extra 
-[ ] Molex 24pin angled connector
-    -> Vin/GND als eerste 
-[ ] Battery backup for RTC, cr2032?
-[ ] Headers for TIVA Launchpad board and wifi/gps/microSD boards
-[ ] USART TXB0104 levelshifter tussen AVR en Tiva -> 2pins JUMPER for testing purposes or disabling
-[ ] Logo's voor breakouts -> AVRISP, WIFI, GPS en ACCEL. (Ook x/y/z arrow vermelden)
-[ ] RPM meten vanaf pulse van hall sensor op vliegwiel:
-    -> optocoupler ertussen
-    -> falling edge counter, welke pin? INT0?
-[ ] Olie temp meten, welke pin?
-[ ] Vergroten range van accu ADC -> 10v tot 15v -> naar 10bit ADC -> 1/3 voltage divider
-[ ] FUTURE: BlackAdder Software: scriptable maken ->
-      bijv. statusses veranderen indien parameters veranderen:
-        bij x km/u, alarmlichten aan
-        bepaalde volgorde etc.. etc..
-[ ] Blackadder Mobile stats:
-  [ ] Engine on/off (checks rpm)
-  [ ] RPM (pulse wire)
-  [ ] Battery: batt info (gel/type and Capacity in amphours)/volt/amp/power/time remaining (only shows when Engine is off)
 
